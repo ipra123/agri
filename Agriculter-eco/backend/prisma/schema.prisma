@@ -1,0 +1,405 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  FARMER
+  SUPPLIER
+  ADMIN
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  NOT_APPLICABLE
+}
+
+enum ProductCategory {
+  SEEDS
+  FERTILIZERS
+  PESTICIDES
+  FARM_TOOLS
+  IRRIGATION_EQUIPMENT
+  ANIMAL_FEED
+  OTHER
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  DEPOSIT_PAID
+  PROCESSING
+  RETURN_PENDING
+  RETURNED
+}
+
+enum PaymentType {
+  FULL
+  DEPOSIT
+  BALANCE
+}
+
+enum PaymentMethod {
+  WAAFI
+  MANUAL
+}
+
+enum ManualType {
+  CASH
+  CARD
+  BANK_TRANSFER
+  OTHER
+}
+
+enum PaymentPlan {
+  FULL
+  DEPOSIT
+}
+
+enum RefundStatus {
+  PENDING
+  REFUNDED
+  NOT_REQUIRED
+}
+
+enum RefundType {
+  FULL
+  PARTIAL
+}
+
+enum ReviewTargetType {
+  PRODUCT
+  SUPPLIER
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+}
+
+enum DisputeType {
+  WRONG_DELIVERY
+  FAKE_PRODUCT
+  OTHER
+}
+
+enum DisputeStatus {
+  OPEN
+  IN_REVIEW
+  RESOLVED
+  REJECTED
+}
+
+enum NotificationChannel {
+  SMS
+  EMAIL
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+model User {
+  id                    String               @id @default(uuid())
+  name                  String
+  email                 String               @unique
+  password              String
+  role                  Role                 @default(FARMER)
+  phoneNumber           String?
+  profilePhotoUrl       String?
+  profilePhotoBlob      Bytes?
+  profilePhotoMime      String?
+  deliveryAddress       String?
+  isActive              Boolean              @default(true)
+
+  businessName          String?
+  supplierBusinessName  String?
+  licenseDocumentUrl    String?
+  supplierLicenseNumber String?
+  verificationStatus    VerificationStatus   @default(NOT_APPLICABLE)
+  verificationNotes     String?
+  approvedBy            String?
+  approvedAt            DateTime?
+
+  orders                Order[]
+  reviews               Review[]
+  payments              Payment[]
+  addresses             Address[]
+  supplierProducts      Product[]            @relation("SupplierProducts")
+  supplierReviews       Review[]             @relation("SupplierReviews")
+  approvedSuppliers     User[]               @relation("SupplierApprovals")
+  approvedByUser        User?                @relation("SupplierApprovals", fields: [approvedBy], references: [id])
+  createdCoupons        Coupon[]             @relation("CouponCreatedBy")
+  disputes              Dispute[]
+  reviewedDisputes      Dispute[]            @relation("DisputeReviews")
+  notifications         Notification[]
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+}
+
+model Address {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label      String?
+  line1      String
+  line2      String?
+  city       String?
+  region     String?
+  country    String?
+  postalCode String?
+  isDefault  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Product {
+  id                String           @id @default(uuid())
+  name              String
+  description       String
+  price             Float
+  stock             Int              @default(0)
+  stockQuantity     Int              @default(0)
+  lowStockThreshold Int              @default(10)
+  unit              String           @default("piece")
+  images            String[]
+  category          ProductCategory
+  supplierId        String?
+  supplier          User?            @relation("SupplierProducts", fields: [supplierId], references: [id])
+  orderItems        OrderItem[]
+  reviews           Review[]
+  inventoryLogs     InventoryLog[]
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  @@index([category])
+  @@index([supplierId])
+}
+
+model Coupon {
+  id                    String        @id @default(uuid())
+  code                  String        @unique
+  discountType          DiscountType
+  value                 Float
+  minOrderAmount        Float         @default(0)
+  validFrom             DateTime?
+  validTo               DateTime?
+  usageLimit            Int?
+  usageCount            Int           @default(0)
+  bulkPurchaseThreshold Int?
+  isActive              Boolean       @default(true)
+  createdById           String?
+  createdBy             User?         @relation("CouponCreatedBy", fields: [createdById], references: [id])
+  orders                Order[]
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  @@index([code])
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id])
+  couponId        String?
+  coupon          Coupon?     @relation(fields: [couponId], references: [id])
+  totalAmount     Float
+  discountAmount  Float?      @default(0)
+  status          OrderStatus @default(PENDING)
+  shippingAddress String
+
+  paymentPlan     PaymentPlan @default(FULL)
+  depositAmount   Float?
+  balanceAmount   Float?
+
+  paymentMethod   String?
+  last4Digits     String?
+  paymentStatus   String      @default("UNPAID")
+
+  comment         String?
+  complaintStatus String      @default("NONE")
+
+  items           OrderItem[]
+  payments        Payment[]
+  disputes        Dispute[]
+  refund          Refund?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([couponId])
+}
+
+model Refund {
+  id              String       @id @default(uuid())
+  orderId         String       @unique
+  order           Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  amount          Float
+  status          RefundStatus @default(PENDING)
+  refundType      RefundType   @default(FULL)
+
+  stockRestored   Boolean      @default(false)
+  stockRestoredAt DateTime?
+
+  reason          String
+  paymentsCount   Int          @default(0)
+
+  requestedBy     String?
+  confirmedBy     String?
+  confirmedAt     DateTime?
+
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([status])
+}
+
+model Dispute {
+  id             String        @id @default(uuid())
+  orderId        String
+  order          Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User          @relation(fields: [userId], references: [id])
+  type           DisputeType
+  description    String
+  evidenceUrl    String?
+  status         DisputeStatus @default(OPEN)
+  resolutionNote String?
+  reviewedById   String?
+  reviewedBy     User?         @relation("DisputeReviews", fields: [reviewedById], references: [id])
+  reviewedAt     DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([status])
+  @@index([orderId])
+}
+
+model Notification {
+  id         String              @id @default(uuid())
+  userId     String
+  user       User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type       String
+  channel    NotificationChannel
+  message    String
+  status     NotificationStatus  @default(PENDING)
+  sentAt     DateTime?
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+model Review {
+  id          String           @id @default(uuid())
+  productId   String?
+  product     Product?         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  supplierId  String?
+  supplier    User?            @relation("SupplierReviews", fields: [supplierId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User             @relation(fields: [userId], references: [id])
+  targetType  ReviewTargetType @default(PRODUCT)
+  rating      Int
+  comment     String
+  isApproved  Boolean          @default(true)
+  moderatedBy String?
+  moderatedAt DateTime?
+  createdAt   DateTime         @default(now())
+
+  @@index([targetType])
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Float
+}
+
+model StoreSettings {
+  id            String   @id @default(uuid())
+  name          String   @default("AgriConnect Market")
+  logo          String?
+  contactEmail  String?
+  contactPhone  String?
+  address       String?
+  currency      String   @default("USD")
+  updatedAt     DateTime @updatedAt
+}
+
+model Transaction {
+  id            String   @id @default(uuid())
+  orderId       String?
+  type          String   // PAYMENT, REFUND, EXPENSE
+  amount        Float
+  description   String?
+  metadata      Json?
+  status        String   @default("COMPLETED")
+  createdAt     DateTime @default(now())
+}
+
+model InventoryLog {
+  id          String   @id @default(uuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  type        String   // STOCK_IN, STOCK_OUT, DAMAGED, RETURNED
+  quantity    Int
+  note        String?
+  createdAt   DateTime @default(now())
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  senderId   String
+  senderName String
+  senderRole Role
+  receiverId String
+  content    String
+  fileUrl    String?
+  fileType   String?
+  fileName   String?
+  createdAt  DateTime @default(now())
+}
+
+model Payment {
+  id            String        @id @default(uuid())
+  orderId       String
+  order         Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User          @relation(fields: [userId], references: [id])
+
+  type          PaymentType   @default(FULL)
+  method        PaymentMethod @default(WAAFI)
+  manualType    ManualType?
+
+  amount        Float
+  phoneNumber   String?
+  status        String
+
+  paymentInfo   Json?
+  collectedBy   String?
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
