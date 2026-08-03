@@ -12,14 +12,14 @@ import 'checkout_view.dart';
 
 /// Agri Marketplace Theme Colors
 class AgriTheme {
-  static const Color background = Color(0xFFF6F9F6);
+  static const Color background = Color(0xFFF7F3E8);
   static const Color primary = Color(0xFF1E6F3D);
-  static const Color primaryLight = Color(0xFFE8F5E9);
-  static const Color accentAmber = Color(0xFFD97706);
-  static const Color textDark = Color(0xFF191C19);
-  static const Color textMuted = Color(0xFF52634F);
+  static const Color primaryLight = Color(0xFFEAF4E4);
+  static const Color accentAmber = Color(0xFFC99728);
+  static const Color textDark = Color(0xFF142016);
+  static const Color textMuted = Color(0xFF5B665C);
   static const Color cardBg = Colors.white;
-  static const Color border = Color(0xFFE2E8E2);
+  static const Color border = Color(0x1F142016);
 }
 
 class CartView extends StatelessWidget {

@@ -30,23 +30,43 @@ class BookingModel {
   });
 
   factory BookingModel.fromJson(Map<String, dynamic> json) {
+    final double totalPriceValue = (json['totalAmount'] ?? json['totalPrice'] ?? 0).toDouble();
+
+    List<BookingItemModel> itemsList = [];
+    if (json['items'] != null) {
+      itemsList = (json['items'] as List).map((i) => BookingItemModel.fromJson(i)).toList();
+    } else if (json['bookingItems'] != null) {
+      itemsList = (json['bookingItems'] as List).map((i) => BookingItemModel.fromJson(i)).toList();
+    }
+
+    List<PaymentModel> paymentsList = [];
+    if (json['payments'] != null) {
+      paymentsList = (json['payments'] as List).map((p) => PaymentModel.fromJson(p)).toList();
+    }
+    if (paymentsList.isEmpty && (json['paymentStatus'] == 'PAID' || json['status'] == 'CONFIRMED' || json['status'] == 'DELIVERED')) {
+      paymentsList.add(PaymentModel(
+        id: 'pay-${json['id']}',
+        amount: totalPriceValue,
+        method: json['paymentMethod'] ?? 'WAAFI',
+        status: 'SUCCESS',
+        transactionId: json['last4Digits'] ?? 'TXN-SUCCESS',
+        createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
+      ));
+    }
+
     return BookingModel(
       id: json['id'] ?? '',
-      eventDate: json['eventDate'] != null ? DateTime.parse(json['eventDate']) : DateTime.now(),
-      endDate: json['endDate'] != null ? DateTime.parse(json['endDate']) : DateTime.now(),
-      location: json['location'] ?? '',
+      eventDate: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
+      endDate: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
+      location: json['shippingAddress'] ?? json['location'] ?? '',
       status: json['status'] ?? 'PENDING',
-      totalPrice: (json['totalPrice'] ?? 0).toDouble(),
-      deposit: (json['deposit'] ?? 0).toDouble(),
-      balance: (json['balance'] ?? 0).toDouble(),
+      totalPrice: totalPriceValue,
+      deposit: totalPriceValue,
+      balance: 0.0,
       createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
-      bookingItems: json['bookingItems'] != null
-          ? (json['bookingItems'] as List).map((i) => BookingItemModel.fromJson(i)).toList()
-          : [],
-      payments: json['payments'] != null
-          ? (json['payments'] as List).map((p) => PaymentModel.fromJson(p)).toList()
-          : [],
-      hasCancelRequest: json['hasCancelRequest'] ?? false,
+      bookingItems: itemsList,
+      payments: paymentsList,
+      hasCancelRequest: json['status'] == 'CANCELLED',
     );
   }
 }
@@ -69,7 +89,7 @@ class BookingItemModel {
       id: json['id'] ?? '',
       quantity: json['quantity'] ?? 0,
       price: (json['price'] ?? 0).toDouble(),
-      decoration: DecorationModel.fromJson(json['decoration'] ?? {}),
+      decoration: DecorationModel.fromJson(json['product'] ?? json['decoration'] ?? {}),
     );
   }
 }

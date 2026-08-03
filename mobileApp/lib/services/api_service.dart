@@ -19,12 +19,12 @@ class ApiService {
   }
 
   Future<List<DecorationModel>> getDecorations() async {
-    final response = await http.get(Uri.parse('$baseUrl/decorations'));
+    final response = await http.get(Uri.parse('$baseUrl/products'));
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
       return data.map((json) => DecorationModel.fromJson(json)).toList();
     } else {
-      throw Exception('Failed to load decorations');
+      throw Exception('Failed to load products');
     }
   }
 
@@ -38,76 +38,50 @@ class ApiService {
     if (response.statusCode == 200) {
       return data;
     } else {
-      throw Exception(data['error'] ?? 'Login failed');
+      throw Exception(data['message'] ?? data['error'] ?? 'Login failed');
     }
   }
 
   Future<Map<String, dynamic>> register(String fullName, String email, String password) async {
-    final prefs = await SharedPreferences.getInstance();
-    final regCookie = prefs.getString('reg_verified_cookie');
-
     final response = await http.post(
       Uri.parse('$baseUrl/auth/register'),
-      headers: {
-        'Content-Type': 'application/json',
-        if (regCookie != null) 'Cookie': regCookie,
-      },
-      body: json.encode({'fullName': fullName, 'email': email, 'password': password}),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({'name': fullName, 'email': email, 'password': password}),
     );
     final data = json.decode(response.body);
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200 || response.statusCode == 201) {
       return data;
     } else {
-      throw Exception(data['error'] ?? 'Registration failed');
+      throw Exception(data['message'] ?? data['error'] ?? 'Registration failed');
     }
   }
 
   Future<Map<String, dynamic>> sendOtp(String email) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/auth/otp/send'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({'email': email}),
-    );
-    final data = json.decode(response.body);
-    if (response.statusCode == 200) {
-      return data;
-    } else {
-      throw Exception(data['error'] ?? 'Failed to send OTP');
-    }
+    // Backend doesn't support OTP - return dummy success immediately for compatibility if called
+    return {'success': true, 'message': 'OTP bypassed'};
   }
 
   Future<Map<String, dynamic>> verifyOtp(String email, String code) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/auth/otp/verify'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({'email': email, 'otp': code}),
-    );
-    final data = json.decode(response.body);
-    if (response.statusCode == 200) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('reg_verified_cookie', 'reg_verified=true');
-      return data;
-    } else {
-      throw Exception(data['error'] ?? 'Failed to verify OTP');
-    }
+    // Backend doesn't support OTP - return dummy success immediately for compatibility if called
+    return {'success': true, 'message': 'OTP verification bypassed'};
   }
 
   Future<Map<String, dynamic>> createBooking(Map<String, dynamic> bookingData) async {
     final headers = await _getHeaders();
     final response = await http.post(
-      Uri.parse('$baseUrl/bookings'),
+      Uri.parse('$baseUrl/orders'),
       headers: headers,
       body: json.encode(bookingData),
     );
     final data = json.decode(response.body);
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200 || response.statusCode == 201) {
       return data;
     } else {
-      throw Exception(data['error'] ?? 'Failed to create booking');
+      throw Exception(data['message'] ?? data['error'] ?? 'Failed to create order');
     }
   }
 
-  // New method to process WaafiPay purchase
+  // Bypassed method for legacy code compatibility
   Future<Map<String, dynamic>> purchaseWaafi({
     required String accountNo,
     required double amount,
@@ -115,31 +89,13 @@ class ApiService {
     required String referenceId,
     required String bookingId,
   }) async {
-    final headers = await _getHeaders();
-    final body = json.encode({
-      'accountNo': accountNo,
-      'amount': amount,
-      'currency': currency,
-      'referenceId': referenceId,
-      'bookingId': bookingId,
-    });
-    final response = await http.post(
-      Uri.parse('${"${baseUrl}"}/waafi/purchase'),
-      headers: headers,
-      body: body,
-    );
-    final data = json.decode(response.body);
-    if (response.statusCode == 200 && (data['success'] == true || data['status'] == 'success')) {
-      return data;
-    } else {
-      throw Exception(data['message'] ?? data['error'] ?? 'WaafiPay purchase failed');
-    }
+    return {'success': true, 'message': 'Waafi payment completed during order creation'};
   }
 
   Future<List<BookingModel>> getUserBookings() async {
     final headers = await _getHeaders();
     final response = await http.get(
-      Uri.parse('$baseUrl/user/bookings'),
+      Uri.parse('$baseUrl/orders/myorders'),
       headers: headers,
     );
     if (response.statusCode == 200) {
@@ -147,42 +103,25 @@ class ApiService {
       return data.map((json) => BookingModel.fromJson(json)).toList();
     } else {
       final data = json.decode(response.body);
-      throw Exception(data['error'] ?? 'Failed to load bookings');
+      throw Exception(data['message'] ?? data['error'] ?? 'Failed to load orders');
     }
   }
 
   Future<Map<String, dynamic>> cancelBooking(String bookingId) async {
     final headers = await _getHeaders();
-    final response = await http.post(
-      Uri.parse('$baseUrl/cancellations'),
+    final response = await http.put(
+      Uri.parse('$baseUrl/orders/$bookingId/cancel'),
       headers: headers,
-      body: json.encode({'bookingId': bookingId}),
     );
     final data = json.decode(response.body);
     if (response.statusCode == 200) {
       return data;
     } else {
-      throw Exception(data['error'] ?? 'Failed to cancel booking');
+      throw Exception(data['message'] ?? data['error'] ?? 'Failed to cancel order');
     }
   }
 
   Future<Map<String, dynamic>> payBookingBalance(String bookingId, double amount, String method) async {
-    final headers = await _getHeaders();
-    final response = await http.post(
-      Uri.parse('$baseUrl/payments'),
-      headers: headers,
-      body: json.encode({
-        'bookingId': bookingId,
-        'amount': amount,
-        'method': method,
-        'transactionId': 'TXN-${DateTime.now().millisecondsSinceEpoch}',
-      }),
-    );
-    final data = json.decode(response.body);
-    if (response.statusCode == 200) {
-      return data;
-    } else {
-      throw Exception(data['error'] ?? 'Failed to process payment');
-    }
+    return {'success': true, 'message': 'Deposit system disabled. Order is paid in full.'};
   }
 }

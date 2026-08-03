@@ -277,7 +277,7 @@ const AdminOrders = () => {
                       <td className="p-6">
                         <select
                           className={`bg-slate-800 border border-white/10 rounded-lg px-3 py-2 text-xs font-bold focus:ring-1 ring-[#16a34a] outline-none cursor-pointer transition-all ${order.status === 'DELIVERED' ? 'text-emerald-500' :
-                              order.status === 'PENDING' ? 'text-blue-500' : 'text-slate-400'
+                            order.status === 'PENDING' ? 'text-blue-500' : 'text-slate-400'
                             }`}
                           value={order.status}
                           onChange={(e) => handleStatusChange(order, e.target.value)}

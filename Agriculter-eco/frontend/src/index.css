@@ -1,131 +1,254 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=Cormorant+Garamond:wght@500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #059669;
-  --color-primary-light: #10b981;
-  --color-primary-dark: #047857;
-  --color-gold: #d97706;
-  --color-gold-light: #f59e0b;
-  --color-gold-dark: #b45309;
-  --color-navy: #1e40af;
-  --color-bg-light: #f8fafc;
-  --color-bg-dark: #0a0f1d;
-  --color-surface-light: #ffffff;
-  --color-surface-dark: #0f172a;
+  --color-primary: #1e6f3d;
+  --color-primary-light: #2f855a;
+  --color-primary-dark: #14532d;
+  --color-accent: #c99728;
+  --color-accent-light: #e7c66a;
+  --color-sand: #f6f0e2;
+  --color-ink: #142016;
+  --color-surface: #ffffff;
+  --color-surface-soft: #f8f5ee;
 
-  --font-heading: "Playfair Display", Georgia, serif;
-  --font-body: "Inter", system-ui, sans-serif;
-  --font-ui: "Outfit", system-ui, sans-serif;
+  --font-heading: "Cormorant Garamond", Georgia, serif;
+  --font-body: "Manrope", system-ui, sans-serif;
+  --font-ui: "Manrope", system-ui, sans-serif;
 
   --radius-xl: 24px;
   --radius-2xl: 32px;
-
-  --shadow-emerald: 0 8px 32px rgba(5, 150, 105, 0.2);
-  --shadow-gold: 0 8px 32px rgba(217, 119, 6, 0.2);
 }
 
-/* ============================================================
-   SMART AGRICULTURAL MARKETPLACE — DESIGN TOKENS & DARK MODE
-   ============================================================ */
-
 :root {
-  --primary: #059669;
-  --primary-hover: #047857;
-  --gold: #d97706;
-  --gold-hover: #b45309;
-  --bg-main: #f8fafc;
-  --bg-card: #ffffff;
-  --bg-card-glass: rgba(255, 255, 255, 0.92);
-  --text-main: #0f172a;
-  --text-muted: #475569;
-  --border-color: rgba(5, 150, 105, 0.12);
-  --shadow-card: 0 10px 30px -10px rgba(5, 150, 105, 0.08);
+  --primary: #1e6f3d;
+  --primary-hover: #14532d;
+  --accent: #c99728;
+  --accent-hover: #9f7617;
+  --bg-main: #f7f3e8;
+  --bg-card: rgba(255, 255, 255, 0.9);
+  --bg-card-solid: #ffffff;
+  --text-main: #142016;
+  --text-muted: #5b665c;
+  --border-color: rgba(20, 32, 22, 0.12);
+  --shadow-card: 0 18px 50px -30px rgba(20, 32, 22, 0.25);
 }
 
 html.dark, .dark {
-  --primary: #10b981;
-  --primary-hover: #34d399;
-  --gold: #f59e0b;
-  --gold-hover: #fbbf24;
-  --bg-main: #0a0f1d;
-  --bg-card: #0f172a;
-  --bg-card-glass: rgba(15, 23, 42, 0.88);
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --border-color: rgba(255, 255, 255, 0.1);
-  --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  --primary: #4cd27a;
+  --primary-hover: #2dc06a;
+  --accent: #f1be4d;
+  --accent-hover: #e6a92f;
+  --bg-main: #07110b;
+  --bg-card: rgba(10, 18, 13, 0.86);
+  --bg-card-solid: #0d1711;
+  --text-main: #f4f7f2;
+  --text-muted: #a7b2a9;
+  --border-color: rgba(255, 255, 255, 0.08);
+  --shadow-card: 0 18px 50px -30px rgba(0, 0, 0, 0.7);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background-color: var(--bg-main);
+  margin: 0;
+  background:
+    radial-gradient(circle at top left, rgba(30, 111, 61, 0.08), transparent 32%),
+    radial-gradient(circle at top right, rgba(201, 151, 40, 0.09), transparent 28%),
+    var(--bg-main);
   color: var(--text-main);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
-  scroll-behavior: smooth;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  text-rendering: optimizeLegibility;
+  transition: background-color 0.35s ease, color 0.35s ease;
 }
 
-h1, h2, h3, h4 {
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
+  letter-spacing: -0.02em;
 }
 
-/* Custom Utilities */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
 @layer utilities {
-  .glass-card {
-    background: var(--bg-card-glass);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid var(--border-color);
-  }
-
-  .text-emerald-gradient {
-    background: linear-gradient(135deg, #10b981 0%, #047857 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .text-gold-gradient {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
   .loading {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    gap: 20px;
+    gap: 18px;
     background: var(--bg-main);
     color: var(--primary);
     font-family: var(--font-ui);
   }
 
   .loading-spinner {
-    width: 44px;
-    height: 44px;
-    border: 4px solid rgba(5, 150, 105, 0.15);
-    border-top-color: var(--gold);
+    width: 46px;
+    height: 46px;
+    border: 4px solid rgba(30, 111, 61, 0.15);
+    border-top-color: var(--accent);
     border-radius: 50%;
-    animation: spin 1s linear infinite;
+    animation: spin 0.95s linear infinite;
+  }
+
+  .glass-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(22px) saturate(160%);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-card);
+  }
+
+  .soft-card {
+    background: var(--bg-card-solid);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-card);
+  }
+
+  .section-shell {
+    width: min(1180px, calc(100% - 32px));
+    margin-inline: auto;
+  }
+
+  .section-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(30, 111, 61, 0.16);
+    background: rgba(30, 111, 61, 0.07);
+    color: var(--primary);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .section-title {
+    font-size: clamp(2rem, 3vw, 3.4rem);
+    line-height: 0.95;
+    margin: 0;
+  }
+
+  .section-copy {
+    color: var(--text-muted);
+    line-height: 1.7;
+    font-size: 15px;
+  }
+
+  .hero-panel {
+    position: relative;
+    overflow: hidden;
+    border-radius: 34px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background:
+      linear-gradient(145deg, rgba(20, 32, 22, 0.88), rgba(28, 53, 34, 0.72)),
+      radial-gradient(circle at top right, rgba(241, 190, 77, 0.18), transparent 30%);
+    box-shadow: 0 28px 80px -34px rgba(9, 18, 11, 0.7);
+  }
+
+  .hero-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    background-size: 42px 42px;
+    mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.85), transparent 82%);
+    pointer-events: none;
+    opacity: 0.45;
+  }
+
+  .soft-grid {
+    background-image:
+      linear-gradient(rgba(20, 32, 22, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(20, 32, 22, 0.05) 1px, transparent 1px);
+    background-size: 26px 26px;
+  }
+
+  .brand-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    border: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.55);
+    color: var(--text-muted);
+  }
+
+  .brand-kpi {
+    border-radius: 24px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card-solid);
+    box-shadow: var(--shadow-card);
+  }
+
+  .brand-kpi__value {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    line-height: 0.95;
+    font-family: var(--font-heading);
+  }
+
+  .brand-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-color), transparent);
   }
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
 .app-container {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  background-color: var(--bg-main);
-  color: var(--text-main);
 }
 
 .content {
   flex: 1;
+}
+
+.font-heading {
+  font-family: var(--font-heading);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+.font-ui {
+  font-family: var(--font-ui);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

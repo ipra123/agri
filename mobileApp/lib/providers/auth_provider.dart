@@ -43,8 +43,8 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
     try {
       final data = await _apiService.login(email, password);
-      if (data['token'] != null && data['user'] != null) {
-        await _saveUser(data['token'], data['user']);
+      if (data['token'] != null) {
+        await _saveUser(data['token'], data);
       }
     } finally {
       _isLoading = false;
@@ -68,8 +68,8 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
     try {
       final data = await _apiService.register(fullName, email, password);
-      if (data['token'] != null && data['user'] != null) {
-        await _saveUser(data['token'], data['user']);
+      if (data['token'] != null) {
+        await _saveUser(data['token'], data);
       }
     } finally {
       _isLoading = false;

@@ -53,31 +53,30 @@ class CartProvider with ChangeNotifier {
   }
 
   Future<String> createBooking({
-    required DateTime eventDate,
-    required DateTime endDate,
-    required String location,
-    required double paymentAmount,
+    required String shippingAddress,
     required String paymentMethod,
+    required String payerPhone,
+    String comment = '',
   }) async {
     if (_items.isEmpty) throw Exception("Cart is empty");
     
     final itemsData = _items.map((item) => {
-      'decorationId': item.decoration.id,
+      'productId': item.decoration.id,
       'quantity': item.quantity,
+      'price': item.decoration.price,
     }).toList();
 
-    final bookingData = {
-      'eventDate': eventDate.toIso8601String(),
-      'endDate': endDate.toIso8601String(),
-      'location': location,
-      'paymentAmount': paymentAmount,
-      'paymentMethod': paymentMethod,
+    final orderData = {
       'items': itemsData,
+      'shippingAddress': shippingAddress,
+      'totalAmount': totalPrice,
+      'paymentMethod': paymentMethod,
+      'last4Digits': payerPhone,
+      'comment': comment,
     };
 
-    final response = await _apiService.createBooking(bookingData);
+    final response = await _apiService.createBooking(orderData);
     clearCart();
-    // Return the booking ID so the caller can pass it to WaafiPay
     return response['id'] as String;
   }
 }

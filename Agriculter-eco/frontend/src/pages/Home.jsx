@@ -1,91 +1,59 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
   FiArrowRight,
-  FiArrowUpRight,
-  FiChevronLeft,
-  FiChevronRight,
   FiShoppingBag,
-  FiTruck,
   FiShield,
-  FiCheckCircle,
-  FiHeadphones,
-  FiSmartphone,
+  FiTruck,
   FiStar,
   FiZap,
+  FiUsers,
 } from "react-icons/fi";
 import { GiWheat, GiPlantSeed } from "react-icons/gi";
 import api from "../lib/api";
 import useCartStore from "../store/useCartStore";
-import toast from "react-hot-toast";
+import ProductCard from "../components/ProductCard";
+import heroImage from "../assets/hero.png";
+import brandLogo from "../assets/logo.png";
 
-const HERO_SLIDES = [
-  {
-    eyebrow: "Farmers & Suppliers, One Marketplace",
-    headline: "Everything your farm needs,",
-    headlineAccent: "delivered",
-    headlineTail: "to your doorstep.",
-    body: "Browse seeds, fertilizers, pesticides, tools and irrigation equipment from verified suppliers, and pay instantly with mobile money — no queues, no middlemen.",
-    image: "https://images.unsplash.com/photo-1500595046743-cd271d694d30?q=80&w=1600&auto=format&fit=crop",
-    cta: { label: "Explore Marketplace", path: "/shop" },
-  },
-  {
-    eyebrow: "New Planting Season Stock",
-    headline: "Better yields start with",
-    headlineAccent: "certified seeds",
-    headlineTail: "& fertilizers.",
-    body: "Compare prices across suppliers, check real farmer reviews, and stock up before the season starts — every listing verified for quality.",
-    image: "https://images.unsplash.com/photo-1574943320219-553eb213f72d?q=80&w=1600&auto=format&fit=crop",
-    cta: { label: "Shop Seeds & Fertilizers", path: "/shop" },
-  },
-  {
-    eyebrow: "Instant Mobile Money Checkout",
-    headline: "Order today,",
-    headlineAccent: "pay with EVC Plus,",
-    headlineTail: "Zaad or Sahal.",
-    body: "Secure checkout built for how farmers actually pay — confirm your order, track delivery, and get a digital receipt in seconds.",
-    image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=1600&auto=format&fit=crop",
-    cta: { label: "Discover More", path: "/collection" },
-  },
-];
-
-const AUTOPLAY_MS = 6000;
-
-const categories = [
+const CATEGORY_CARDS = [
   {
     title: "Seeds & Grains",
     dbCategory: "SEEDS",
-    desc: "Certified, high-yield seeds for staple and cash crops",
-    image: "https://images.unsplash.com/photo-1592982537447-7440770cbfc9?q=80&w=600&auto=format&fit=crop",
+    copy: "Certified varieties, strong germination, and season-ready stock.",
+    tone: "from-[#224c2d] to-[#1e6f3d]",
   },
   {
-    title: "Fertilizers & Soil Care",
+    title: "Fertilizers",
     dbCategory: "FERTILIZERS",
-    desc: "Organic and mineral fertilizers to boost every harvest",
-    image: "https://images.unsplash.com/photo-1592982573971-2c0a51e5cd45?q=80&w=600&auto=format&fit=crop",
+    copy: "Balanced nutrition for rich soil and healthier yields.",
+    tone: "from-[#5e4820] to-[#c99728]",
   },
   {
-    title: "Farm Tools & Equipment",
-    dbCategory: "FARMTOOLS",
-    desc: "Durable hand tools, sprayers, and machinery for every field",
-    image: "https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?q=80&w=600&auto=format&fit=crop",
+    title: "Farm Tools",
+    dbCategory: "FARM_TOOLS",
+    copy: "Hand tools, sprayers, and durable equipment for daily work.",
+    tone: "from-[#1d3147] to-[#3a556f]",
   },
   {
-    title: "Irrigation & Water Systems",
-    dbCategory: "IRRIGATION",
-    desc: "Drip lines, sprinklers, and pumps for reliable watering",
-    image: "https://images.unsplash.com/photo-1625246334831-d10f61e02a11?q=80&w=600&auto=format&fit=crop",
+    title: "Irrigation",
+    dbCategory: "IRRIGATION_EQUIPMENT",
+    copy: "Water delivery systems designed for reliable growth.",
+    tone: "from-[#13493f] to-[#1f9b74]",
   },
+];
+
+const QUICK_STATS = [
+  { label: "Verified suppliers", value: "120+", icon: FiShield },
+  { label: "Season stock", value: "24/7", icon: FiTruck },
+  { label: "Rated products", value: "4.8/5", icon: FiStar },
+  { label: "Farmers served", value: "8k+", icon: FiUsers },
 ];
 
 export default function Home() {
   const navigate = useNavigate();
   const { addItem } = useCartStore();
-
-  const [activeSlide, setActiveSlide] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-  const timerRef = useRef(null);
 
   const { data: featuredProducts = [], isLoading } = useQuery({
     queryKey: ["featured-products"],
@@ -95,338 +63,201 @@ export default function Home() {
     },
   });
 
-  const nextSlide = useCallback(() => {
-    setActiveSlide((prev) => (prev + 1) % HERO_SLIDES.length);
-  }, []);
-
-  const prevSlide = () => {
-    setActiveSlide((prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
-  };
-
-  useEffect(() => {
-    if (isPaused) return;
-    timerRef.current = setInterval(nextSlide, AUTOPLAY_MS);
-    return () => clearInterval(timerRef.current);
-  }, [isPaused, nextSlide]);
-
-  const slide = HERO_SLIDES[activeSlide];
+  const featured = useMemo(() => featuredProducts.slice(0, 8), [featuredProducts]);
 
   return (
-    <div className="min-h-screen bg-[#FBF7EC] dark:bg-[#0B140D] text-slate-900 dark:text-slate-100 transition-colors duration-300 font-body">
-      {/* ============================================================
-         HERO SECTION — furrow-row texture evokes plowed fields
-         ============================================================ */}
-      <section
-        className="relative pt-24 pb-16 lg:pt-32 lg:pb-24 overflow-hidden"
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
-      >
-        {/* Ambient furrow-line background */}
-        <div
-          className="absolute inset-0 opacity-[0.05] dark:opacity-[0.08] pointer-events-none"
-          style={{
-            backgroundImage:
-              "repeating-linear-gradient(115deg, currentColor 0px, currentColor 2px, transparent 2px, transparent 42px)",
-            color: "#3F6B3F",
-          }}
-        />
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-green-700/10 dark:bg-amber-500/10 rounded-full blur-[140px] pointer-events-none" />
+    <div className="home-page min-h-screen pt-28 pb-16">
+      <section className="page-shell page-hero">
+        <div className="page-hero__grid">
+          <div className="space-y-8 text-left">
+            <span className="section-eyebrow">
+              <GiWheat />
+              Agricultural marketplace
+            </span>
 
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="grid lg:grid-cols-12 gap-12 items-center">
-            {/* Left Content */}
-            <div className="lg:col-span-7 space-y-8 text-left">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-50 dark:bg-slate-800 border border-green-200 dark:border-slate-700 text-green-800 dark:text-amber-400 text-xs font-bold uppercase tracking-widest shadow-sm">
-                <GiWheat className="text-amber-500" />
-                <span>{slide.eyebrow}</span>
-              </div>
-
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black font-heading leading-[1.15] text-slate-900 dark:text-white">
-                {slide.headline}{" "}
-                <span className="text-green-800 dark:text-amber-400 underline decoration-amber-500/40 decoration-4">
-                  {slide.headlineAccent}
-                </span>{" "}
-                {slide.headlineTail}
+            <div className="space-y-5">
+              <h1 className="page-hero__title">
+                Fresh farm inputs,
+                <span className="text-[color:var(--primary)]"> trusted suppliers </span>
+                and faster checkout.
               </h1>
-
-              <p className="text-slate-600 dark:text-slate-300 text-base sm:text-lg leading-relaxed max-w-xl">
-                {slide.body}
+              <p className="page-hero__lead">
+                Order seeds, fertilizers, irrigation gear, and farm tools from verified suppliers with a brand feel inspired by the reference designs: warm earth tones, soft surfaces, and premium spacing.
               </p>
-
-              <div className="flex flex-wrap items-center gap-4 pt-2">
-                <button
-                  onClick={() => navigate(slide.cta.path)}
-                  className="px-8 py-4 rounded-full bg-green-800 hover:bg-green-900 dark:bg-amber-500 dark:hover:bg-amber-400 text-white dark:text-slate-950 font-extrabold text-sm uppercase tracking-widest shadow-lg shadow-green-800/25 dark:shadow-amber-500/25 transition-all flex items-center gap-3 group"
-                >
-                  <span>{slide.cta.label}</span>
-                  <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
-                </button>
-                <button
-                  onClick={() => navigate("/shop")}
-                  className="px-8 py-4 rounded-full bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 hover:border-green-700 dark:hover:border-amber-400 text-slate-800 dark:text-slate-200 font-bold text-sm uppercase tracking-widest shadow-sm transition-all"
-                >
-                  View All Inputs
-                </button>
-              </div>
-
-              {/* Slider Controls */}
-              <div className="flex items-center gap-4 pt-6 border-t border-slate-200 dark:border-slate-800">
-                <div className="flex items-center gap-2">
-                  {HERO_SLIDES.map((_, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setActiveSlide(idx)}
-                      className={`h-2.5 rounded-full transition-all duration-300 ${idx === activeSlide
-                          ? "w-8 bg-green-800 dark:bg-amber-500"
-                          : "w-2.5 bg-slate-300 dark:bg-slate-700"
-                        }`}
-                      aria-label={`Go to slide ${idx + 1}`}
-                    />
-                  ))}
-                </div>
-                <div className="flex items-center gap-2 ml-auto">
-                  <button
-                    onClick={prevSlide}
-                    className="p-3 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-green-50 dark:hover:bg-slate-700 transition-colors"
-                  >
-                    <FiChevronLeft />
-                  </button>
-                  <button
-                    onClick={nextSlide}
-                    className="p-3 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-green-50 dark:hover:bg-slate-700 transition-colors"
-                  >
-                    <FiChevronRight />
-                  </button>
-                </div>
-              </div>
             </div>
 
-            {/* Right Slide Image Card */}
-            <div className="lg:col-span-5 relative">
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white dark:border-slate-800 h-[420px] sm:h-[480px]">
-                <img
-                  src={slide.image}
-                  alt={slide.headline}
-                  className="w-full h-full object-cover transition-all duration-700 scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
-                <div className="absolute bottom-6 left-6 right-6 p-6 rounded-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-slate-200/60 dark:border-slate-700/60 text-left">
-                  <div className="flex items-center gap-2 text-amber-500 font-bold text-xs uppercase tracking-wider mb-1">
-                    <GiPlantSeed className="text-amber-500" />
-                    <span>Fresh This Season</span>
-                  </div>
-                  <h4 className="text-base font-extrabold text-slate-900 dark:text-white">
-                    Verified Suppliers, Fair Prices
-                  </h4>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ============================================================
-         VALUE PROPS STRIP
-         ============================================================ */}
-      <section className="py-12 bg-white dark:bg-[#0F1C12] border-y border-slate-200/80 dark:border-slate-800">
-        <div className="container mx-auto px-6">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              {
-                icon: <FiTruck className="text-2xl text-green-700 dark:text-amber-400" />,
-                title: "Nationwide Farm Delivery",
-                desc: "Inputs shipped door-to-door across every region",
-              },
-              {
-                icon: <FiShield className="text-2xl text-green-700 dark:text-amber-400" />,
-                title: "Verified Suppliers",
-                desc: "Every listing checked for authenticity and quality",
-              },
-              {
-                icon: <FiSmartphone className="text-2xl text-green-700 dark:text-amber-400" />,
-                title: "Instant Mobile Pay",
-                desc: "EVC Plus, Zaad, Sahal & card payments accepted",
-              },
-              {
-                icon: <FiHeadphones className="text-2xl text-green-700 dark:text-amber-400" />,
-                title: "24/7 Farmer Support",
-                desc: "Real help with orders, delivery and disputes",
-              },
-            ].map((prop, i) => (
-              <div key={i} className="flex items-start gap-4 p-4 rounded-2xl hover:bg-green-50/60 dark:hover:bg-slate-800/40 transition-colors text-left">
-                <div className="p-3 rounded-2xl bg-green-50 dark:bg-slate-800 border border-green-100 dark:border-slate-700 shrink-0">
-                  {prop.icon}
-                </div>
-                <div>
-                  <h4 className="font-extrabold text-slate-900 dark:text-white text-sm">
-                    {prop.title}
-                  </h4>
-                  <p className="text-slate-500 dark:text-slate-400 text-xs mt-1 leading-relaxed">
-                    {prop.desc}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ============================================================
-         CATEGORIES SECTION
-         ============================================================ */}
-      <section className="py-20">
-        <div className="container mx-auto px-6">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 text-left">
-            <div>
-              <span className="text-xs font-black uppercase tracking-widest text-green-700 dark:text-amber-400 block mb-2">
-                Shop by Input
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-black font-heading text-slate-900 dark:text-white">
-                Explore Top Categories
-              </h2>
-            </div>
-            <button
-              onClick={() => navigate("/shop")}
-              className="mt-4 md:mt-0 inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-green-800 dark:text-amber-400 hover:underline"
-            >
-              <span>View All Categories</span>
-              <FiArrowUpRight />
-            </button>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {categories.map((cat, i) => (
-              <div
-                key={i}
-                onClick={() => navigate(`/shop?category=${cat.dbCategory}`)}
-                className="group relative rounded-3xl overflow-hidden cursor-pointer border border-slate-200 dark:border-slate-800 h-80 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 text-left"
+            <div className="page-hero__actions">
+              <button
+                onClick={() => navigate("/shop")}
+                className="inline-flex items-center gap-3 rounded-full bg-[color:var(--primary)] px-6 py-3.5 text-[11px] font-black uppercase tracking-[0.22em] text-white shadow-lg shadow-emerald-900/10 transition hover:bg-[color:var(--primary-hover)]"
               >
-                <img
-                  src={cat.image}
-                  alt={cat.title}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent" />
-                <div className="absolute bottom-6 left-6 right-6 text-white space-y-2">
-                  <h3 className="text-xl font-extrabold font-heading group-hover:text-amber-400 transition-colors">
-                    {cat.title}
-                  </h3>
-                  <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed">
-                    {cat.desc}
+                Explore marketplace
+                <FiArrowRight />
+              </button>
+              <button
+                onClick={() => navigate("/collection")}
+                className="inline-flex items-center gap-3 rounded-full border border-[color:var(--border-color)] bg-white/75 px-6 py-3.5 text-[11px] font-black uppercase tracking-[0.22em] text-[color:var(--text-main)] transition hover:border-[color:var(--primary)]"
+              >
+                Browse collections
+              </button>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              {QUICK_STATS.map((stat) => {
+                const Icon = stat.icon;
+                return (
+                  <div key={stat.label} className="feature-card">
+                    <div className="flex items-center gap-3">
+                      <div className="grid h-11 w-11 place-items-center rounded-2xl bg-[color:var(--surface-soft)] text-[color:var(--primary)]">
+                        <Icon />
+                      </div>
+                      <div>
+                        <div className="feature-card__label">{stat.label}</div>
+                        <div className="feature-card__value">{stat.value}</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="hero-panel p-4 sm:p-5">
+              <div className="hero-image">
+                <img src={heroImage} alt="Agricultural marketplace" />
+                <div className="hero-image__overlay" />
+                <div className="hero-image__badge">
+                  <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.22em] text-[color:var(--accent)]">
+                    <FiZap />
+                    Season ready inventory
+                  </div>
+                  <p className="mt-2 text-sm leading-6 text-white/85">
+                    Highlighting the same premium, grounded aesthetic across desktop and mobile.
                   </p>
-                  <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-amber-400 pt-2">
-                    Browse Category <FiArrowRight />
-                  </span>
                 </div>
               </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="stat-card">
+                <div className="stat-card__icon">
+                  <FiShoppingBag />
+                </div>
+                <p className="dashboard-card__label">Instant order flow</p>
+                <p className="dashboard-card__value">Simple</p>
+                <p className="dashboard-card__meta">Clean browsing, product comparison, and quick add to cart.</p>
+              </div>
+              <div className="stat-card">
+                <div className="stat-card__icon">
+                  <FiShield />
+                </div>
+                <p className="dashboard-card__label">Trust signal</p>
+                <p className="dashboard-card__value">Verified</p>
+                <p className="dashboard-card__meta">Supplier-first marketplace with clearer credibility cues.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section-block section-block--soft">
+        <div className="page-shell">
+          <div className="section-heading text-left">
+            <span className="section-eyebrow">
+              <GiPlantSeed />
+              Shop by category
+            </span>
+            <h2>Curated around the crop cycle</h2>
+            <p>
+              Each category card uses a rich color block so the layout feels closer to the reference mood boards while still staying clean and modern.
+            </p>
+          </div>
+
+          <div className="panel-grid panel-grid--4">
+            {CATEGORY_CARDS.map((item) => (
+              <button
+                key={item.title}
+                onClick={() => navigate(`/shop?category=${item.dbCategory}`)}
+                className={`group overflow-hidden rounded-[28px] border border-white/30 bg-gradient-to-br ${item.tone} p-6 text-left text-white shadow-[0_24px_70px_-36px_rgba(0,0,0,0.5)] transition hover:-translate-y-1`}
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/20 bg-white/15 text-lg">
+                  <GiWheat />
+                </div>
+                <h3 className="mt-12 text-2xl font-black leading-tight">{item.title}</h3>
+                <p className="mt-3 text-sm leading-6 text-white/82">{item.copy}</p>
+                <span className="mt-6 inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.22em]">
+                  Explore
+                  <FiArrowRight className="transition group-hover:translate-x-1" />
+                </span>
+              </button>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ============================================================
-         FEATURED PRODUCTS
-         ============================================================ */}
-      <section className="py-20 bg-white dark:bg-[#0F1C12] border-t border-slate-200/80 dark:border-slate-800">
-        <div className="container mx-auto px-6">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 text-left">
-            <div>
-              <span className="text-xs font-black uppercase tracking-widest text-green-700 dark:text-amber-400 block mb-2">
-                Handpicked for This Season
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-black font-heading text-slate-900 dark:text-white">
-                Featured Inputs
-              </h2>
-            </div>
-            <button
-              onClick={() => navigate("/shop")}
-              className="mt-4 md:mt-0 inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest text-green-800 dark:text-amber-400 hover:underline"
-            >
-              <span>Explore Entire Marketplace</span>
-              <FiArrowUpRight />
-            </button>
+      <section className="section-block">
+        <div className="page-shell">
+          <div className="section-heading text-left">
+            <span className="section-eyebrow">
+              <FiStar />
+              Featured products
+            </span>
+            <h2>Top picks from trusted suppliers</h2>
+            <p>High-value inputs highlighted with a more editorial, premium layout.</p>
           </div>
 
           {isLoading ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-80 rounded-3xl bg-slate-200 dark:bg-slate-800 animate-pulse" />
+            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className="brand-kpi h-[380px] animate-pulse" />
               ))}
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredProducts.slice(0, 8).map((product) => (
-                <div
+            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+              {featured.map((product) => (
+                <ProductCard
                   key={product.id}
-                  className="group relative bg-[#FBF7EC] dark:bg-slate-900 rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 hover:border-green-600/50 dark:hover:border-amber-500/50 transition-all duration-300 hover:-translate-y-2 shadow-sm hover:shadow-xl text-left flex flex-col justify-between"
-                >
-                  <div
-                    onClick={() => navigate(`/product/${product.id}`)}
-                    className="cursor-pointer"
-                  >
-                    <div className="relative h-60 overflow-hidden bg-slate-100 dark:bg-slate-800">
-                      <img
-                        src={product.images?.[0] || "https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?w=400&auto=format"}
-                        alt={product.name}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
-                      <span className="absolute top-4 left-4 px-3 py-1 rounded-full bg-green-800 dark:bg-amber-500 text-white dark:text-slate-950 font-black text-[10px] uppercase tracking-wider shadow-md">
-                        {product.category}
-                      </span>
-                    </div>
-
-                    <div className="p-6 space-y-2">
-                      <h3 className="text-base font-extrabold text-slate-900 dark:text-white group-hover:text-green-700 dark:group-hover:text-amber-400 transition-colors line-clamp-1">
-                        {product.name}
-                      </h3>
-                      <p className="text-slate-500 dark:text-slate-400 text-xs line-clamp-2">
-                        {product.description || "Quality agricultural input sourced from verified suppliers."}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="p-6 pt-0 flex items-center justify-between">
-                    <span className="text-xl font-black text-slate-900 dark:text-amber-400">
-                      ${product.price}
-                    </span>
-                    <button
-                      onClick={() => {
-                        addItem(product);
-                        toast.success(`${product.name} added to cart`);
-                      }}
-                      className="px-4 py-2.5 rounded-full bg-green-800 hover:bg-green-900 dark:bg-amber-500 dark:hover:bg-amber-400 text-white dark:text-slate-950 text-xs font-bold uppercase tracking-wider transition-all shadow-md"
-                    >
-                      Add to Cart
-                    </button>
-                  </div>
-                </div>
+                  product={product}
+                  onAddToCart={(item) => addItem(item)}
+                  onNavigate={(id) => navigate(`/product/${id}`)}
+                />
               ))}
             </div>
           )}
         </div>
       </section>
 
-      {/* ============================================================
-         GOLD/GREEN CTA BANNER
-         ============================================================ */}
-      <section className="py-20 relative overflow-hidden bg-gradient-to-r from-green-900 via-green-800 to-amber-900 text-white">
-        <div className="container mx-auto px-6 relative z-10 text-center space-y-6 max-w-3xl">
-          <span className="px-4 py-1.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30 text-xs font-bold uppercase tracking-widest inline-block">
-            Plant Smarter, Sell Faster
-          </span>
-          <h2 className="text-3xl sm:text-5xl font-black font-heading leading-tight">
-            Ready to Grow Your Farm's Potential?
-          </h2>
-          <p className="text-green-100 text-base sm:text-lg leading-relaxed">
-            Join thousands of farmers sourcing seeds, fertilizers and tools from verified suppliers — with instant mobile money checkout and nationwide delivery.
-          </p>
-          <div className="pt-4">
-            <button
-              onClick={() => navigate("/shop")}
-              className="px-10 py-4 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm uppercase tracking-widest shadow-xl shadow-amber-500/30 transition-all hover:scale-105 active:scale-95"
-            >
-              Start Shopping Now
-            </button>
+      <section className="section-block section-block--soft">
+        <div className="page-shell">
+          <div className="floating-card p-8 sm:p-10">
+            <div className="grid gap-8 lg:grid-cols-[1.3fr_0.7fr] lg:items-center">
+              <div className="text-left text-white">
+                <span className="section-eyebrow border-white/20 bg-white/10 text-white">
+                  Verified suppliers
+                </span>
+                <h2 className="mt-5 text-4xl font-black leading-tight sm:text-5xl">
+                  Built for farmers who want speed, trust, and a cleaner checkout.
+                </h2>
+                <p className="mt-4 max-w-2xl text-sm leading-7 text-white/78">
+                  The refreshed UI keeps the same marketplace experience while aligning the web surfaces and mobile app around one visual language.
+                </p>
+              </div>
+              <div className="rounded-[28px] border border-white/15 bg-white/10 p-6 text-left text-white backdrop-blur">
+                <div className="flex items-center gap-3">
+                  <img src={brandLogo} alt="brand" className="h-12 w-12 rounded-2xl object-cover" />
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.24em] text-white/70">Marketplace identity</p>
+                    <p className="text-lg font-black tracking-[0.16em]">AGRIECO</p>
+                  </div>
+                </div>
+                <div className="brand-divider my-5 bg-white/10" />
+                <div className="space-y-3 text-sm text-white/80">
+                  <p>Earthy palette, soft glass panels, and stronger hierarchy.</p>
+                  <p>One visual system across home, shop, admin, supplier, and mobile.</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

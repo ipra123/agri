@@ -2,21 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // Brand Colors
-  static const Color primary = Color(0xFF4F46E5); // Indigo 600
-  static const Color primaryDark = Color(0xFF4338CA); // Indigo 700
-  static const Color background = Color(0xFFF8FAFC); // Slate 50
+  static const Color primary = Color(0xFF1E6F3D);
+  static const Color primaryDark = Color(0xFF14532D);
+  static const Color accent = Color(0xFFC99728);
+  static const Color background = Color(0xFFF7F3E8);
   static const Color surface = Colors.white;
-  static const Color textPrimary = Color(0xFF0F172A); // Slate 950
-  static const Color textSecondary = Color(0xFF64748B); // Slate 500
-  static const Color border = Color(0xFFE2E8F0); // Slate 200
+  static const Color textPrimary = Color(0xFF142016);
+  static const Color textSecondary = Color(0xFF5B665C);
+  static const Color border = Color(0x1F142016);
 
   static ThemeData get lightTheme {
+    final baseText = GoogleFonts.manropeTextTheme();
+
     return ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.light(
         primary: primary,
-        secondary: primary,
+        secondary: accent,
         surface: surface,
         background: background,
         onPrimary: Colors.white,
@@ -25,35 +27,46 @@ class AppTheme {
         outline: border,
       ),
       scaffoldBackgroundColor: background,
-      textTheme: GoogleFonts.interTextTheme().copyWith(
-        displayLarge: GoogleFonts.inter(
+      textTheme: baseText.copyWith(
+        displayLarge: GoogleFonts.cormorantGaramond(
+          color: textPrimary,
+          fontWeight: FontWeight.w700,
+        ),
+        displayMedium: GoogleFonts.cormorantGaramond(
+          color: textPrimary,
+          fontWeight: FontWeight.w700,
+        ),
+        headlineLarge: GoogleFonts.cormorantGaramond(
+          color: textPrimary,
+          fontWeight: FontWeight.w700,
+        ),
+        titleLarge: GoogleFonts.manrope(
           color: textPrimary,
           fontWeight: FontWeight.w800,
         ),
-        displayMedium: GoogleFonts.inter(
+        titleMedium: GoogleFonts.manrope(
           color: textPrimary,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w700,
         ),
-        titleLarge: GoogleFonts.inter(
+        bodyLarge: GoogleFonts.manrope(
           color: textPrimary,
-          fontWeight: FontWeight.bold,
+          height: 1.45,
         ),
-        bodyLarge: GoogleFonts.inter(
-          color: textPrimary,
-        ),
-        bodyMedium: GoogleFonts.inter(
+        bodyMedium: GoogleFonts.manrope(
           color: textSecondary,
+          height: 1.45,
         ),
       ),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: surface,
+      appBarTheme: AppBarTheme(
+        backgroundColor: background,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
         centerTitle: false,
-        iconTheme: IconThemeData(color: textPrimary),
-        titleTextStyle: TextStyle(
+        iconTheme: const IconThemeData(color: textPrimary),
+        titleTextStyle: GoogleFonts.manrope(
           color: textPrimary,
           fontSize: 18,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w800,
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -61,23 +74,67 @@ class AppTheme {
           backgroundColor: primary,
           foregroundColor: Colors.white,
           elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(18),
           ),
-          textStyle: GoogleFonts.inter(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
+          textStyle: GoogleFonts.manrope(
+            fontWeight: FontWeight.w800,
+            fontSize: 15,
+            letterSpacing: 0.2,
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: textPrimary,
+          side: const BorderSide(color: border),
+          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
+          textStyle: GoogleFonts.manrope(
+            fontWeight: FontWeight.w800,
+            fontSize: 15,
           ),
         ),
       ),
       cardTheme: CardThemeData(
         color: surface,
         elevation: 0,
+        margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(24),
           side: const BorderSide(color: border),
         ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: surface,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: const BorderSide(color: border),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: const BorderSide(color: border),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: const BorderSide(color: primary, width: 1.4),
+        ),
+        labelStyle: GoogleFonts.manrope(color: textSecondary, fontWeight: FontWeight.w700),
+        hintStyle: GoogleFonts.manrope(color: textSecondary.withOpacity(0.75)),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: Colors.white,
+        disabledColor: Colors.white,
+        selectedColor: primary,
+        secondarySelectedColor: primary,
+        side: const BorderSide(color: border),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+        labelStyle: GoogleFonts.manrope(fontWeight: FontWeight.w800),
       ),
     );
   }

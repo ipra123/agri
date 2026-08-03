@@ -79,61 +79,64 @@ class _MainNavigationState extends State<MainNavigation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
-      ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, -4),
+      body: IndexedStack(index: _currentIndex, children: _screens),
+      extendBody: true,
+      bottomNavigationBar: SafeArea(
+        minimum: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.92),
+            borderRadius: BorderRadius.circular(26),
+            border: Border.all(color: AppTheme.border),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 24,
+                offset: const Offset(0, 12),
+              ),
+            ],
+          ),
+          child: NavigationBarTheme(
+            data: NavigationBarThemeData(
+              backgroundColor: Colors.transparent,
+              indicatorColor: AppTheme.primary.withOpacity(0.12),
+              labelTextStyle: MaterialStateProperty.all(
+                const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
+              ),
             ),
-          ],
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            child: BottomNavigationBar(
-              currentIndex: _currentIndex,
-              onTap: (index) {
+            child: NavigationBar(
+              selectedIndex: _currentIndex,
+              onDestinationSelected: (index) {
                 MainNavigation.selectedTabNotifier.value = index;
                 setState(() => _currentIndex = index);
               },
               backgroundColor: Colors.transparent,
-              elevation: 0,
-              type: BottomNavigationBarType.fixed,
-              selectedItemColor: AppTheme.primary,
-              unselectedItemColor: AppTheme.textSecondary,
-              selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-              unselectedLabelStyle: const TextStyle(fontSize: 12),
-              items: const [
-                BottomNavigationBarItem(
+              surfaceTintColor: Colors.transparent,
+              height: 72,
+              destinations: const [
+                NavigationDestination(
                   icon: Icon(LucideIcons.home),
-                  activeIcon: Icon(LucideIcons.home, color: AppTheme.primary),
+                  selectedIcon: Icon(LucideIcons.home, color: AppTheme.primary),
                   label: 'Home',
                 ),
-                BottomNavigationBarItem(
+                NavigationDestination(
                   icon: Icon(LucideIcons.search),
-                  activeIcon: Icon(LucideIcons.search, color: AppTheme.primary),
+                  selectedIcon: Icon(LucideIcons.search, color: AppTheme.primary),
                   label: 'Explore',
                 ),
-                BottomNavigationBarItem(
+                NavigationDestination(
                   icon: Icon(LucideIcons.shoppingCart),
-                  activeIcon: Icon(LucideIcons.shoppingCart, color: AppTheme.primary),
+                  selectedIcon: Icon(LucideIcons.shoppingCart, color: AppTheme.primary),
                   label: 'Cart',
                 ),
-                BottomNavigationBarItem(
+                NavigationDestination(
                   icon: Icon(LucideIcons.calendar),
-                  activeIcon: Icon(LucideIcons.calendar, color: AppTheme.primary),
-                  label: 'My Books',
+                  selectedIcon: Icon(LucideIcons.calendar, color: AppTheme.primary),
+                  label: 'Bookings',
                 ),
-                BottomNavigationBarItem(
+                NavigationDestination(
                   icon: Icon(LucideIcons.user),
-                  activeIcon: Icon(LucideIcons.user, color: AppTheme.primary),
+                  selectedIcon: Icon(LucideIcons.user, color: AppTheme.primary),
                   label: 'Profile',
                 ),
               ],

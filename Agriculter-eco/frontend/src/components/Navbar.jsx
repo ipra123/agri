@@ -1,27 +1,36 @@
-import { useState, useEffect } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, NavLink } from "react-router-dom";
 import {
-  FiShoppingCart, FiUser, FiLogOut, FiSun, FiMoon,
-  FiMenu, FiX, FiShield, FiGlobe, FiSmartphone
+  FiShoppingCart,
+  FiUser,
+  FiLogOut,
+  FiSun,
+  FiMoon,
+  FiMenu,
+  FiX,
+  FiShield,
+  FiGlobe,
+  FiSmartphone,
 } from "react-icons/fi";
 import useAuthStore from "../store/useAuthStore";
 import useCartStore from "../store/useCartStore";
 import { useSettings } from "../hooks";
+import brandLogo from "../assets/logo.png";
 
 const NAV_LINKS = [
   { name: "Home", path: "/" },
-  { name: "Farm Inputs Market", path: "/shop" },
-  { name: "Farming Seasons", path: "/collection" },
-  { name: "About AgriSmart", path: "/about" },
+  { name: "Marketplace", path: "/shop" },
+  { name: "Collections", path: "/collection" },
+  { name: "About", path: "/about" },
 ];
 
 const CATEGORY_SHORTCUTS = [
   { label: "Seeds", category: "SEEDS" },
   { label: "Fertilizers", category: "FERTILIZERS" },
   { label: "Pesticides", category: "PESTICIDES" },
-  { label: "Farm Tools", category: "FARM_TOOLS" },
+  { label: "Tools", category: "FARM_TOOLS" },
   { label: "Irrigation", category: "IRRIGATION_EQUIPMENT" },
-  { label: "Animal Feed", category: "ANIMAL_FEED" },
+  { label: "Feed", category: "ANIMAL_FEED" },
 ];
 
 const Navbar = () => {
@@ -33,133 +42,122 @@ const Navbar = () => {
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 30);
+    const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   useEffect(() => {
-    if (theme === "dark") {
-      document.documentElement.classList.add("dark");
-      document.documentElement.classList.remove("light");
-    } else {
-      document.documentElement.classList.remove("dark");
-      document.documentElement.classList.add("light");
-    }
+    document.documentElement.classList.toggle("dark", theme === "dark");
+    document.documentElement.classList.toggle("light", theme !== "dark");
     localStorage.setItem("theme", theme);
   }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
-  };
 
   const cartCount = items.reduce((acc, item) => acc + item.quantity, 0);
   const dashboardPath = user?.role === "ADMIN" ? "/admin" : user?.role === "SUPPLIER" ? "/supplier" : "/my-orders";
 
+  const navBase = "text-[11px] font-extrabold uppercase tracking-[0.2em] transition-colors";
+  const navActive = "text-[color:var(--primary)]";
+  const navIdle = "text-[color:var(--text-muted)] hover:text-[color:var(--text-main)]";
+
   return (
-    <header className="fixed top-0 left-0 w-full z-[1000] font-body transition-all duration-300">
-      {/* Top Banner Bar for Mobile Payments */}
-      <div className="bg-emerald-900 text-emerald-100 text-[11px] font-bold py-1.5 px-6 flex items-center justify-between border-b border-emerald-800">
-        <div className="flex items-center gap-2">
-          <FiSmartphone className="text-amber-400" />
-          <span>Mobile Money Payments Enabled: EVC Plus, Zaad & Sahal</span>
-        </div>
-        <div className="hidden md:flex items-center gap-4 text-emerald-200">
-          <span>Verified Agrovet Suppliers</span>
-          <span>•</span>
-          <span>Gu & Dayr Season Stock Available</span>
+    <header className="fixed inset-x-0 top-0 z-[1000] font-body">
+      <div className="bg-[color:var(--primary)] text-white/90 text-[11px] font-bold tracking-[0.18em] uppercase">
+        <div className="section-shell flex items-center justify-between py-2 gap-4">
+          <div className="flex items-center gap-2">
+            <FiSmartphone className="text-[color:var(--accent)]" />
+            <span>Mobile money checkout enabled</span>
+          </div>
+          <div className="hidden md:flex items-center gap-4 text-white/70">
+            <span>Verified suppliers only</span>
+            <span>•</span>
+            <span>Season-ready inventory</span>
+          </div>
         </div>
       </div>
 
-      {/* Main Nav */}
       <nav
-        className={`w-full transition-all duration-300 ${
+        className={`transition-all duration-300 ${
           scrolled
-            ? "py-3 bg-white/95 dark:bg-[#0b1329]/95 backdrop-blur-xl border-b border-emerald-900/10 dark:border-white/10 shadow-lg"
-            : "py-4 bg-white/80 dark:bg-[#0a0f1d]/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800"
+            ? "glass-card py-3"
+            : "bg-white/78 dark:bg-black/20 backdrop-blur-xl border-b border-[color:var(--border-color)] py-4"
         }`}
       >
-        <div className="container mx-auto px-6 flex items-center justify-between">
-          {/* Mobile Menu Toggle */}
-          <div className="flex-1 flex items-center lg:hidden">
+        <div className="section-shell flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 lg:hidden">
             <button
-              className="p-2 text-2xl text-slate-800 dark:text-slate-100 hover:text-emerald-600 transition-colors"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="rounded-full border border-[color:var(--border-color)] bg-[color:var(--bg-card-solid)] p-2 text-lg text-[color:var(--text-main)]"
+              onClick={() => setIsMenuOpen((v) => !v)}
               aria-label={isMenuOpen ? "Close menu" : "Open menu"}
             >
               {isMenuOpen ? <FiX /> : <FiMenu />}
             </button>
           </div>
 
-          {/* Brand Logo & Name */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-amber-500 flex items-center justify-center text-white font-black text-xl shadow-md shadow-emerald-600/20 group-hover:rotate-6 transition-transform">
-              <FiGlobe />
-            </div>
+            <img
+              src={brandLogo}
+              alt={storeName}
+              className="h-12 w-12 rounded-2xl object-cover ring-1 ring-[color:var(--border-color)] shadow-md"
+            />
             <div className="text-left">
-              <span className="font-black text-lg tracking-wider text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors block leading-tight">
-                AGRISMART
-              </span>
-              <span className="text-[9px] font-extrabold text-amber-600 dark:text-amber-400 uppercase tracking-widest block">
-                Inputs Marketplace
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-black tracking-[0.22em] text-[color:var(--text-main)]">
+                  {storeName || "AGRIECO"}
+                </span>
+                <FiGlobe className="text-[color:var(--primary)]" />
+              </div>
+              <span className="text-[10px] font-extrabold tracking-[0.28em] uppercase text-[color:var(--text-muted)]">
+                farm inputs marketplace
               </span>
             </div>
           </Link>
 
-          {/* Desktop Nav Links */}
-          <div className="hidden lg:flex items-center gap-8 ml-12">
+          <div className="hidden lg:flex items-center gap-8">
             {NAV_LINKS.map((link) => (
               <NavLink
                 key={link.name}
                 to={link.path}
-                className={({ isActive }) =>
-                  `text-xs font-extrabold uppercase tracking-widest transition-all ${
-                    isActive
-                      ? "text-emerald-600 dark:text-emerald-400 border-b-2 border-amber-500 pb-1"
-                      : "text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400"
-                  }`
-                }
+                className={({ isActive }) => `${navBase} ${isActive ? navActive : navIdle}`}
               >
                 {link.name}
               </NavLink>
             ))}
           </div>
 
-          {/* Right Actions (Cart, Theme, Auth) */}
-          <div className="flex-1 flex items-center justify-end gap-3 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Link
               to="/cart"
-              className="relative p-2.5 rounded-full text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-slate-800 hover:text-emerald-600 transition-all"
-              aria-label="Shopping Cart"
+              className="relative grid h-11 w-11 place-items-center rounded-full border border-[color:var(--border-color)] bg-[color:var(--bg-card-solid)] text-[color:var(--text-main)] transition hover:border-[color:var(--primary)] hover:text-[color:var(--primary)]"
             >
-              <FiShoppingCart className="text-xl" />
+              <FiShoppingCart className="text-lg" />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[20px] h-[20px] px-1 bg-amber-500 text-slate-950 font-black text-[11px] rounded-full flex items-center justify-center shadow-md shadow-amber-500/30 animate-pulse">
+                <span className="absolute -right-1 -top-1 min-w-[20px] rounded-full bg-[color:var(--accent)] px-1.5 py-0.5 text-[10px] font-black text-[#111]">
                   {cartCount}
                 </span>
               )}
             </Link>
 
             <button
-              onClick={toggleTheme}
-              className="p-2.5 rounded-full text-amber-500 hover:bg-amber-500/10 transition-colors"
-              title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              onClick={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}
+              className="grid h-11 w-11 place-items-center rounded-full border border-[color:var(--border-color)] bg-[color:var(--bg-card-solid)] text-[color:var(--text-main)] transition hover:border-[color:var(--accent)]"
+              title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
             >
-              {theme === "dark" ? <FiSun className="text-xl text-amber-400" /> : <FiMoon className="text-xl text-emerald-700" />}
+              {theme === "dark" ? <FiSun className="text-lg text-[color:var(--accent)]" /> : <FiMoon className="text-lg text-[color:var(--primary)]" />}
             </button>
 
             {user ? (
-              <div className="hidden sm:flex items-center gap-3 pl-3 border-l border-slate-200 dark:border-slate-800">
+              <div className="hidden sm:flex items-center gap-3 pl-3">
                 <Link
                   to={dashboardPath}
-                  className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 border border-emerald-200 dark:border-emerald-800 text-xs font-extrabold uppercase tracking-wider transition-all"
+                  className="inline-flex items-center gap-2 rounded-full border border-[color:var(--border-color)] bg-[color:var(--bg-card-solid)] px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-[color:var(--text-main)] transition hover:border-[color:var(--primary)]"
                 >
-                  <FiShield className="text-amber-500" />
-                  <span>{user.role === "ADMIN" ? "Admin Console" : user.role === "SUPPLIER" ? "Supplier Portal" : "My Orders"}</span>
+                  <FiShield className="text-[color:var(--primary)]" />
+                  <span>{user.role === "ADMIN" ? "Admin" : user.role === "SUPPLIER" ? "Supplier" : "Orders"}</span>
                 </Link>
                 <button
                   onClick={logout}
-                  className="p-2 rounded-full text-slate-500 hover:text-red-500 hover:bg-red-500/10 transition-colors"
+                  className="grid h-11 w-11 place-items-center rounded-full border border-[color:var(--border-color)] bg-[color:var(--bg-card-solid)] text-[color:var(--text-muted)] transition hover:text-red-500"
                   title="Log out"
                 >
                   <FiLogOut className="text-lg" />
@@ -168,7 +166,7 @@ const Navbar = () => {
             ) : (
               <Link
                 to="/login"
-                className="hidden sm:inline-flex items-center px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-400 text-white dark:text-slate-950 text-xs font-black uppercase tracking-widest transition-all shadow-md shadow-emerald-600/20"
+                className="hidden sm:inline-flex items-center gap-2 rounded-full bg-[color:var(--primary)] px-5 py-3 text-[10px] font-black uppercase tracking-[0.22em] text-white shadow-lg shadow-emerald-900/10 transition hover:bg-[color:var(--primary-hover)]"
               >
                 Sign In
               </Link>
@@ -176,55 +174,56 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Category Quick Bar */}
-        <div className="hidden md:flex items-center justify-center gap-6 py-2 bg-slate-50 dark:bg-slate-900/60 border-t border-slate-200/60 dark:border-slate-800/80 text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
-          {CATEGORY_SHORTCUTS.map((sc) => (
-            <Link
-              key={sc.category}
-              to={`/shop?category=${sc.category}`}
-              className="hover:text-emerald-600 dark:hover:text-amber-400 transition-colors"
-            >
-              {sc.label}
-            </Link>
-          ))}
+        <div className="hidden md:block border-t border-[color:var(--border-color)] bg-white/55 dark:bg-black/15">
+          <div className="section-shell flex items-center justify-center gap-6 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-[color:var(--text-muted)]">
+            {CATEGORY_SHORTCUTS.map((item) => (
+              <Link
+                key={item.category}
+                to={`/shop?category=${item.category}`}
+                className="transition hover:text-[color:var(--primary)]"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
         </div>
       </nav>
 
-      {/* Mobile Drawer */}
       <div
-        className={`fixed inset-0 bg-slate-950/60 backdrop-blur-md z-[999] lg:hidden transition-opacity duration-300 ${
-          isMenuOpen ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"
+        className={`fixed inset-0 z-[999] bg-black/55 backdrop-blur-md transition-opacity duration-300 lg:hidden ${
+          isMenuOpen ? "visible opacity-100" : "invisible opacity-0 pointer-events-none"
         }`}
         onClick={() => setIsMenuOpen(false)}
       >
         <div
-          className="w-4/5 max-w-xs h-full bg-white dark:bg-[#0a0f1d] p-6 flex flex-col justify-between shadow-2xl transition-transform duration-300 border-r border-slate-200 dark:border-slate-800 text-left"
+          className="flex h-full w-4/5 max-w-xs flex-col justify-between border-r border-[color:var(--border-color)] bg-[color:var(--bg-card-solid)] p-6 text-left shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="space-y-6">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-              <span className="font-black text-emerald-600 dark:text-emerald-400 tracking-wider">
-                AGRISMART MARKET
-              </span>
-              <button
-                onClick={() => setIsMenuOpen(false)}
-                className="p-2 text-slate-500 dark:text-slate-400 text-xl"
-              >
+            <div className="flex items-center justify-between border-b border-[color:var(--border-color)] pb-4">
+              <div className="flex items-center gap-3">
+                <img src={brandLogo} alt={storeName} className="h-10 w-10 rounded-xl object-cover" />
+                <div>
+                  <p className="font-black tracking-[0.18em] text-[color:var(--text-main)]">AGRIECO</p>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[color:var(--text-muted)]">farm inputs</p>
+                </div>
+              </div>
+              <button onClick={() => setIsMenuOpen(false)} className="text-xl text-[color:var(--text-muted)]">
                 <FiX />
               </button>
             </div>
 
-            <div className="flex flex-col space-y-3">
+            <div className="flex flex-col gap-2">
               {NAV_LINKS.map((link) => (
                 <NavLink
                   key={link.name}
                   to={link.path}
                   onClick={() => setIsMenuOpen(false)}
                   className={({ isActive }) =>
-                    `text-xs font-bold uppercase tracking-widest p-2.5 rounded-xl transition-colors ${
+                    `rounded-2xl px-4 py-3 text-[11px] font-black uppercase tracking-[0.2em] transition ${
                       isActive
-                        ? "bg-emerald-50 dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 font-black"
-                        : "text-slate-700 dark:text-slate-300 hover:text-emerald-600"
+                        ? "bg-[color:var(--primary)] text-white"
+                        : "bg-[color:var(--surface-soft)] text-[color:var(--text-main)]"
                     }`
                   }
                 >
@@ -233,63 +232,54 @@ const Navbar = () => {
               ))}
             </div>
 
-            <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2">
-                Input Categories
-              </span>
-              <div className="grid grid-cols-2 gap-2 text-[11px] font-bold">
-                {CATEGORY_SHORTCUTS.map((sc) => (
+            <div className="border-t border-[color:var(--border-color)] pt-4">
+              <p className="mb-2 text-[10px] font-black uppercase tracking-[0.24em] text-[color:var(--text-muted)]">
+                Quick Categories
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {CATEGORY_SHORTCUTS.map((item) => (
                   <Link
-                    key={sc.category}
-                    to={`/shop?category=${sc.category}`}
+                    key={item.category}
+                    to={`/shop?category=${item.category}`}
                     onClick={() => setIsMenuOpen(false)}
-                    className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 hover:text-emerald-500"
+                    className="rounded-xl border border-[color:var(--border-color)] bg-[color:var(--surface-soft)] px-3 py-2 text-[11px] font-bold text-[color:var(--text-main)]"
                   >
-                    {sc.label}
+                    {item.label}
                   </Link>
                 ))}
               </div>
             </div>
           </div>
 
-          <div className="space-y-4 pt-6 border-t border-slate-100 dark:border-slate-800">
+          <div className="space-y-3 border-t border-[color:var(--border-color)] pt-4">
             <button
               onClick={() => {
-                toggleTheme();
+                setTheme((current) => (current === "dark" ? "light" : "dark"));
                 setIsMenuOpen(false);
               }}
-              className="w-full flex items-center justify-center gap-3 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold text-xs uppercase tracking-wider"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[color:var(--border-color)] bg-[color:var(--surface-soft)] px-4 py-3 text-[11px] font-black uppercase tracking-[0.2em]"
             >
-              {theme === "dark" ? <FiSun className="text-amber-400" /> : <FiMoon className="text-emerald-600" />}
-              {theme === "dark" ? "Light Mode" : "Dark Mode"}
+              {theme === "dark" ? <FiSun /> : <FiMoon />}
+              {theme === "dark" ? "Light mode" : "Dark mode"}
             </button>
-
             {user ? (
-              <div className="space-y-2">
-                <Link
-                  to={dashboardPath}
-                  onClick={() => setIsMenuOpen(false)}
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-600 text-white font-bold text-xs uppercase tracking-wider shadow-md"
-                >
-                  <FiShield /> Dashboard
-                </Link>
-                <button
-                  onClick={() => {
-                    logout();
-                    setIsMenuOpen(false);
-                  }}
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 font-bold text-xs uppercase tracking-wider"
-                >
-                  <FiLogOut /> Log Out
-                </button>
-              </div>
+              <button
+                onClick={() => {
+                  logout();
+                  setIsMenuOpen(false);
+                }}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[color:var(--primary)] px-4 py-3 text-[11px] font-black uppercase tracking-[0.2em] text-white"
+              >
+                <FiLogOut />
+                Sign out
+              </button>
             ) : (
               <Link
                 to="/login"
                 onClick={() => setIsMenuOpen(false)}
-                className="w-full flex items-center justify-center py-3 rounded-xl bg-emerald-600 text-white font-black text-xs uppercase tracking-wider shadow-md"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[color:var(--primary)] px-4 py-3 text-[11px] font-black uppercase tracking-[0.2em] text-white"
               >
-                Sign In
+                Sign in
               </Link>
             )}
           </div>
