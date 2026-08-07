@@ -1,7 +1,8 @@
 import { Routes, Route, Navigate, Outlet } from "react-router-dom";
-
 import { useEffect } from "react";
+
 import useAuthStore from "./store/useAuthStore";
+
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 
@@ -17,7 +18,8 @@ import MyOrders from "./pages/MyOrders";
 import OrderDetail from "./pages/OrderDetail";
 import Collection from "./pages/Collection";
 import About from "./pages/About";
-
+import Suppliers from "./pages/Suppliers";
+import SupplierDetail from "./pages/SupplierDetail";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -28,12 +30,16 @@ import AdminSettings from "./pages/admin/AdminSettings";
 import AdminFinance from "./pages/admin/AdminFinance";
 import AdminInventory from "./pages/admin/AdminInventory";
 import AdminRefunds from "./pages/admin/AdminRefunds";
+import AdminReviews from "./pages/admin/AdminReviews";
+
+// Supplier Pages
 import SupplierLayout from "./components/supplier/SupplierLayout";
 import SupplierDashboard from "./pages/supplier/SupplierDashboard";
 import SupplierProducts from "./pages/supplier/SupplierProducts";
 import SupplierOrders from "./pages/supplier/SupplierOrders";
 import SupplierProfile from "./pages/supplier/SupplierProfile";
 
+import AdminLayout from "./components/admin/AdminLayout";
 
 const ProtectedRoute = ({ children, adminOnly = false, supplierOnly = false }) => {
   const { user, loading } = useAuthStore();
@@ -45,8 +51,6 @@ const ProtectedRoute = ({ children, adminOnly = false, supplierOnly = false }) =
 
   return children;
 };
-
-import AdminLayout from "./components/admin/AdminLayout";
 
 function App() {
   const { checkAuth, loading } = useAuthStore();
@@ -72,6 +76,8 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/suppliers" element={<Suppliers />} />
+          <Route path="/suppliers/:id" element={<SupplierDetail />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/collection" element={<Collection />} />
           <Route path="/about" element={<About />} />
@@ -88,6 +94,7 @@ function App() {
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/products" element={<ProtectedRoute adminOnly><AdminProducts /></ProtectedRoute>} />
           <Route path="/admin/orders" element={<ProtectedRoute adminOnly><AdminOrders /></ProtectedRoute>} />
+          <Route path="/admin/reviews" element={<ProtectedRoute adminOnly><AdminReviews /></ProtectedRoute>} />
           <Route path="/admin/refunds" element={<ProtectedRoute adminOnly><AdminRefunds /></ProtectedRoute>} />
           <Route path="/dashboard/refunds" element={<ProtectedRoute adminOnly><AdminRefunds /></ProtectedRoute>} />
           <Route path="/admin/customers" element={<ProtectedRoute adminOnly><AdminCustomers /></ProtectedRoute>} />
@@ -102,11 +109,9 @@ function App() {
           <Route path="/supplier/orders" element={<ProtectedRoute supplierOnly><SupplierOrders /></ProtectedRoute>} />
           <Route path="/supplier/profile" element={<ProtectedRoute supplierOnly><SupplierProfile /></ProtectedRoute>} />
         </Route>
-
       </Routes>
     </div>
   );
 }
-
 
 export default App;

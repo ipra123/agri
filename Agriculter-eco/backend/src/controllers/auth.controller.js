@@ -1,12 +1,101 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import prisma from "../lib/prisma.js";
+import { sendOtpEmail, sendForgotPasswordEmail } from "../lib/sendEmails.js";
+
+// In-memory store for OTPs: { [email]: { otp, expires } }
+const otpStore = new Map();
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET || "secret", {
     expiresIn: "30d",
   });
 };
+
+export const sendOtp = async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ message: "Email is required" });
+  }
+
+  try {
+    const cleanEmail = email.trim().toLowerCase();
+    // Generate 6-digit random code
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expires = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+    otpStore.set(cleanEmail, { otp, expires, verified: false });
+
+    await sendOtpEmail(cleanEmail, otp);
+    res.json({ message: "OTP code sent to email successfully", email: cleanEmail });
+  } catch (error) {
+    console.error("sendOtp error:", error);
+    res.status(500).json({ message: "Failed to send OTP email: " + error.message });
+  }
+};
+
+export const verifyOtp = async (req, res) => {
+  const { email, otp } = req.body;
+  if (!email || !otp) {
+    return res.status(400).json({ message: "Email and OTP code are required" });
+  }
+
+  const cleanEmail = email.trim().toLowerCase();
+  const stored = otpStore.get(cleanEmail);
+
+  if (!stored) {
+    return res.status(400).json({ message: "No OTP request found for this email. Please request a new code." });
+  }
+
+  if (Date.now() > stored.expires) {
+    otpStore.delete(cleanEmail);
+    return res.status(400).json({ message: "OTP code has expired. Please request a new code." });
+  }
+
+  if (stored.otp !== otp.toString().trim()) {
+    return res.status(400).json({ message: "Invalid OTP code" });
+  }
+
+  stored.verified = true;
+  res.json({ success: true, message: "OTP verified successfully" });
+};
+
+export const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ message: "Email is required" });
+  }
+
+  try {
+    const cleanEmail = email.trim().toLowerCase();
+    const user = await prisma.user.findUnique({ where: { email: cleanEmail } });
+
+    if (!user) {
+      return res.status(404).json({ message: "No account found with this email" });
+    }
+
+    // Generate 6-digit random password
+    const newPassword = Math.floor(100000 + Math.random() * 900000).toString();
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Directly update password in DB
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { password: hashedPassword },
+    });
+
+    // Send email with new password
+    await sendForgotPasswordEmail(cleanEmail, newPassword);
+
+    res.json({
+      message: "Password reset successful! A new 6-digit password has been sent to your email.",
+    });
+  } catch (error) {
+    console.error("forgotPassword error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 
 export const register = async (req, res) => {
   const {

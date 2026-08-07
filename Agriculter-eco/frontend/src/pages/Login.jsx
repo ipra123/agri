@@ -1,10 +1,14 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FiMail, FiLock, FiArrowRight, FiShield } from "react-icons/fi";
+import { FiMail, FiLock, FiArrowRight, FiShield, FiX, FiCheckCircle } from "react-icons/fi";
 import useAuthStore from "../store/useAuthStore";
 import { useSettings } from "../hooks";
 import brandLogo from "../assets/logo.png";
 import heroImage from "../assets/hero.png";
+import axios from "axios";
+import toast from "react-hot-toast";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -12,6 +16,12 @@ const Login = () => {
   const { login, isLoggingIn } = useAuthStore();
   const { storeName } = useSettings();
   const navigate = useNavigate();
+
+  // Forgot password state
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [isResetting, setIsResetting] = useState(false);
+  const [resetSuccessMsg, setResetSuccessMsg] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,8 +33,28 @@ const Login = () => {
     }
   };
 
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    if (!forgotEmail) {
+      toast.error("Please enter your email address.");
+      return;
+    }
+
+    setIsResetting(true);
+    setResetSuccessMsg("");
+    try {
+      const res = await axios.post(`${API_URL}/auth/forgot-password`, { email: forgotEmail });
+      setResetSuccessMsg(res.data.message || "A new 6-digit password has been sent to your email.");
+      toast.success("New password sent to your email!");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to reset password.");
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
   return (
-    <div className="auth-shell min-h-screen pt-0">
+    <div className="auth-shell min-h-screen pt-0 relative">
       <div className="auth-shell__visual hero-panel m-4 hidden overflow-hidden lg:block">
         <img src={heroImage} alt="Marketplace preview" className="h-full w-full object-cover opacity-75" />
         <div className="absolute inset-0 bg-gradient-to-br from-[#07110b]/95 via-[#16331f]/65 to-[#07110b]/90" />
@@ -46,7 +76,7 @@ const Login = () => {
               Sign in to manage orders, catalog, and supplier workspaces.
             </h1>
             <p className="mt-4 max-w-xl text-sm leading-7 text-white/76">
-              The refreshed visual system keeps the form calm, premium, and aligned with the rest of the marketplace.
+              Forgot your password? Reset it easily with an instant 6-digit password sent to your email.
             </p>
           </div>
         </div>
@@ -92,9 +122,21 @@ const Login = () => {
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.18em] text-[color:var(--text-muted)]">
-                Password
-              </span>
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-[11px] font-black uppercase tracking-[0.18em] text-[color:var(--text-muted)]">
+                  Password
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setForgotEmail(email);
+                    setShowForgotModal(true);
+                  }}
+                  className="text-[11px] font-bold text-[color:var(--primary)] hover:underline"
+                >
+                  Forgot Password?
+                </button>
+              </div>
               <div className="relative">
                 <FiLock className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[color:var(--text-muted)]" />
                 <input
@@ -126,6 +168,74 @@ const Login = () => {
           </p>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      {showForgotModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl text-left">
+            <div className="flex items-center justify-between border-b pb-4">
+              <h3 className="text-xl font-black text-[color:var(--text-main)]">Reset Password</h3>
+              <button
+                onClick={() => {
+                  setShowForgotModal(false);
+                  setResetSuccessMsg("");
+                }}
+                className="rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+              >
+                <FiX size={20} />
+              </button>
+            </div>
+
+            {resetSuccessMsg ? (
+              <div className="my-6 text-center">
+                <FiCheckCircle className="mx-auto text-5xl text-emerald-600 mb-3" />
+                <p className="font-bold text-gray-800 text-lg mb-2">Email Sent!</p>
+                <p className="text-sm text-gray-600">{resetSuccessMsg}</p>
+                <button
+                  onClick={() => {
+                    setShowForgotModal(false);
+                    setResetSuccessMsg("");
+                  }}
+                  className="mt-6 w-full rounded-full bg-[color:var(--primary)] py-3 text-xs font-black uppercase tracking-widest text-white hover:bg-[color:var(--primary-hover)]"
+                >
+                  Back to Sign In
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleForgotPassword} className="mt-6 space-y-4">
+                <p className="text-sm text-[color:var(--text-muted)]">
+                  Enter your email address below. We will send a 6-digit random password directly to your email.
+                </p>
+
+                <label className="block">
+                  <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.18em] text-[color:var(--text-muted)]">
+                    Email address
+                  </span>
+                  <div className="relative">
+                    <FiMail className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[color:var(--text-muted)]" />
+                    <input
+                      type="email"
+                      className="w-full rounded-2xl border border-[color:var(--border-color)] bg-white px-12 py-3.5 text-sm text-[color:var(--text-main)] outline-none focus:border-[color:var(--primary)]"
+                      placeholder="yourname@domain.com"
+                      value={forgotEmail}
+                      onChange={(e) => setForgotEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                </label>
+
+                <button
+                  type="submit"
+                  disabled={isResetting}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[color:var(--primary)] px-6 py-3.5 text-[11px] font-black uppercase tracking-[0.22em] text-white transition hover:bg-[color:var(--primary-hover)] disabled:opacity-70"
+                >
+                  {isResetting ? "Sending Password..." : "Send New 6-Digit Password"}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

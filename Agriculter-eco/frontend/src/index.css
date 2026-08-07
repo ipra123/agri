@@ -28,6 +28,7 @@
   --bg-main: #f7f3e8;
   --bg-card: rgba(255, 255, 255, 0.9);
   --bg-card-solid: #ffffff;
+  --surface-soft: #f4eee2;
   --text-main: #142016;
   --text-muted: #5b665c;
   --border-color: rgba(20, 32, 22, 0.12);
@@ -39,13 +40,14 @@ html.dark, .dark {
   --primary-hover: #2dc06a;
   --accent: #f1be4d;
   --accent-hover: #e6a92f;
-  --bg-main: #07110b;
-  --bg-card: rgba(10, 18, 13, 0.86);
-  --bg-card-solid: #0d1711;
+  --bg-main: #050c07;
+  --bg-card: rgba(10, 24, 15, 0.92);
+  --bg-card-solid: #09170e;
+  --surface-soft: #0e2215;
   --text-main: #f4f7f2;
-  --text-muted: #a7b2a9;
-  --border-color: rgba(255, 255, 255, 0.08);
-  --shadow-card: 0 18px 50px -30px rgba(0, 0, 0, 0.7);
+  --text-muted: #a3b3a5;
+  --border-color: rgba(76, 210, 122, 0.15);
+  --shadow-card: 0 18px 50px -30px rgba(0, 0, 0, 0.85);
 }
 
 * {

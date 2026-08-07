@@ -44,25 +44,25 @@ const Collection = () => {
   ];
 
   return (
-    <div className="bg-slate-50 dark:bg-[#0a0f1d] min-h-screen text-slate-900 dark:text-slate-100 pt-28 pb-20 font-body transition-colors duration-300">
+    <div className="min-h-screen bg-[color:var(--bg-main)] text-[color:var(--text-main)] pt-28 pb-20 font-body transition-colors duration-300">
       <div className="container mx-auto px-6 text-left">
         {/* Header Title */}
         <div className="max-w-3xl mb-16 space-y-6">
-          <div className="inline-flex items-center gap-3 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full shadow-sm">
-            <span className="w-2.5 h-2.5 bg-amber-500 rounded-full animate-pulse" />
-            <span className="text-xs uppercase tracking-widest text-emerald-600 dark:text-amber-400 font-black">
+          <div className="inline-flex items-center gap-3 px-4 py-2 bg-[color:var(--surface-soft)] border border-[color:var(--border-color)] rounded-full shadow-sm">
+            <span className="w-2.5 h-2.5 bg-[color:var(--accent)] rounded-full animate-pulse" />
+            <span className="text-xs uppercase tracking-widest text-[color:var(--primary)] font-black">
               Somali Agricultural Seasons Guide
             </span>
           </div>
 
-          <h1 className="text-4xl sm:text-6xl font-black font-heading text-slate-900 dark:text-white leading-tight">
+          <h1 className="text-4xl sm:text-6xl font-black font-heading text-[color:var(--text-main)] leading-tight">
             Seasonal Input <br />
-            <span className="text-emerald-600 dark:text-emerald-400 underline decoration-amber-500/40">
+            <span className="text-[color:var(--primary)] underline decoration-[color:var(--accent)]/40">
               Collections & Catalog.
             </span>
           </h1>
 
-          <p className="text-slate-600 dark:text-slate-300 text-base sm:text-lg leading-relaxed">
+          <p className="text-[color:var(--text-muted)] text-base sm:text-lg leading-relaxed">
             Align your crop purchases with the Somali agricultural calendar. Explore curated inputs specifically suited for the Gu, Xagaa, Dayr, and Jiilaal farming periods.
           </p>
         </div>
@@ -72,37 +72,37 @@ const Collection = () => {
           {seasonalCollections.map((col, i) => (
             <div
               key={i}
-              className="group relative h-[520px] rounded-3xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl transition-all duration-500 hover:-translate-y-2 flex flex-col justify-end"
+              className="group relative h-[520px] rounded-3xl overflow-hidden bg-[color:var(--bg-card-solid)] border border-[color:var(--border-color)] shadow-xl transition-all duration-500 hover:-translate-y-2 flex flex-col justify-end"
             >
               <img
                 src={col.image}
                 alt={col.title}
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/50 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#061009]/95 via-[#061009]/60 to-transparent" />
 
               <div className="relative z-10 p-8 space-y-4 text-white">
                 <div className="flex items-center gap-2">
-                  <span className="px-3 py-1 bg-amber-500 text-slate-950 text-[10px] font-black uppercase tracking-wider rounded-full shadow-md">
+                  <span className="px-3 py-1 bg-[color:var(--accent)] text-slate-950 text-[10px] font-black uppercase tracking-wider rounded-full shadow-md">
                     {col.tag}
                   </span>
-                  <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
+                  <span className="text-xs font-bold text-[color:var(--primary)] uppercase tracking-wider">
                     {col.season}
                   </span>
                 </div>
 
-                <h2 className="text-2xl sm:text-3xl font-black font-heading leading-snug group-hover:text-amber-400 transition-colors">
+                <h2 className="text-2xl sm:text-3xl font-black font-heading leading-snug group-hover:text-[color:var(--accent)] transition-colors">
                   {col.title}
                 </h2>
 
-                <p className="text-slate-300 text-xs sm:text-sm line-clamp-2 leading-relaxed">
+                <p className="text-[color:var(--text-muted)] text-xs sm:text-sm line-clamp-2 leading-relaxed">
                   {col.desc}
                 </p>
 
                 <div className="pt-2">
                   <Link
                     to={col.link}
-                    className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-emerald-400 hover:text-amber-300 transition-colors"
+                    className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-[color:var(--primary)] hover:text-[color:var(--accent)] transition-colors"
                   >
                     <span>Shop {col.focus}</span>
                     <FiArrowRight />
@@ -114,18 +114,18 @@ const Collection = () => {
         </div>
 
         {/* Need Help Banner */}
-        <div className="mt-20 p-12 bg-white dark:bg-[#0f172a] rounded-3xl border border-slate-200/80 dark:border-slate-800 text-center space-y-6 shadow-xl relative overflow-hidden">
+        <div className="mt-20 p-12 bg-[color:var(--bg-card-solid)] rounded-3xl border border-[color:var(--border-color)] text-center space-y-6 shadow-xl relative overflow-hidden">
           <div className="relative z-10 space-y-3 max-w-xl mx-auto">
-            <h3 className="text-3xl font-black font-heading text-slate-900 dark:text-white">
+            <h3 className="text-3xl font-black font-heading text-[color:var(--text-main)]">
               Need Assistance Selecting Farm Inputs?
             </h3>
-            <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+            <p className="text-[color:var(--text-muted)] text-sm leading-relaxed">
               Consult our verified agrovet suppliers or contact our customer support for advice on seed varieties, fertilizer dosage, and EVC Plus checkout.
             </p>
           </div>
           <button
             onClick={() => navigate("/shop")}
-            className="px-8 py-4 rounded-full bg-emerald-600 hover:bg-emerald-700 dark:bg-amber-500 dark:hover:bg-amber-400 text-white dark:text-slate-950 font-black text-xs uppercase tracking-widest shadow-lg shadow-emerald-600/20 relative z-10"
+            className="px-8 py-4 rounded-full bg-[color:var(--primary)] hover:bg-[color:var(--primary-hover)] text-white font-black text-xs uppercase tracking-widest shadow-lg shadow-emerald-900/20 relative z-10"
           >
             Explore Market Store
           </button>

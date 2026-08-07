@@ -319,7 +319,7 @@ model Review {
   targetType  ReviewTargetType @default(PRODUCT)
   rating      Int
   comment     String
-  isApproved  Boolean          @default(true)
+  isApproved  Boolean          @default(false)
   moderatedBy String?
   moderatedAt DateTime?
   createdAt   DateTime         @default(now())

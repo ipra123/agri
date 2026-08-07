@@ -27,7 +27,7 @@ const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:49596",
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   },
@@ -92,8 +92,7 @@ app.use("/api/coupons", couponRoutes);
 app.use("/api/disputes", disputeRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/supplier", supplierRoutes);
-
-
+app.use("/api/suppliers", supplierRoutes);
 
 
 

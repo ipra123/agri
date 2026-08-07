@@ -20,6 +20,7 @@ import brandLogo from "../assets/logo.png";
 const NAV_LINKS = [
   { name: "Home", path: "/" },
   { name: "Marketplace", path: "/shop" },
+  { name: "Suppliers", path: "/suppliers" },
   { name: "Collections", path: "/collection" },
   { name: "About", path: "/about" },
 ];

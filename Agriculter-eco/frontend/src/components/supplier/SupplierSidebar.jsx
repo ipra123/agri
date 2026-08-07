@@ -23,7 +23,7 @@ const SupplierSidebar = () => {
         </div>
       </div>
 
-      <div className="border-b border-[color:var(--border-color)] bg-white/45 px-6 py-4 text-left">
+      <div className="border-b border-[color:var(--border-color)] bg-[color:var(--surface-soft)] px-6 py-4 text-left">
         <span className="mb-1 block text-[9px] font-black uppercase tracking-[0.24em] text-[color:var(--text-muted)]">Active business</span>
         <p className="truncate text-xs font-black text-[color:var(--primary)]">
           {user?.supplierBusinessName || user?.businessName || user?.name}
@@ -40,7 +40,7 @@ const SupplierSidebar = () => {
               `flex items-center gap-3 rounded-2xl px-4 py-3 text-[11px] font-black uppercase tracking-[0.18em] transition ${
                 isActive
                   ? "bg-[color:var(--primary)] text-white shadow-lg shadow-emerald-900/10"
-                  : "bg-white/55 text-[color:var(--text-muted)] hover:bg-[color:var(--surface-soft)] hover:text-[color:var(--text-main)]"
+                  : "bg-[color:var(--surface-soft)] text-[color:var(--text-muted)] border border-[color:var(--border-color)] hover:border-[color:var(--primary)] hover:text-[color:var(--text-main)]"
               }`
             }
           >
@@ -53,7 +53,7 @@ const SupplierSidebar = () => {
       <div className="border-t border-[color:var(--border-color)] p-4">
         <NavLink
           to="/"
-          className="flex items-center gap-3 rounded-2xl bg-white/55 px-4 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-[color:var(--text-muted)] transition hover:text-[color:var(--primary)]"
+          className="flex items-center gap-3 rounded-2xl bg-[color:var(--surface-soft)] border border-[color:var(--border-color)] px-4 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-[color:var(--text-muted)] transition hover:border-[color:var(--primary)] hover:text-[color:var(--primary)]"
         >
           <FiArrowLeft className="text-base" />
           <span>Exit to market</span>

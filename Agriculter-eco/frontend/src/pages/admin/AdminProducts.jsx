@@ -161,30 +161,30 @@ const AdminProducts = () => {
     <div className="space-y-8 text-left pb-16 transition-colors duration-300">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black font-heading text-slate-900 dark:text-white">
+          <h1 className="text-3xl font-black font-heading text-[color:var(--text-main)]">
             Agricultural Input Catalog
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+          <p className="text-[color:var(--text-muted)] text-sm mt-1">
             Manage certified seeds, fertilizers, pesticides, tools, and irrigation stock.
           </p>
         </div>
         <button
           onClick={() => openModal()}
-          className="px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 dark:bg-amber-500 dark:hover:bg-amber-400 text-white dark:text-slate-950 font-black text-xs uppercase tracking-widest rounded-2xl shadow-md transition-all flex items-center gap-2"
+          className="px-6 py-3.5 bg-[color:var(--primary)] hover:bg-[color:var(--primary-hover)] text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-md transition-all flex items-center gap-2"
         >
           <FiPlus className="text-base" /> Add Farm Input
         </button>
       </div>
 
       {isLoading ? (
-        <div className="flex items-center justify-center h-64 text-slate-400">
-          <FiLoader className="text-3xl animate-spin text-emerald-600" />
+        <div className="flex items-center justify-center h-64 text-[color:var(--text-muted)]">
+          <FiLoader className="text-3xl animate-spin text-[color:var(--primary)]" />
         </div>
       ) : (
-        <div className="bg-white dark:bg-[#0f172a] rounded-3xl border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-sm">
+        <div className="bg-[color:var(--bg-card-solid)] rounded-3xl border border-[color:var(--border-color)] overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 dark:bg-slate-800/60 uppercase tracking-widest text-[10px] text-slate-500 dark:text-slate-400 font-extrabold border-b border-slate-200/80 dark:border-slate-800">
+              <thead className="bg-[color:var(--surface-soft)] uppercase tracking-widest text-[10px] text-[color:var(--primary)] font-extrabold border-b border-[color:var(--border-color)]">
                 <tr>
                   <th className="p-4">Input Name</th>
                   <th className="p-4">Category</th>
@@ -194,51 +194,51 @@ const AdminProducts = () => {
                   <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-bold">
+              <tbody className="divide-y divide-[color:var(--border-color)] font-bold">
                 {products?.map((p) => {
                   const isLow = p.stock < (p.lowStockThreshold || 10);
                   return (
-                    <tr key={p.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                    <tr key={p.id} className="hover:bg-[color:var(--surface-soft)] transition-all">
                       <td className="p-4 flex items-center gap-3">
                         <img
                           src={p.images?.[0] || "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=100&auto=format"}
                           alt={p.name}
-                          className="w-10 h-10 rounded-xl object-cover"
+                          className="w-10 h-10 rounded-xl object-cover border border-[color:var(--border-color)]"
                         />
                         <div>
-                          <p className="font-extrabold text-slate-900 dark:text-white">{p.name}</p>
-                          <p className="text-[10px] text-slate-400 line-clamp-1">{p.description}</p>
+                          <p className="font-extrabold text-[color:var(--text-main)]">{p.name}</p>
+                          <p className="text-[10px] text-[color:var(--text-muted)] line-clamp-1">{p.description}</p>
                         </div>
                       </td>
                       <td className="p-4">
-                        <span className="px-2.5 py-1 bg-emerald-50 dark:bg-slate-800 text-emerald-700 dark:text-emerald-300 rounded-full text-[10px] font-black uppercase">
+                        <span className="px-2.5 py-1 bg-[color:var(--surface-soft)] text-[color:var(--primary)] border border-[color:var(--border-color)] rounded-full text-[10px] font-black uppercase">
                           {p.category}
                         </span>
                       </td>
-                      <td className="p-4 text-slate-900 dark:text-amber-400 font-black">
-                        ${p.price} <span className="text-[10px] text-slate-400">/ {p.unit}</span>
+                      <td className="p-4 text-[color:var(--primary)] font-black">
+                        ${p.price} <span className="text-[10px] text-[color:var(--text-muted)]">/ {p.unit}</span>
                       </td>
                       <td className="p-4">
                         <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${
-                          isLow ? "bg-amber-500/10 text-amber-600 dark:text-amber-400" : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                          isLow ? "bg-amber-500/10 text-amber-500 border border-amber-500/20" : "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
                         }`}>
                           {p.stock} {p.unit}s {isLow && "(Low Stock)"}
                         </span>
                       </td>
-                      <td className="p-4 text-slate-600 dark:text-slate-300">
+                      <td className="p-4 text-[color:var(--text-muted)]">
                         {p.supplier?.supplierBusinessName || p.supplier?.name || "Market Supplier"}
                       </td>
                       <td className="p-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => openModal(p)}
-                            className="p-2 rounded-xl text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-800"
+                            className="p-2 rounded-xl text-blue-400 hover:bg-[color:var(--surface-soft)]"
                           >
                             <FiEdit2 />
                           </button>
                           <button
                             onClick={() => deleteMutation.mutate(p.id)}
-                            className="p-2 rounded-xl text-red-600 hover:bg-red-50 dark:hover:bg-slate-800"
+                            className="p-2 rounded-xl text-red-400 hover:bg-[color:var(--surface-soft)]"
                           >
                             <FiTrash2 />
                           </button>
@@ -255,20 +255,20 @@ const AdminProducts = () => {
 
       {/* Add / Edit Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[999] bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#0f172a] rounded-3xl p-6 sm:p-8 max-w-xl w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-6 text-left max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-              <h3 className="text-lg font-black font-heading text-slate-900 dark:text-white">
+        <div className="fixed inset-0 z-[999] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[color:var(--bg-card-solid)] rounded-3xl p-6 sm:p-8 max-w-xl w-full border border-[color:var(--border-color)] shadow-2xl space-y-6 text-left max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-[color:var(--border-color)] pb-4">
+              <h3 className="text-lg font-black font-heading text-[color:var(--text-main)]">
                 {editingProduct ? "Edit Farm Input" : "Add New Agricultural Input"}
               </h3>
-              <button onClick={closeModal} className="p-2 text-slate-400 hover:text-slate-600">
+              <button onClick={closeModal} className="p-2 text-[color:var(--text-muted)] hover:text-[color:var(--text-main)]">
                 <FiX className="text-xl" />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                <label className="text-xs font-bold uppercase tracking-wider text-[color:var(--text-muted)]">
                   Input Name
                 </label>
                 <input
@@ -277,22 +277,22 @@ const AdminProducts = () => {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-xs text-slate-900 dark:text-white font-bold focus:outline-none"
+                  className="w-full bg-[color:var(--surface-soft)] border border-[color:var(--border-color)] rounded-2xl px-4 py-3 text-xs text-[color:var(--text-main)] placeholder:text-[color:var(--text-muted)] font-bold focus:outline-none"
                 />
               </div>
 
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                  <label className="text-xs font-bold uppercase tracking-wider text-[color:var(--text-muted)]">
                     Category
                   </label>
                   <select
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-xs font-bold text-slate-900 dark:text-white focus:outline-none"
+                    className="w-full bg-[color:var(--surface-soft)] border border-[color:var(--border-color)] rounded-2xl px-4 py-3 text-xs font-bold text-[color:var(--text-main)] focus:outline-none"
                   >
                     {AGRICULTURAL_CATEGORIES.map((cat) => (
-                      <option key={cat.value} value={cat.value}>
+                      <option key={cat.value} value={cat.value} className="bg-[color:var(--bg-card-solid)] text-[color:var(--text-main)]">
                         {cat.label}
                       </option>
                     ))}
@@ -300,16 +300,16 @@ const AdminProducts = () => {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                  <label className="text-xs font-bold uppercase tracking-wider text-[color:var(--text-muted)]">
                     Unit of Measure
                   </label>
                   <select
                     value={formData.unit}
                     onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-xs font-bold text-slate-900 dark:text-white focus:outline-none"
+                    className="w-full bg-[color:var(--surface-soft)] border border-[color:var(--border-color)] rounded-2xl px-4 py-3 text-xs font-bold text-[color:var(--text-main)] focus:outline-none"
                   >
                     {UNITS.map((u) => (
-                      <option key={u} value={u}>{u}</option>
+                      <option key={u} value={u} className="bg-[color:var(--bg-card-solid)] text-[color:var(--text-main)]">{u}</option>
                     ))}
                   </select>
                 </div>
@@ -317,7 +317,7 @@ const AdminProducts = () => {
 
               <div className="grid sm:grid-cols-3 gap-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                  <label className="text-xs font-bold uppercase tracking-wider text-[color:var(--text-muted)]">
                     Price ($)
                   </label>
                   <input
@@ -327,12 +327,12 @@ const AdminProducts = () => {
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                     required
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-xs font-bold text-slate-900 dark:text-white focus:outline-none"
+                    className="w-full bg-[color:var(--surface-soft)] border border-[color:var(--border-color)] rounded-2xl px-4 py-3 text-xs font-bold text-[color:var(--text-main)] placeholder:text-[color:var(--text-muted)] focus:outline-none"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                  <label className="text-xs font-bold uppercase tracking-wider text-[color:var(--text-muted)]">
                     Stock Units
                   </label>
                   <input
@@ -341,12 +341,12 @@ const AdminProducts = () => {
                     value={formData.stock}
                     onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
                     required
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-xs font-bold text-slate-900 dark:text-white focus:outline-none"
+                    className="w-full bg-[color:var(--surface-soft)] border border-[color:var(--border-color)] rounded-2xl px-4 py-3 text-xs font-bold text-[color:var(--text-main)] placeholder:text-[color:var(--text-muted)] focus:outline-none"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                  <label className="text-xs font-bold uppercase tracking-wider text-[color:var(--text-muted)]">
                     Low Stock Threshold
                   </label>
                   <input
@@ -354,23 +354,23 @@ const AdminProducts = () => {
                     placeholder="10"
                     value={formData.lowStockThreshold}
                     onChange={(e) => setFormData({ ...formData, lowStockThreshold: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-xs font-bold text-slate-900 dark:text-white focus:outline-none"
+                    className="w-full bg-[color:var(--surface-soft)] border border-[color:var(--border-color)] rounded-2xl px-4 py-3 text-xs font-bold text-[color:var(--text-main)] placeholder:text-[color:var(--text-muted)] focus:outline-none"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                <label className="text-xs font-bold uppercase tracking-wider text-[color:var(--text-muted)]">
                   Agrovet Supplier
                 </label>
                 <select
                   value={formData.supplierId}
                   onChange={(e) => setFormData({ ...formData, supplierId: e.target.value })}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-xs font-bold text-slate-900 dark:text-white focus:outline-none"
+                  className="w-full bg-[color:var(--surface-soft)] border border-[color:var(--border-color)] rounded-2xl px-4 py-3 text-xs font-bold text-[color:var(--text-main)] focus:outline-none"
                 >
-                  <option value="">-- Platform Default Supplier --</option>
+                  <option value="" className="bg-[color:var(--bg-card-solid)] text-[color:var(--text-main)]">-- Platform Default Supplier --</option>
                   {suppliers.map((s) => (
-                    <option key={s.id} value={s.id}>
+                    <option key={s.id} value={s.id} className="bg-[color:var(--bg-card-solid)] text-[color:var(--text-main)]">
                       {s.supplierBusinessName || s.name} ({s.email})
                     </option>
                   ))}
@@ -378,7 +378,7 @@ const AdminProducts = () => {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                <label className="text-xs font-bold uppercase tracking-wider text-[color:var(--text-muted)]">
                   Description & Specifications
                 </label>
                 <textarea
@@ -386,25 +386,25 @@ const AdminProducts = () => {
                   placeholder="Germination rate, NPK ratio, dosage recommendations..."
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-3 text-xs text-slate-900 dark:text-white focus:outline-none"
+                  className="w-full bg-[color:var(--surface-soft)] border border-[color:var(--border-color)] rounded-2xl p-3 text-xs text-[color:var(--text-main)] placeholder:text-[color:var(--text-muted)] focus:outline-none"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                <label className="text-xs font-bold uppercase tracking-wider text-[color:var(--text-muted)]">
                   Product Image File
                 </label>
                 <input
                   type="file"
                   onChange={(e) => setFormData({ ...formData, images: e.target.files })}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-3 text-xs text-slate-900 dark:text-white"
+                  className="w-full bg-[color:var(--surface-soft)] border border-[color:var(--border-color)] rounded-2xl p-3 text-xs text-[color:var(--text-main)]"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={createMutation.isPending || updateMutation.isPending}
-                className="w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 dark:bg-amber-500 dark:hover:bg-amber-400 text-white dark:text-slate-950 font-black text-xs uppercase tracking-widest shadow-md transition-all"
+                className="w-full py-3.5 rounded-2xl bg-[color:var(--primary)] hover:bg-[color:var(--primary-hover)] text-white font-black text-xs uppercase tracking-widest shadow-md transition-all"
               >
                 {createMutation.isPending || updateMutation.isPending
                   ? "Saving Input..."

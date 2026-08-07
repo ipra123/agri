@@ -1,3 +1,4 @@
+import { log } from "console";
 import prisma from "../lib/prisma.js";
 
 const getSupplierOrder = async (orderId, supplierId) => {
@@ -397,3 +398,94 @@ export const getSupplierProducts = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const getPublicSuppliers = async (req, res) => {
+  try {
+    const suppliers = await prisma.user.findMany({
+      where: {
+        role: "SUPPLIER",
+        isActive: true,
+      },
+      select: {
+        id: true,
+        name: true,
+        businessName: true,
+        supplierBusinessName: true,
+        profilePhotoUrl: true,
+        deliveryAddress: true,
+        createdAt: true,
+        supplierProducts: {
+          select: { id: true, name: true, price: true, images: true, category: true }
+        },
+        supplierReviews: {
+          where: { isApproved: true },
+          select: { id: true, rating: true, comment: true, createdAt: true, user: { select: { name: true } } }
+        }
+      }
+    });
+
+    const enriched = suppliers.map((supplier) => {
+      const reviews = supplier.supplierReviews || [];
+      const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0);
+      const avgRating = reviews.length > 0 ? (totalRating / reviews.length).toFixed(1) : 0;
+      return {
+        ...supplier,
+        avgRating: parseFloat(avgRating),
+        reviewCount: reviews.length,
+      };
+    });
+
+    res.json(enriched);
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const getPublicSupplierById = async (req, res) => {
+  try {
+    const supplier = await prisma.user.findFirst({
+      where: {
+        id: req.params.id,
+        role: "SUPPLIER",
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phoneNumber: true,
+        businessName: true,
+        supplierBusinessName: true,
+        profilePhotoUrl: true,
+        deliveryAddress: true,
+        createdAt: true,
+        supplierProducts: {
+          select: { id: true, name: true, price: true, images: true, category: true, description: true }
+        },
+        supplierReviews: {
+          where: { isApproved: true },
+          select: { id: true, rating: true, comment: true, createdAt: true, user: { select: { name: true } } },
+          orderBy: { createdAt: "desc" }
+        }
+      }
+    });
+
+    if (!supplier) {
+      return res.status(404).json({ message: "Supplier not found" });
+    }
+
+    const reviews = supplier.supplierReviews || [];
+    const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0);
+    const avgRating = reviews.length > 0 ? (totalRating / reviews.length).toFixed(1) : 0;
+
+    res.json({
+      ...supplier,
+      avgRating: parseFloat(avgRating),
+      reviewCount: reviews.length,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+

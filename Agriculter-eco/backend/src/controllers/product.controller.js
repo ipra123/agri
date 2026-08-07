@@ -67,11 +67,21 @@ export const getProducts = async (req, res) => {
             verificationStatus: true,
           },
         },
+        reviews: {
+          where: { isApproved: true },
+          select: { id: true, rating: true, comment: true, createdAt: true, user: { select: { name: true } } }
+        }
       },
       orderBy: { createdAt: "desc" },
     });
 
-    res.json(products);
+    const enriched = products.map(p => {
+      const reviews = p.reviews || [];
+      const avgRating = reviews.length > 0 ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1) : 0;
+      return { ...p, avgRating: parseFloat(avgRating), reviewCount: reviews.length };
+    });
+
+    res.json(enriched);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -91,11 +101,18 @@ export const getProductById = async (req, res) => {
             verificationStatus: true,
           },
         },
+        reviews: {
+          where: { isApproved: true },
+          select: { id: true, rating: true, comment: true, createdAt: true, user: { select: { name: true, profilePhotoUrl: true } } },
+          orderBy: { createdAt: "desc" },
+        }
       },
     });
 
     if (product) {
-      res.json(product);
+      const reviews = product.reviews || [];
+      const avgRating = reviews.length > 0 ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1) : 0;
+      res.json({ ...product, avgRating: parseFloat(avgRating), reviewCount: reviews.length });
     } else {
       res.status(404).json({ message: "Product not found" });
     }
@@ -103,6 +120,7 @@ export const getProductById = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 export const createProduct = async (req, res) => {
   const {

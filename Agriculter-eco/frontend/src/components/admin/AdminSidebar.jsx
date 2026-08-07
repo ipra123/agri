@@ -9,6 +9,7 @@ import {
   FiArchive,
   FiRefreshCw,
   FiSettings,
+  FiMessageSquare,
 } from "react-icons/fi";
 import brandLogo from "../../assets/logo.png";
 
@@ -16,6 +17,7 @@ const NAV_ITEMS = [
   { to: "/admin", end: true, icon: <FiGrid />, label: "Overview" },
   { to: "/admin/products", icon: <FiBox />, label: "Products" },
   { to: "/admin/orders", icon: <FiShoppingBag />, label: "Orders" },
+  { to: "/admin/reviews", icon: <FiMessageSquare />, label: "Pending Reviews" },
   { to: "/admin/refunds", icon: <FiRefreshCw />, label: "Refunds" },
   { to: "/admin/customers", icon: <FiUsers />, label: "Customers" },
   { to: "/admin/finance", icon: <FiDollarSign />, label: "Finance" },
@@ -44,7 +46,7 @@ const AdminSidebar = () => {
               `flex items-center gap-3 rounded-2xl px-4 py-3 text-[11px] font-black uppercase tracking-[0.18em] transition ${
                 isActive
                   ? "bg-[color:var(--primary)] text-white shadow-lg shadow-emerald-900/10"
-                  : "bg-white/55 text-[color:var(--text-muted)] hover:bg-[color:var(--surface-soft)] hover:text-[color:var(--text-main)]"
+                  : "bg-[color:var(--surface-soft)] text-[color:var(--text-muted)] border border-[color:var(--border-color)] hover:border-[color:var(--primary)] hover:text-[color:var(--text-main)]"
               }`
             }
           >
@@ -57,7 +59,7 @@ const AdminSidebar = () => {
       <div className="border-t border-[color:var(--border-color)] p-4">
         <NavLink
           to="/"
-          className="flex items-center gap-3 rounded-2xl bg-white/55 px-4 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-[color:var(--text-muted)] transition hover:text-[color:var(--primary)]"
+          className="flex items-center gap-3 rounded-2xl bg-[color:var(--surface-soft)] border border-[color:var(--border-color)] px-4 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-[color:var(--text-muted)] transition hover:border-[color:var(--primary)] hover:text-[color:var(--primary)]"
         >
           <FiArrowLeft className="text-base" />
           <span>Exit to market</span>

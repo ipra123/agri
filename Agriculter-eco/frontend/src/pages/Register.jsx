@@ -1,10 +1,14 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FiUser, FiMail, FiLock, FiBriefcase, FiArrowRight, FiShield } from "react-icons/fi";
+import { FiUser, FiMail, FiLock, FiBriefcase, FiArrowRight, FiShield, FiKey } from "react-icons/fi";
 import useAuthStore from "../store/useAuthStore";
 import { useSettings } from "../hooks";
 import brandLogo from "../assets/logo.png";
 import heroImage from "../assets/hero.png";
+import axios from "axios";
+import toast from "react-hot-toast";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -15,17 +19,60 @@ const Register = () => {
     supplierBusinessName: "",
     supplierLicenseNumber: "",
   });
+  
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+
   const { register, isRegistering } = useAuthStore();
   const { storeName } = useSettings();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleSendOtp = async (e) => {
     e.preventDefault();
+    if (!formData.email || !formData.name || !formData.password) {
+      toast.error("Please fill in your name, email, and password first.");
+      return;
+    }
+    if (formData.role === "SUPPLIER" && !formData.supplierBusinessName) {
+      toast.error("Business name is required for suppliers.");
+      return;
+    }
+
+    setIsSendingOtp(true);
     try {
+      await axios.post(`${API_URL}/auth/send-otp`, { email: formData.email });
+      setOtpSent(true);
+      toast.success("OTP verification code sent to your email!");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to send OTP code.");
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
+
+  const handleVerifyAndRegister = async (e) => {
+    e.preventDefault();
+    if (!otpCode || otpCode.trim().length !== 6) {
+      toast.error("Please enter the 6-digit OTP code sent to your email.");
+      return;
+    }
+
+    setIsVerifyingOtp(true);
+    try {
+      await axios.post(`${API_URL}/auth/verify-otp`, {
+        email: formData.email,
+        otp: otpCode.trim(),
+      });
+
       await register(formData);
+      toast.success("Account created successfully!");
       navigate("/");
     } catch (error) {
-      // handled in store
+      toast.error(error.response?.data?.message || "OTP verification or registration failed.");
+    } finally {
+      setIsVerifyingOtp(false);
     }
   };
 
@@ -52,7 +99,7 @@ const Register = () => {
               Join as a customer or verified supplier partner.
             </h1>
             <p className="mt-4 max-w-xl text-sm leading-7 text-white/76">
-              Registration now matches the rest of the platform with calm earth tones, strong spacing, and premium surfaces.
+              Registration requires email OTP verification for enhanced security.
             </p>
           </div>
         </div>
@@ -79,14 +126,15 @@ const Register = () => {
             <p className="mt-2 text-sm text-[color:var(--text-muted)]">Choose a customer or supplier profile.</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="mt-8 space-y-5 text-left">
+          <form onSubmit={otpSent ? handleVerifyAndRegister : handleSendOtp} className="mt-8 space-y-5 text-left">
             <label className="block">
               <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.18em] text-[color:var(--text-muted)]">Full name</span>
               <div className="relative">
                 <FiUser className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[color:var(--text-muted)]" />
                 <input
                   type="text"
-                  className="w-full rounded-2xl border border-[color:var(--border-color)] bg-white px-12 py-3.5 text-sm text-[color:var(--text-main)] outline-none transition placeholder:text-[color:var(--text-muted)] focus:border-[color:var(--primary)]"
+                  disabled={otpSent}
+                  className="w-full rounded-2xl border border-[color:var(--border-color)] bg-white px-12 py-3.5 text-sm text-[color:var(--text-main)] outline-none transition placeholder:text-[color:var(--text-muted)] focus:border-[color:var(--primary)] disabled:bg-gray-100"
                   placeholder="Amina Hassan"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -101,7 +149,8 @@ const Register = () => {
                 <FiMail className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[color:var(--text-muted)]" />
                 <input
                   type="email"
-                  className="w-full rounded-2xl border border-[color:var(--border-color)] bg-white px-12 py-3.5 text-sm text-[color:var(--text-main)] outline-none transition placeholder:text-[color:var(--text-muted)] focus:border-[color:var(--primary)]"
+                  disabled={otpSent}
+                  className="w-full rounded-2xl border border-[color:var(--border-color)] bg-white px-12 py-3.5 text-sm text-[color:var(--text-main)] outline-none transition placeholder:text-[color:var(--text-muted)] focus:border-[color:var(--primary)] disabled:bg-gray-100"
                   placeholder="amina@domain.com"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -116,7 +165,8 @@ const Register = () => {
                 <FiLock className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[color:var(--text-muted)]" />
                 <input
                   type="password"
-                  className="w-full rounded-2xl border border-[color:var(--border-color)] bg-white px-12 py-3.5 text-sm text-[color:var(--text-main)] outline-none transition placeholder:text-[color:var(--text-muted)] focus:border-[color:var(--primary)]"
+                  disabled={otpSent}
+                  className="w-full rounded-2xl border border-[color:var(--border-color)] bg-white px-12 py-3.5 text-sm text-[color:var(--text-main)] outline-none transition placeholder:text-[color:var(--text-muted)] focus:border-[color:var(--primary)] disabled:bg-gray-100"
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -137,6 +187,7 @@ const Register = () => {
                     <button
                       key={item.value}
                       type="button"
+                      disabled={otpSent}
                       onClick={() => setFormData({ ...formData, role: item.value })}
                       className={`inline-flex items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-[11px] font-black uppercase tracking-[0.18em] transition ${
                         formData.role === item.value
@@ -158,7 +209,8 @@ const Register = () => {
                   <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.18em] text-[color:var(--text-muted)]">Business name</span>
                   <input
                     type="text"
-                    className="w-full rounded-2xl border border-[color:var(--border-color)] bg-white px-4 py-3 text-sm text-[color:var(--text-main)] outline-none"
+                    disabled={otpSent}
+                    className="w-full rounded-2xl border border-[color:var(--border-color)] bg-white px-4 py-3 text-sm text-[color:var(--text-main)] outline-none disabled:bg-gray-100"
                     placeholder="Grand Craft Ltd"
                     value={formData.supplierBusinessName}
                     onChange={(e) => setFormData({ ...formData, supplierBusinessName: e.target.value })}
@@ -169,7 +221,8 @@ const Register = () => {
                   <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.18em] text-[color:var(--text-muted)]">License number</span>
                   <input
                     type="text"
-                    className="w-full rounded-2xl border border-[color:var(--border-color)] bg-white px-4 py-3 text-sm text-[color:var(--text-main)] outline-none"
+                    disabled={otpSent}
+                    className="w-full rounded-2xl border border-[color:var(--border-color)] bg-white px-4 py-3 text-sm text-[color:var(--text-main)] outline-none disabled:bg-gray-100"
                     placeholder="REG-2026-88"
                     value={formData.supplierLicenseNumber}
                     onChange={(e) => setFormData({ ...formData, supplierLicenseNumber: e.target.value })}
@@ -178,14 +231,57 @@ const Register = () => {
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={isRegistering}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[color:var(--primary)] px-6 py-3.5 text-[11px] font-black uppercase tracking-[0.22em] text-white transition hover:bg-[color:var(--primary-hover)] disabled:opacity-70"
-            >
-              {isRegistering ? "Creating account..." : "Create account"}
-              {!isRegistering && <FiArrowRight />}
-            </button>
+            {otpSent && (
+              <div className="rounded-3xl border-2 border-emerald-500 bg-emerald-50 p-4 text-left">
+                <label className="block">
+                  <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.18em] text-emerald-800">
+                    Enter 6-Digit Email OTP Code
+                  </span>
+                  <div className="relative">
+                    <FiKey className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-emerald-700" />
+                    <input
+                      type="text"
+                      maxLength={6}
+                      className="w-full rounded-2xl border border-emerald-300 bg-white px-12 py-3 text-lg font-bold tracking-widest text-emerald-900 outline-none focus:border-emerald-600"
+                      placeholder="123456"
+                      value={otpCode}
+                      onChange={(e) => setOtpCode(e.target.value)}
+                      required
+                    />
+                  </div>
+                </label>
+                <div className="mt-2 flex items-center justify-between text-xs text-emerald-700">
+                  <span>Code sent to {formData.email}</span>
+                  <button
+                    type="button"
+                    onClick={handleSendOtp}
+                    className="font-bold underline hover:text-emerald-900"
+                  >
+                    Resend Code
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {!otpSent ? (
+              <button
+                type="submit"
+                disabled={isSendingOtp}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[color:var(--primary)] px-6 py-3.5 text-[11px] font-black uppercase tracking-[0.22em] text-white transition hover:bg-[color:var(--primary-hover)] disabled:opacity-70"
+              >
+                {isSendingOtp ? "Sending OTP Code..." : "Send Email Verification OTP"}
+                {!isSendingOtp && <FiArrowRight />}
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={isVerifyingOtp || isRegistering}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-emerald-700 px-6 py-3.5 text-[11px] font-black uppercase tracking-[0.22em] text-white transition hover:bg-emerald-800 disabled:opacity-70"
+              >
+                {isVerifyingOtp || isRegistering ? "Verifying & Creating Account..." : "Verify OTP & Create Account"}
+                <FiArrowRight />
+              </button>
+            )}
           </form>
 
           <p className="mt-6 text-center text-sm text-[color:var(--text-muted)]">
