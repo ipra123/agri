@@ -6,7 +6,7 @@ import 'views/home_view.dart';
 import 'views/catalog_view.dart';
 import 'views/cart_view.dart';
 import 'views/profile_view.dart';
-import 'views/my_bookings_view.dart';
+import 'views/suppliers_view.dart';
 import 'providers/auth_provider.dart';
 import 'providers/decoration_provider.dart';
 import 'providers/cart_provider.dart';
@@ -25,13 +25,12 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'DecorRent',
+      title: 'AgriMarket',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       home: const MainNavigation(),
@@ -53,8 +52,8 @@ class _MainNavigationState extends State<MainNavigation> {
   final List<Widget> _screens = [
     const HomeView(),
     const CatalogView(),
+    const SuppliersView(),
     const CartView(),
-    const MyBookingsView(),
     const ProfileView(),
   ];
 
@@ -85,22 +84,24 @@ class _MainNavigationState extends State<MainNavigation> {
         minimum: const EdgeInsets.fromLTRB(16, 0, 16, 14),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.92),
-            borderRadius: BorderRadius.circular(26),
+            color: Colors.white.withOpacity(0.96),
+            borderRadius: BorderRadius.circular(28),
             border: Border.all(color: AppTheme.border),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                blurRadius: 24,
-                offset: const Offset(0, 12),
+                color: Colors.black.withOpacity(0.07),
+                blurRadius: 28,
+                offset: const Offset(0, 14),
               ),
             ],
           ),
           child: NavigationBarTheme(
             data: NavigationBarThemeData(
               backgroundColor: Colors.transparent,
-              indicatorColor: AppTheme.primary.withOpacity(0.12),
-              labelTextStyle: MaterialStateProperty.all(
+              indicatorColor: AppTheme.primary.withOpacity(0.14),
+              elevation: 0,
+              labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+              labelTextStyle: WidgetStateProperty.all(
                 const TextStyle(fontWeight: FontWeight.w800, fontSize: 11),
               ),
             ),
@@ -112,7 +113,7 @@ class _MainNavigationState extends State<MainNavigation> {
               },
               backgroundColor: Colors.transparent,
               surfaceTintColor: Colors.transparent,
-              height: 72,
+              height: 74,
               destinations: const [
                 NavigationDestination(
                   icon: Icon(LucideIcons.home),
@@ -125,14 +126,14 @@ class _MainNavigationState extends State<MainNavigation> {
                   label: 'Explore',
                 ),
                 NavigationDestination(
-                  icon: Icon(LucideIcons.shoppingCart),
-                  selectedIcon: Icon(LucideIcons.shoppingCart, color: AppTheme.primary),
-                  label: 'Cart',
+                  icon: Icon(LucideIcons.store),
+                  selectedIcon: Icon(LucideIcons.store, color: AppTheme.primary),
+                  label: 'Suppliers',
                 ),
                 NavigationDestination(
-                  icon: Icon(LucideIcons.calendar),
-                  selectedIcon: Icon(LucideIcons.calendar, color: AppTheme.primary),
-                  label: 'Bookings',
+                  icon: Icon(LucideIcons.shoppingBag),
+                  selectedIcon: Icon(LucideIcons.shoppingBag, color: AppTheme.primary),
+                  label: 'Cart',
                 ),
                 NavigationDestination(
                   icon: Icon(LucideIcons.user),

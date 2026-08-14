@@ -14,12 +14,10 @@ const AdminOrders = () => {
   const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [orderItems, setOrderItems] = useState([{ productId: "", quantity: 1, price: 0 }]);
 
-  // Cancel Order & Refund Modal States
-  const [cancelModalOrder, setCancelModalOrder] = useState(null);
+  // Refund confirmation modal states
   const [cancelReason, setCancelReason] = useState("");
   const [cancelRefundedNow, setCancelRefundedNow] = useState(true);
   const [cancelAmount, setCancelAmount] = useState("");
-  const [cancelRefundType, setCancelRefundType] = useState("FULL");
 
   const [confirmRefundModal, setConfirmRefundModal] = useState(null);
 
@@ -101,7 +99,6 @@ const AdminOrders = () => {
       queryClient.invalidateQueries(["admin-refunds"]);
       queryClient.invalidateQueries(["admin-finance-summary"]);
       toast.success("Order cancelled and refund logged successfully!");
-      setCancelModalOrder(null);
     },
     onError: (err) => {
       toast.error(err?.response?.data?.message || "Failed to cancel order");
@@ -125,11 +122,17 @@ const AdminOrders = () => {
 
   const handleStatusChange = (order, newStatus) => {
     if (newStatus === "CANCELLED") {
-      setCancelModalOrder(order);
-      setCancelReason("");
-      setCancelRefundedNow(true);
-      setCancelAmount(order.totalAmount);
-      setCancelRefundType("FULL");
+      const ok = window.confirm(`Cancel order #${order.id.slice(0, 8).toUpperCase()}?`);
+      if (!ok) return;
+
+      cancelOrderWithRefundMutation.mutate({
+        id: order.id,
+        payload: {
+          reason: "Cancelled by admin after confirmation",
+          refundedNow: true,
+          amount: order.totalAmount,
+        },
+      });
       return;
     }
 
@@ -261,6 +264,7 @@ const AdminOrders = () => {
                   <th className="p-6 text-[color:var(--primary)] uppercase text-xs font-bold tracking-wider">Amount</th>
                   <th className="p-6 text-[color:var(--primary)] uppercase text-xs font-bold tracking-wider">Status</th>
                   <th className="p-6 text-[color:var(--primary)] uppercase text-xs font-bold tracking-wider">Complaints</th>
+                  <th className="p-6 text-[color:var(--primary)] uppercase text-xs font-bold tracking-wider">Cancellation</th>
                   <th className="p-6 text-[color:var(--primary)] uppercase text-xs font-bold tracking-wider">Actions</th>
                 </tr>
               </thead>
@@ -306,6 +310,20 @@ const AdminOrders = () => {
                         )}
                       </td>
                       <td className="p-6">
+                        {order.status === "CANCELLED" ? (
+                          <div className="flex flex-col gap-1">
+                            <span className="inline-flex w-fit rounded-full border border-red-500/20 bg-red-500/10 px-2.5 py-1 text-[10px] font-black uppercase text-red-500">
+                              {order.refund?.status || "CANCELLED"}
+                            </span>
+                            <p className="max-w-[220px] text-[10px] text-[color:var(--text-muted)] line-clamp-2">
+                              {order.refund?.reason || "Cancelled order"}
+                            </p>
+                          </div>
+                        ) : (
+                          <span className="text-[10px] text-[color:var(--text-muted)]">-</span>
+                        )}
+                      </td>
+                      <td className="p-6">
                         <div className="flex gap-2 items-center flex-wrap">
                           <button
                             onClick={() => setViewingOrder(order)}
@@ -321,7 +339,6 @@ const AdminOrders = () => {
                               onClick={() => {
                                 setConfirmRefundModal(order.refund);
                                 setCancelAmount(order.refund.amount);
-                                setCancelRefundType(order.refund.refundType || "FULL");
                                 setCancelReason(order.refund.reason || "");
                                 setCancelRefundedNow(true);
                               }}
@@ -680,109 +697,6 @@ const AdminOrders = () => {
           </div>
         </div>
       )}
-      {/* ===== Cancel Order Modal ===== */}
-      {cancelModalOrder && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex justify-center items-center z-[3000] p-6">
-          <div className="w-full max-w-md bg-[color:var(--bg-card-solid)] border border-red-500/30 rounded-3xl p-8 shadow-2xl animate-in zoom-in-95 duration-300">
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <h3 className="text-xl font-bold text-[color:var(--text-main)]">Cancel Order #{cancelModalOrder.id.slice(0, 8).toUpperCase()}</h3>
-                <p className="text-[color:var(--text-muted)] text-xs mt-0.5">Specify cancellation reason and refund processing option.</p>
-              </div>
-              <button onClick={() => setCancelModalOrder(null)} className="p-2 hover:bg-[color:var(--surface-soft)] rounded-full text-[color:var(--text-muted)]">
-                <FiX className="text-xl" />
-              </button>
-            </div>
-
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                const amt = parseFloat(cancelAmount);
-                if (cancelRefundedNow && (isNaN(amt) || amt <= 0)) {
-                  toast.error("Lacagta la celinayo waa in ay ka badnaataa eber ($0) mar haddii la xaqiijiyay in lacagtii la celiyay.");
-                  return;
-                }
-                cancelOrderWithRefundMutation.mutate({
-                  id: cancelModalOrder.id,
-                  payload: {
-                    reason: cancelReason,
-                    refundedNow: cancelRefundedNow,
-                    amount: amt,
-                  },
-                });
-              }}
-              className="space-y-5"
-            >
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-[color:var(--text-muted)] uppercase tracking-wider">Reason for Cancellation *</label>
-                <textarea
-                  required
-                  placeholder="E.g. Customer requested cancellation / Out of stock"
-                  value={cancelReason}
-                  onChange={(e) => setCancelReason(e.target.value)}
-                  className="w-full bg-[color:var(--surface-soft)] border border-[color:var(--border-color)] rounded-xl px-4 py-3 text-sm text-[color:var(--text-main)] placeholder:text-[color:var(--text-muted)] focus:outline-none focus:border-[color:var(--primary)] transition-all min-h-[80px]"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-[color:var(--text-muted)] uppercase tracking-wider">Refund Customer Now?</label>
-                <div className="flex gap-4 pt-1">
-                  <label className="flex items-center gap-2 text-sm text-[color:var(--text-main)] cursor-pointer">
-                    <input
-                      type="radio"
-                      name="cancelRefundedNow"
-                      checked={cancelRefundedNow === true}
-                      onChange={() => setCancelRefundedNow(true)}
-                      className="accent-[color:var(--primary)]"
-                    />
-                    Yes (Confirmed Refunded)
-                  </label>
-                  <label className="flex items-center gap-2 text-sm text-[color:var(--text-main)] cursor-pointer">
-                    <input
-                      type="radio"
-                      name="cancelRefundedNow"
-                      checked={cancelRefundedNow === false}
-                      onChange={() => setCancelRefundedNow(false)}
-                      className="accent-[color:var(--primary)]"
-                    />
-                    No (Mark Pending)
-                  </label>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-[color:var(--text-muted)] uppercase tracking-wider">Refund Amount ($)</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={cancelAmount}
-                  onChange={(e) => setCancelAmount(e.target.value)}
-                  className="w-full bg-[color:var(--surface-soft)] border border-[color:var(--border-color)] rounded-xl px-4 py-3 text-sm text-[color:var(--text-main)] focus:outline-none focus:border-[color:var(--primary)] transition-all"
-                  required
-                />
-              </div>
-
-              <div className="flex gap-3 pt-3">
-                <button
-                  type="button"
-                  onClick={() => setCancelModalOrder(null)}
-                  className="flex-1 py-3 bg-[color:var(--surface-soft)] border border-[color:var(--border-color)] text-[color:var(--text-muted)] font-bold rounded-xl hover:text-[color:var(--text-main)] transition-all text-sm"
-                >
-                  Close
-                </button>
-                <button
-                  type="submit"
-                  disabled={cancelOrderWithRefundMutation.isPending}
-                  className="flex-1 py-3 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition-all text-sm flex items-center justify-center gap-2 disabled:opacity-50"
-                >
-                  {cancelOrderWithRefundMutation.isPending ? <FiLoader className="animate-spin" /> : "Confirm Cancellation"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
       {/* ===== Confirm Money Returned Modal ===== */}
       {confirmRefundModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex justify-center items-center z-[3000] p-6">

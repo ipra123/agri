@@ -3,6 +3,7 @@ import { useState } from "react";
 import api from "../../lib/api";
 import toast from "react-hot-toast";
 import { FiPlus, FiEdit2, FiTrash2, FiX, FiLoader, FiBox, FiAlertTriangle, FiCheckCircle } from "react-icons/fi";
+import { resolveMediaUrl } from "../../lib/media";
 
 const AGRICULTURAL_CATEGORIES = [
   { value: "SEEDS", label: "Certified Seeds" },
@@ -86,6 +87,10 @@ const SupplierProducts = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!editingProduct && formData.images.length === 0) {
+      toast.error("Please upload at least one product image.");
+      return;
+    }
 
     const payload = new FormData();
     payload.append("name", formData.name);
@@ -199,7 +204,7 @@ const SupplierProducts = () => {
                     <tr key={p.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
                       <td className="p-4 flex items-center gap-3">
                         <img
-                          src={p.images?.[0] || "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=100&auto=format"}
+                          src={resolveMediaUrl(p.images?.[0]) || "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=100&auto=format"}
                           alt={p.name}
                           className="w-10 h-10 rounded-xl object-cover"
                         />
@@ -373,8 +378,10 @@ const SupplierProducts = () => {
                 </label>
                 <input
                   type="file"
+                  accept="image/*"
                   onChange={(e) => setFormData({ ...formData, images: e.target.files })}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-3 text-xs text-slate-900 dark:text-white"
+                  required={!editingProduct}
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-3 text-xs text-slate-900 dark:text-white file:mr-4 file:rounded-xl file:border-0 file:bg-emerald-600 file:px-4 file:py-2 file:text-[10px] file:font-black file:uppercase file:tracking-[0.16em] file:text-white"
                 />
               </div>
 

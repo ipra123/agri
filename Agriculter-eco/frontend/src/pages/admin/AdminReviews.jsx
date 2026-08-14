@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
 import { FiCheckCircle, FiTrash2, FiMessageSquare, FiStar, FiUser, FiPackage, FiBriefcase } from "react-icons/fi";
-import axios from "axios";
 import toast from "react-hot-toast";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+import api from "../../lib/api";
 
 const AdminReviews = () => {
   const [pendingReviews, setPendingReviews] = useState([]);
@@ -15,11 +13,7 @@ const AdminReviews = () => {
 
   const fetchPendingReviews = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const res = await axios.get(`${API_URL}/reviews/admin/pending`, {
-        headers: { Authorization: `Bearer ${token}` },
-        withCredentials: true,
-      });
+      const res = await api.get("/reviews/admin/pending");
       setPendingReviews(res.data);
     } catch (error) {
       console.error("Failed to fetch pending reviews", error);
@@ -31,15 +25,7 @@ const AdminReviews = () => {
 
   const handleApprove = async (id) => {
     try {
-      const token = localStorage.getItem("token");
-      await axios.put(
-        `${API_URL}/reviews/admin/${id}/approve`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          withCredentials: true,
-        }
-      );
+      await api.put(`/reviews/admin/${id}/approve`);
       toast.success("Review approved and published publicly!");
       setPendingReviews((prev) => prev.filter((r) => r.id !== id));
     } catch (error) {
@@ -50,11 +36,7 @@ const AdminReviews = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this pending review?")) return;
     try {
-      const token = localStorage.getItem("token");
-      await axios.delete(`${API_URL}/reviews/admin/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-        withCredentials: true,
-      });
+      await api.delete(`/reviews/admin/${id}`);
       toast.success("Review deleted");
       setPendingReviews((prev) => prev.filter((r) => r.id !== id));
     } catch (error) {

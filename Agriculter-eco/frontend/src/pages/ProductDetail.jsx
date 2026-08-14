@@ -6,6 +6,7 @@ import api from "../lib/api";
 import useCartStore from "../store/useCartStore";
 import Reviews from "../components/Reviews";
 import toast from "react-hot-toast";
+import { resolveMediaUrl } from "../lib/media";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -64,7 +65,7 @@ const ProductDetail = () => {
           <div className="space-y-6">
             <div className="relative aspect-square rounded-3xl overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 shadow-xl">
               <img
-                src={product.images?.[activeImg] || product.images?.[0]}
+                src={resolveMediaUrl(product.images?.[activeImg] || product.images?.[0])}
                 alt={product.name}
                 className="w-full h-full object-cover rounded-2xl transition-all duration-500"
               />
@@ -85,7 +86,7 @@ const ProductDetail = () => {
                         : "border-slate-200 dark:border-slate-800 opacity-60 hover:opacity-100"
                     }`}
                   >
-                    <img src={img} alt={product.name} className="w-full h-full object-cover" />
+                    <img src={resolveMediaUrl(img)} alt={product.name} className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>

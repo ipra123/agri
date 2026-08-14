@@ -4,6 +4,8 @@ import { FiBriefcase, FiMapPin, FiStar, FiPackage, FiCheckCircle, FiMessageSquar
 import axios from "axios";
 import toast from "react-hot-toast";
 import useAuthStore from "../store/useAuthStore";
+import api from "../lib/api";
+import { resolveMediaUrl } from "../lib/media";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
@@ -49,22 +51,12 @@ const SupplierDetail = () => {
 
     setIsSubmittingReview(true);
     try {
-      const token = localStorage.getItem("token");
-      await axios.post(
-        `${API_URL}/reviews`,
-        {
-          supplierId: id,
-          targetType: "SUPPLIER",
-          rating,
-          comment: comment.trim(),
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          withCredentials: true,
-        }
-      );
+      await api.post("/reviews", {
+        supplierId: id,
+        targetType: "SUPPLIER",
+        rating,
+        comment: comment.trim(),
+      });
 
       setComment("");
       setRating(5);
@@ -183,7 +175,7 @@ const SupplierDetail = () => {
                 >
                   <div className="h-44 w-full overflow-hidden rounded-xl bg-gray-100">
                     <img
-                      src={product.images?.[0] || "https://via.placeholder.com/300"}
+                      src={resolveMediaUrl(product.images?.[0]) || "https://via.placeholder.com/300"}
                       alt={product.name}
                       className="h-full w-full object-cover transition group-hover:scale-105"
                     />

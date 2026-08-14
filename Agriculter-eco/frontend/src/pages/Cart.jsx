@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import useCartStore from "../store/useCartStore";
 import { FiTrash2, FiMinus, FiPlus, FiShoppingBag, FiArrowRight, FiShield, FiTruck } from "react-icons/fi";
+import { resolveMediaUrl } from "../lib/media";
 
 const Cart = () => {
   const { items, removeItem, updateQuantity, getTotal } = useCartStore();
@@ -45,7 +46,7 @@ const Cart = () => {
                   to={`/product/${item.id}`}
                   className="w-full sm:w-28 h-28 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 shrink-0 border border-slate-200 dark:border-slate-700"
                 >
-                  <img src={item.images?.[0]} alt={item.name} className="w-full h-full object-cover" />
+                  <img src={resolveMediaUrl(item.images?.[0])} alt={item.name} className="w-full h-full object-cover" />
                 </Link>
 
                 <div className="flex-1 flex flex-col sm:flex-row sm:items-start justify-between gap-4">

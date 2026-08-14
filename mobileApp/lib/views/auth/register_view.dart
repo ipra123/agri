@@ -4,6 +4,7 @@ import '../../providers/auth_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/custom_button.dart';
 import 'login_view.dart';
+import 'otp_view.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -18,23 +19,48 @@ class _RegisterViewState extends State<RegisterView> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
 
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
   void _register() async {
-    if (_nameController.text.isEmpty || _emailController.text.isEmpty || _passwordController.text.isEmpty) {
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (name.isEmpty || email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please fill all fields')));
       return;
     }
 
     setState(() => _isLoading = true);
     try {
-      await context.read<AuthProvider>().registerAndLogin(
-        _nameController.text.trim(),
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
-      );
-      if (mounted) Navigator.pop(context);
+      final apiService = context.read<AuthProvider>().apiService;
+      await apiService.sendOtp(email);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('OTP code sent to your email!')),
+        );
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => OtpView(
+              email: email,
+              fullName: name,
+              password: password,
+            ),
+          ),
+        );
+      }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+        );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

@@ -15,8 +15,9 @@ import {
   resolveComplaint,
   deleteOrder,
   getPayments,
+  payOrderBalance,
 } from "../controllers/order.controller.js";
-
+import { cancelOrderWithRefund } from "../controllers/refund.controller.js";
 import { protect, adminOnly } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
@@ -46,6 +47,7 @@ router.get("/:id", protect, getOrderById);
 router.put("/:id/cancel", protect, cancelOrder);
 router.put("/:id/return", protect, requestReturn);
 router.post("/:id/complaint", protect, submitComplaint);
+router.post("/:id/pay", protect, payOrderBalance);
 
 router.get("/:id/payments", protect, getPayments);
 router.post("/upload-proof", protect, upload.single("proof"), (req, res) => {
@@ -55,8 +57,6 @@ router.post("/upload-proof", protect, upload.single("proof"), (req, res) => {
   const fileUrl = `/userchatingfiles/${req.file.filename}`;
   res.json({ fileUrl });
 });
-
-import { cancelOrderWithRefund } from "../controllers/refund.controller.js";
 
 // Admin Routes
 router.get("/", protect, adminOnly, getAllOrders);

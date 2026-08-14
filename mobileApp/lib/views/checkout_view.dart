@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/custom_button.dart';
 import '../providers/cart_provider.dart';
+import '../providers/auth_provider.dart';
+import 'auth/login_view.dart';
 import 'booking_success_view.dart';
 
 class CheckoutView extends StatefulWidget {
@@ -143,30 +145,11 @@ class _CheckoutViewState extends State<CheckoutView> {
   }
 
   Widget _buildLocationInput() {
-    return DropdownButtonFormField<String>(
-      value: _selectedLocation,
-      items: _locations.map((loc) {
-        return DropdownMenuItem<String>(
-          value: loc,
-          child: Text(
-            loc,
-            style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
-          ),
-        );
-      }).toList(),
-      onChanged: (val) {
-        setState(() {
-          _selectedLocation = val;
-          _locationController.text = val ?? "";
-        });
-      },
-      validator: (value) {
-        if (value == null || value.trim().isEmpty) return "Delivery district is required";
-        return null;
-      },
+    return TextFormField(
+      controller: _locationController,
       decoration: InputDecoration(
-        labelText: "Delivery District",
-        hintText: "Select district",
+        labelText: "Delivery Address / Location",
+        hintText: "e.g., Hodan, KM4, Mogadishu",
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppTheme.border),
@@ -179,6 +162,10 @@ class _CheckoutViewState extends State<CheckoutView> {
         fillColor: Colors.white,
         filled: true,
       ),
+      validator: (value) {
+        if (value == null || value.trim().isEmpty) return "Delivery location is required";
+        return null;
+      },
     );
   }
 
@@ -279,6 +266,21 @@ class _CheckoutViewState extends State<CheckoutView> {
 
   Future<void> _handleSubmit(CartProvider cartProvider, double maxTotal) async {
     if (!_formKey.currentState!.validate()) return;
+
+    final authProvider = context.read<AuthProvider>();
+    if (!authProvider.isAuthenticated) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please log in first to complete your order & payment."),
+          backgroundColor: Colors.red,
+        ),
+      );
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginView()),
+      );
+      return;
+    }
 
     if (_payerPhone.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(

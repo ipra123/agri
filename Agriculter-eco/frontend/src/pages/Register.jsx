@@ -19,6 +19,7 @@ const Register = () => {
     supplierBusinessName: "",
     supplierLicenseNumber: "",
   });
+  const [verificationDocument, setVerificationDocument] = useState(null);
   
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState("");
@@ -37,6 +38,10 @@ const Register = () => {
     }
     if (formData.role === "SUPPLIER" && !formData.supplierBusinessName) {
       toast.error("Business name is required for suppliers.");
+      return;
+    }
+    if (formData.role === "SUPPLIER" && !verificationDocument) {
+      toast.error("Supplier verification document is required.");
       return;
     }
 
@@ -58,6 +63,10 @@ const Register = () => {
       toast.error("Please enter the 6-digit OTP code sent to your email.");
       return;
     }
+    if (formData.role === "SUPPLIER" && !verificationDocument) {
+      toast.error("Please upload a supplier verification document.");
+      return;
+    }
 
     setIsVerifyingOtp(true);
     try {
@@ -66,7 +75,18 @@ const Register = () => {
         otp: otpCode.trim(),
       });
 
-      await register(formData);
+      const payload = new FormData();
+      payload.append("name", formData.name.trim());
+      payload.append("email", formData.email.trim());
+      payload.append("password", formData.password);
+      payload.append("role", formData.role);
+      payload.append("supplierBusinessName", formData.supplierBusinessName.trim());
+      payload.append("supplierLicenseNumber", formData.supplierLicenseNumber.trim());
+      if (verificationDocument) {
+        payload.append("verificationDocument", verificationDocument);
+      }
+
+      await register(payload);
       toast.success("Account created successfully!");
       navigate("/");
     } catch (error) {
@@ -127,7 +147,8 @@ const Register = () => {
           </div>
 
           <form onSubmit={otpSent ? handleVerifyAndRegister : handleSendOtp} className="mt-8 space-y-5 text-left">
-            <label className="block">
+            <div className="grid gap-5 sm:grid-cols-2">
+              <label className="block">
               <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.18em] text-[color:var(--text-muted)]">Full name</span>
               <div className="relative">
                 <FiUser className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[color:var(--text-muted)]" />
@@ -143,7 +164,7 @@ const Register = () => {
               </div>
             </label>
 
-            <label className="block">
+              <label className="block">
               <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.18em] text-[color:var(--text-muted)]">Email address</span>
               <div className="relative">
                 <FiMail className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[color:var(--text-muted)]" />
@@ -159,7 +180,7 @@ const Register = () => {
               </div>
             </label>
 
-            <label className="block">
+              <label className="block sm:col-span-2">
               <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.18em] text-[color:var(--text-muted)]">Password</span>
               <div className="relative">
                 <FiLock className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[color:var(--text-muted)]" />
@@ -174,6 +195,7 @@ const Register = () => {
                 />
               </div>
             </label>
+            </div>
 
             <div className="space-y-2">
               <span className="mb-1 block text-[11px] font-black uppercase tracking-[0.18em] text-[color:var(--text-muted)]">Account type</span>
@@ -204,29 +226,47 @@ const Register = () => {
             </div>
 
             {formData.role === "SUPPLIER" && (
-              <div className="space-y-4 rounded-3xl border border-[color:var(--border-color)] bg-[color:var(--surface-soft)] p-4">
+              <div className="space-y-4 rounded-3xl border border-emerald-200 bg-emerald-50 p-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <label className="block">
+                    <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.18em] text-emerald-800">Business name</span>
+                    <input
+                      type="text"
+                      disabled={otpSent}
+                      className="w-full rounded-2xl border border-emerald-200 bg-white px-4 py-3 text-sm text-[color:var(--text-main)] outline-none disabled:bg-gray-100 focus:border-[color:var(--primary)]"
+                      placeholder="Grand Craft Ltd"
+                      value={formData.supplierBusinessName}
+                      onChange={(e) => setFormData({ ...formData, supplierBusinessName: e.target.value })}
+                      required
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.18em] text-emerald-800">License number</span>
+                    <input
+                      type="text"
+                      disabled={otpSent}
+                      className="w-full rounded-2xl border border-emerald-200 bg-white px-4 py-3 text-sm text-[color:var(--text-main)] outline-none disabled:bg-gray-100 focus:border-[color:var(--primary)]"
+                      placeholder="REG-2026-88"
+                      value={formData.supplierLicenseNumber}
+                      onChange={(e) => setFormData({ ...formData, supplierLicenseNumber: e.target.value })}
+                      required
+                    />
+                  </label>
+                </div>
+
                 <label className="block">
-                  <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.18em] text-[color:var(--text-muted)]">Business name</span>
+                  <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.18em] text-emerald-800">Verification document image</span>
                   <input
-                    type="text"
+                    type="file"
                     disabled={otpSent}
-                    className="w-full rounded-2xl border border-[color:var(--border-color)] bg-white px-4 py-3 text-sm text-[color:var(--text-main)] outline-none disabled:bg-gray-100"
-                    placeholder="Grand Craft Ltd"
-                    value={formData.supplierBusinessName}
-                    onChange={(e) => setFormData({ ...formData, supplierBusinessName: e.target.value })}
+                    accept="image/*"
+                    className="w-full rounded-2xl border border-emerald-200 bg-white px-4 py-3 text-sm text-[color:var(--text-main)] outline-none file:mr-4 file:rounded-xl file:border-0 file:bg-[color:var(--primary)] file:px-4 file:py-2 file:text-xs file:font-black file:uppercase file:tracking-[0.16em] file:text-white disabled:bg-gray-100"
+                    onChange={(e) => setVerificationDocument(e.target.files?.[0] || null)}
                     required
                   />
-                </label>
-                <label className="block">
-                  <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.18em] text-[color:var(--text-muted)]">License number</span>
-                  <input
-                    type="text"
-                    disabled={otpSent}
-                    className="w-full rounded-2xl border border-[color:var(--border-color)] bg-white px-4 py-3 text-sm text-[color:var(--text-main)] outline-none disabled:bg-gray-100"
-                    placeholder="REG-2026-88"
-                    value={formData.supplierLicenseNumber}
-                    onChange={(e) => setFormData({ ...formData, supplierLicenseNumber: e.target.value })}
-                  />
+                  <p className="mt-2 text-[11px] text-emerald-800/70">
+                    Upload your supplier registration or verification document as an image.
+                  </p>
                 </label>
               </div>
             )}

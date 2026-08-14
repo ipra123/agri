@@ -18,11 +18,11 @@ const NAV_ITEMS = [
   { to: "/admin/products", icon: <FiBox />, label: "Products" },
   { to: "/admin/orders", icon: <FiShoppingBag />, label: "Orders" },
   { to: "/admin/reviews", icon: <FiMessageSquare />, label: "Pending Reviews" },
-  { to: "/admin/refunds", icon: <FiRefreshCw />, label: "Refunds" },
+  { to: "/admin/refunds", icon: <FiRefreshCw />, label: "Cancel orders" },
   { to: "/admin/customers", icon: <FiUsers />, label: "Customers" },
   { to: "/admin/finance", icon: <FiDollarSign />, label: "Finance" },
-  { to: "/admin/inventory", icon: <FiArchive />, label: "Inventory" },
-  { to: "/admin/settings", icon: <FiSettings />, label: "Settings" },
+  // { to: "/admin/inventory", icon: <FiArchive />, label: "Inventory" },
+  // { to: "/admin/settings", icon: <FiSettings />, label: "Settings" },
 ];
 
 const AdminSidebar = () => {

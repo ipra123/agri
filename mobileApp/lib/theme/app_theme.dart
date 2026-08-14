@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  static const Color primary = Color(0xFF1E6F3D);
-  static const Color primaryDark = Color(0xFF14532D);
-  static const Color accent = Color(0xFFC99728);
-  static const Color background = Color(0xFFF7F3E8);
+  static const Color primary = Color(0xFF1B6B42);
+  static const Color primaryDark = Color(0xFF134B2E);
+  static const Color accent = Color(0xFFD08B2E);
+  static const Color background = Color(0xFFF5F1E7);
   static const Color surface = Colors.white;
   static const Color textPrimary = Color(0xFF142016);
   static const Color textSecondary = Color(0xFF5B665C);
@@ -16,6 +16,9 @@ class AppTheme {
 
     return ThemeData(
       useMaterial3: true,
+      splashFactory: InkSparkle.splashFactory,
+      visualDensity: VisualDensity.standard,
+      iconTheme: const IconThemeData(color: textPrimary, size: 22),
       colorScheme: ColorScheme.light(
         primary: primary,
         secondary: accent,
@@ -27,6 +30,11 @@ class AppTheme {
         outline: border,
       ),
       scaffoldBackgroundColor: background,
+      dividerTheme: const DividerThemeData(
+        color: Color(0x17142016),
+        space: 1,
+        thickness: 1,
+      ),
       textTheme: baseText.copyWith(
         displayLarge: GoogleFonts.cormorantGaramond(
           color: textPrimary,
@@ -62,6 +70,7 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         centerTitle: false,
+        toolbarHeight: 68,
         iconTheme: const IconThemeData(color: textPrimary),
         titleTextStyle: GoogleFonts.manrope(
           color: textPrimary,
@@ -99,6 +108,27 @@ class AppTheme {
           ),
         ),
       ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: Colors.white.withOpacity(0.96),
+        elevation: 0,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        indicatorColor: primary.withOpacity(0.12),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          final selected = states.contains(WidgetState.selected);
+          return IconThemeData(
+            color: selected ? primary : textSecondary,
+            size: selected ? 25 : 22,
+          );
+        }),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          final selected = states.contains(WidgetState.selected);
+          return GoogleFonts.manrope(
+            fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+            fontSize: 11,
+            color: selected ? primary : textSecondary,
+          );
+        }),
+      ),
       cardTheme: CardThemeData(
         color: surface,
         elevation: 0,
@@ -111,17 +141,20 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: surface,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        isDense: true,
+        prefixIconColor: textSecondary,
+        suffixIconColor: textSecondary,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(20),
           borderSide: const BorderSide(color: border),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(20),
           borderSide: const BorderSide(color: border),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(20),
           borderSide: const BorderSide(color: primary, width: 1.4),
         ),
         labelStyle: GoogleFonts.manrope(color: textSecondary, fontWeight: FontWeight.w700),

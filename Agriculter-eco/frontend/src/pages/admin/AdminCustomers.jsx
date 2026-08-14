@@ -1,8 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import api from "../../lib/api";
+import { resolveMediaUrl } from "../../lib/media";
 import toast from "react-hot-toast";
-import { FiTrash2, FiUserPlus, FiX, FiLoader, FiShield, FiUser, FiEdit2, FiCheckCircle, FiClock, FiXCircle, FiBriefcase } from "react-icons/fi";
+import { FiTrash2, FiUserPlus, FiX, FiLoader, FiShield, FiUser, FiEdit2, FiCheckCircle, FiClock, FiXCircle, FiBriefcase, FiFileText, FiDownload, FiExternalLink } from "react-icons/fi";
 
 const AdminCustomers = () => {
   const queryClient = useQueryClient();
@@ -79,6 +80,7 @@ const AdminCustomers = () => {
       role: user.role,
       supplierBusinessName: user.supplierBusinessName || "",
       supplierLicenseNumber: user.supplierLicenseNumber || "",
+      licenseDocumentUrl: user.licenseDocumentUrl || "",
       verificationStatus: user.verificationStatus || "PENDING",
     });
     setIsModalOpen(true);
@@ -300,6 +302,40 @@ const AdminCustomers = () => {
                       onChange={(e) => setFormData({ ...formData, supplierBusinessName: e.target.value })}
                       className="w-full bg-[color:var(--surface-soft)] border border-[color:var(--border-color)] rounded-2xl px-4 py-3 text-xs text-[color:var(--text-main)] placeholder:text-[color:var(--text-muted)] font-bold focus:outline-none"
                     />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-wider text-[color:var(--text-muted)] flex items-center gap-2">
+                      <FiFileText /> Supplier Verification Document
+                    </label>
+                    {formData.licenseDocumentUrl ? (
+                      <div className="rounded-2xl border border-[color:var(--border-color)] bg-[color:var(--surface-soft)] p-4 space-y-3">
+                        <div className="text-xs text-[color:var(--text-muted)] break-all">
+                          {formData.licenseDocumentUrl}
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <a
+                            href={resolveMediaUrl(formData.licenseDocumentUrl)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-2 rounded-xl bg-[color:var(--primary)] px-4 py-2 text-[10px] font-black uppercase tracking-widest text-white"
+                          >
+                            <FiExternalLink /> Open
+                          </a>
+                          <a
+                            href={resolveMediaUrl(formData.licenseDocumentUrl)}
+                            download
+                            className="inline-flex items-center gap-2 rounded-xl border border-[color:var(--border-color)] bg-white px-4 py-2 text-[10px] font-black uppercase tracking-widest text-[color:var(--text-main)]"
+                          >
+                            <FiDownload /> Download
+                          </a>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="rounded-2xl border border-dashed border-[color:var(--border-color)] bg-[color:var(--surface-soft)] px-4 py-3 text-[11px] text-[color:var(--text-muted)]">
+                        No verification document uploaded yet.
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-1">

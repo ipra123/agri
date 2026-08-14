@@ -17,6 +17,7 @@ const SupplierProfile = () => {
   });
 
   const [profilePhotoFile, setProfilePhotoFile] = useState(null);
+  const [verificationDocumentFile, setVerificationDocumentFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState("");
 
   const { data: profile, isLoading, refetch } = useQuery({
@@ -57,6 +58,14 @@ const SupplierProfile = () => {
     }
   };
 
+  const handleDocumentChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setVerificationDocumentFile(file);
+      setForm((current) => ({ ...current, licenseDocumentUrl: file.name }));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -66,11 +75,16 @@ const SupplierProfile = () => {
       formData.append("deliveryAddress", form.deliveryAddress);
       formData.append("businessName", form.businessName);
       formData.append("supplierBusinessName", form.supplierBusinessName);
-      formData.append("licenseDocumentUrl", form.licenseDocumentUrl);
       formData.append("supplierLicenseNumber", form.supplierLicenseNumber);
 
       if (profilePhotoFile) {
         formData.append("profilePhoto", profilePhotoFile);
+      }
+
+      if (verificationDocumentFile) {
+        formData.append("verificationDocument", verificationDocumentFile);
+      } else if (form.licenseDocumentUrl) {
+        formData.append("licenseDocumentUrl", form.licenseDocumentUrl);
       }
 
       await api.put("/auth/profile", formData, {
@@ -174,6 +188,26 @@ const SupplierProfile = () => {
                 className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-xs text-slate-900 dark:text-white font-bold focus:outline-none"
               />
             </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 flex items-center gap-2">
+              <FiFileText /> Verification Document Image
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleDocumentChange}
+              className="w-full rounded-2xl border border-emerald-200 dark:border-emerald-500/20 bg-emerald-50/70 dark:bg-emerald-500/10 px-4 py-3 text-xs font-bold text-emerald-800 dark:text-emerald-200 file:mr-4 file:rounded-xl file:border-0 file:bg-emerald-600 file:px-4 file:py-2 file:text-white file:font-black hover:file:bg-emerald-700"
+            />
+            <p className="text-[11px] text-slate-400">
+              Upload a new business license or registration card image here when you update KYC.
+            </p>
+            {form.licenseDocumentUrl && !verificationDocumentFile ? (
+              <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">
+                Current document: {form.licenseDocumentUrl.split("/").pop()}
+              </p>
+            ) : null}
           </div>
         </div>
 

@@ -394,6 +394,58 @@ export const submitComplaint = async (req, res) => {
   }
 };
 
+export const payOrderBalance = async (req, res) => {
+  try {
+    const { amount, paymentMethod } = req.body;
+    const order = await prisma.order.findUnique({
+      where: { id: req.params.id },
+    });
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    if (order.userId !== req.user.id && req.user.role !== "ADMIN") {
+      return res.status(403).json({ message: "Not authorized to pay for this order" });
+    }
+
+    const payAmount = parseFloat(amount || order.totalAmount);
+
+    await prisma.payment.create({
+      data: {
+        orderId: order.id,
+        userId: req.user.id,
+        amount: payAmount,
+        status: "COMPLETED",
+        type: "FULL",
+      },
+    });
+
+    const updatedOrder = await prisma.order.update({
+      where: { id: req.params.id },
+      data: {
+        paymentStatus: "PAID",
+        paymentMethod: paymentMethod || order.paymentMethod,
+      },
+    });
+
+    await prisma.transaction.create({
+      data: {
+        orderId: order.id,
+        type: "PAYMENT",
+        amount: payAmount,
+        description: `Payment for Order #${order.id.slice(0, 8)}`,
+        status: "COMPLETED",
+      },
+    });
+
+    res.json(updatedOrder);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
 export const resolveComplaint = async (req, res) => {
   const { resolution } = req.body;
   try {

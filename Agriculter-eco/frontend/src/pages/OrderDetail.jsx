@@ -18,6 +18,7 @@ import {
   FiSmartphone,
   FiAlertTriangle
 } from "react-icons/fi";
+import { resolveMediaUrl } from "../lib/media";
 
 const money = (value) => `$${Number(value || 0).toFixed(2)}`;
 
@@ -172,7 +173,7 @@ const OrderDetail = () => {
               {order.items?.map((item) => (
                 <div key={item.id} className="py-4 flex items-center gap-4">
                   <img
-                    src={item.product?.images?.[0] || "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=150&auto=format"}
+                    src={resolveMediaUrl(item.product?.images?.[0]) || "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=150&auto=format"}
                     alt={item.product?.name}
                     className="w-16 h-16 rounded-2xl object-cover border border-slate-200 dark:border-slate-700 shrink-0"
                   />

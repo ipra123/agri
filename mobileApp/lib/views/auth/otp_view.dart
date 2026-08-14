@@ -87,13 +87,13 @@ class _OtpViewState extends State<OtpView> {
               TextField(
                 controller: _codeController,
                 decoration: InputDecoration(
-                  labelText: '5-digit code',
+                  labelText: '6-digit OTP code',
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 keyboardType: TextInputType.number,
                 textAlign: TextAlign.center,
                 style: const TextStyle(letterSpacing: 8, fontSize: 24, fontWeight: FontWeight.bold),
-                maxLength: 5,
+                maxLength: 6,
               ),
               const SizedBox(height: 32),
               _isLoading 

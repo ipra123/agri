@@ -1,10 +1,28 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import fs from "fs/promises";
+import path from "path";
+import { fileURLToPath } from "url";
 import prisma from "../lib/prisma.js";
 import { sendOtpEmail, sendForgotPasswordEmail } from "../lib/sendEmails.js";
 
 // In-memory store for OTPs: { [email]: { otp, expires } }
 const otpStore = new Map();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const buildLocalProfilePhotoUrl = (filename) => `/uploads/profile-photos/${filename}`;
+const buildLocalVerificationDocumentUrl = (filename) => `/uploads/verification-documents/${filename}`;
+
+const getUploadedFile = (files, fieldName) => {
+  if (!files || !files[fieldName]) return null;
+  return Array.isArray(files[fieldName]) ? files[fieldName][0] : files[fieldName];
+};
+
+const getProfilePhotoFilePath = (profilePhotoUrl) => {
+  if (!profilePhotoUrl || !profilePhotoUrl.startsWith("/uploads/profile-photos/")) return null;
+  return path.join(__dirname, "../../", profilePhotoUrl.replace(/^\//, ""));
+};
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET || "secret", {
@@ -114,6 +132,8 @@ export const register = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const profilePhotoFile = getUploadedFile(req.files, "profilePhoto");
+    const verificationDocumentFile = getUploadedFile(req.files, "verificationDocument");
 
     const allowedRoles = new Set(["FARMER", "SUPPLIER"]);
     const requestedRole = allowedRoles.has(role) ? role : "FARMER";
@@ -125,12 +145,20 @@ export const register = async (req, res) => {
     if (assignedRole === "SUPPLIER" && !supplierBusinessName) {
       return res.status(400).json({ message: "Supplier business name is required" });
     }
-    let profilePhotoBlob = null;
+    if (assignedRole === "SUPPLIER" && !verificationDocumentFile) {
+      return res.status(400).json({ message: "Supplier verification document is required" });
+    }
     let profilePhotoMime = null;
+    let profilePhotoUrl = null;
+    let licenseDocumentUrl = null;
 
-    if (req.file) {
-      profilePhotoBlob = req.file.buffer;
-      profilePhotoMime = req.file.mimetype;
+    if (profilePhotoFile) {
+      profilePhotoMime = profilePhotoFile.mimetype;
+      profilePhotoUrl = buildLocalProfilePhotoUrl(profilePhotoFile.filename);
+    }
+
+    if (verificationDocumentFile) {
+      licenseDocumentUrl = buildLocalVerificationDocumentUrl(verificationDocumentFile.filename);
     }
 
     const user = await prisma.user.create({
@@ -141,22 +169,13 @@ export const register = async (req, res) => {
         role: assignedRole,
         businessName: assignedRole === "SUPPLIER" ? supplierBusinessName : null,
         supplierBusinessName: assignedRole === "SUPPLIER" ? supplierBusinessName : null,
-        licenseDocumentUrl: assignedRole === "SUPPLIER" ? supplierLicenseNumber || null : null,
         supplierLicenseNumber: assignedRole === "SUPPLIER" ? supplierLicenseNumber || null : null,
+        licenseDocumentUrl: assignedRole === "SUPPLIER" ? licenseDocumentUrl : null,
         verificationStatus: assignedRole === "SUPPLIER" ? "PENDING" : "NOT_APPLICABLE",
-        profilePhotoBlob,
         profilePhotoMime,
+        profilePhotoUrl,
       },
     });
-
-    if (profilePhotoBlob) {
-      const updatedUrl = `/api/auth/profile-photo/${user.id}`;
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { profilePhotoUrl: updatedUrl },
-      });
-      user.profilePhotoUrl = updatedUrl;
-    }
 
     const token = generateToken(user.id);
     res.cookie("token", token, {
@@ -240,14 +259,16 @@ export const updateProfile = async (req, res) => {
 
   try {
     const data = {};
+    const profilePhotoFile = getUploadedFile(req.files, "profilePhoto");
+    const verificationDocumentFile = getUploadedFile(req.files, "verificationDocument");
+
     if (name !== undefined) data.name = name;
     if (phoneNumber !== undefined) data.phoneNumber = phoneNumber;
     if (deliveryAddress !== undefined) data.deliveryAddress = deliveryAddress;
 
-    if (req.file) {
-      data.profilePhotoBlob = req.file.buffer;
-      data.profilePhotoMime = req.file.mimetype;
-      data.profilePhotoUrl = `/api/auth/profile-photo/${req.user.id}`;
+    if (profilePhotoFile) {
+      data.profilePhotoMime = profilePhotoFile.mimetype;
+      data.profilePhotoUrl = buildLocalProfilePhotoUrl(profilePhotoFile.filename);
     } else if (profilePhotoUrl !== undefined) {
       data.profilePhotoUrl = profilePhotoUrl;
     }
@@ -255,8 +276,15 @@ export const updateProfile = async (req, res) => {
     if (req.user.role === "SUPPLIER") {
       if (businessName !== undefined) data.businessName = businessName;
       if (supplierBusinessName !== undefined) data.supplierBusinessName = supplierBusinessName;
-      if (licenseDocumentUrl !== undefined) data.licenseDocumentUrl = licenseDocumentUrl;
       if (supplierLicenseNumber !== undefined) data.supplierLicenseNumber = supplierLicenseNumber;
+
+      if (verificationDocumentFile) {
+        data.licenseDocumentUrl = buildLocalVerificationDocumentUrl(verificationDocumentFile.filename);
+        data.verificationStatus = "PENDING";
+        data.verificationNotes = null;
+      } else if (licenseDocumentUrl !== undefined) {
+        data.licenseDocumentUrl = licenseDocumentUrl;
+      }
     }
 
     const user = await prisma.user.update({
@@ -292,12 +320,28 @@ export const getProfilePhoto = async (req, res) => {
     const user = await prisma.user.findUnique({
       where: { id: req.params.id },
       select: {
+        profilePhotoUrl: true,
         profilePhotoBlob: true,
         profilePhotoMime: true,
       },
     });
 
-    if (!user || !user.profilePhotoBlob) {
+    if (!user) {
+      return res.status(404).send("Not found");
+    }
+
+    const localPath = getProfilePhotoFilePath(user.profilePhotoUrl);
+    if (localPath) {
+      try {
+        const file = await fs.readFile(localPath);
+        res.setHeader("Content-Type", user.profilePhotoMime || "image/jpeg");
+        return res.send(file);
+      } catch {
+        // Fall through to the legacy blob path below.
+      }
+    }
+
+    if (!user.profilePhotoBlob) {
       return res.status(404).send("Not found");
     }
 

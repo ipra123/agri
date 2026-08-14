@@ -3,6 +3,7 @@ import { FiShoppingBag, FiArrowRight, FiCheckCircle, FiAlertTriangle } from "rea
 import useCartStore from "../store/useCartStore";
 import toast from "react-hot-toast";
 import { useSettings } from "../hooks";
+import { resolveMediaUrl } from "../lib/media";
 
 const ProductCard = ({ product }) => {
   const { addItem } = useCartStore();
@@ -25,7 +26,7 @@ const ProductCard = ({ product }) => {
         <div className="relative h-64 overflow-hidden bg-slate-100 dark:bg-slate-800">
           <img
             src={
-              product.images?.[0] ||
+              resolveMediaUrl(product.images?.[0]) ||
               "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=400&auto=format"
             }
             alt={product.name}

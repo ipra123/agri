@@ -6,6 +6,9 @@ import '../theme/app_theme.dart';
 import '../widgets/custom_button.dart';
 import '../models/decoration_model.dart';
 import '../providers/cart_provider.dart';
+import '../providers/auth_provider.dart';
+import '../services/api_service.dart';
+import 'auth/login_view.dart';
 
 class ItemDetailsView extends StatefulWidget {
   final DecorationModel item;
@@ -96,6 +99,8 @@ class _ItemDetailsViewState extends State<ItemDetailsView> {
                   ),
                   const SizedBox(height: 16),
                   _buildFeaturesGrid(),
+                  const SizedBox(height: 28),
+                  _buildProductReviewsSection(),
                   const SizedBox(height: 120), // Spacing for floating bottom bar
                 ],
               ),
@@ -106,6 +111,120 @@ class _ItemDetailsViewState extends State<ItemDetailsView> {
       bottomSheet: _buildBottomActions(context, totalPrice),
     );
   }
+
+  Widget _buildProductReviewsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Customer Reviews",
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppTheme.border),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text("Write a Product Review", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              const SizedBox(height: 8),
+              Row(
+                children: List.generate(5, (index) {
+                  final star = index + 1;
+                  return IconButton(
+                    onPressed: () => setState(() => _selectedRating = star),
+                    icon: Icon(
+                      LucideIcons.star,
+                      color: star <= _selectedRating ? Colors.amber : Colors.grey.shade300,
+                      size: 22,
+                    ),
+                  );
+                }),
+              ),
+              TextField(
+                controller: _reviewCommentController,
+                maxLines: 2,
+                decoration: InputDecoration(
+                  hintText: 'Share your feedback about this product...',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              const SizedBox(height: 12),
+              _isSubmittingReview
+                  ? const Center(child: CircularProgressIndicator())
+                  : CustomButton(
+                      text: 'Submit Product Review',
+                      onPressed: _submitProductReview,
+                    ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  final _reviewCommentController = TextEditingController();
+  int _selectedRating = 5;
+  bool _isSubmittingReview = false;
+
+  Future<void> _submitProductReview() async {
+    final authProvider = context.read<AuthProvider>();
+    if (!authProvider.isAuthenticated) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please log in first to write a product review.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginView()),
+      );
+      return;
+    }
+
+    if (_reviewCommentController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please write a review')));
+      return;
+    }
+    setState(() => _isSubmittingReview = true);
+    try {
+      final apiService = ApiService();
+      final res = await apiService.createReview(
+        productId: widget.item.id,
+        rating: _selectedRating,
+        comment: _reviewCommentController.text.trim(),
+        targetType: 'PRODUCT',
+      );
+      _reviewCommentController.clear();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.amber.shade900,
+            content: Text(res['message'] ?? 'Review submitted! Pending admin approval.'),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSubmittingReview = false);
+    }
+  }
+
 
   Widget _buildSliverAppBar(BuildContext context) {
     return SliverAppBar(

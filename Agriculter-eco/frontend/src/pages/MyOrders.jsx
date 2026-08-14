@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import api from "../lib/api";
 import { FiShoppingBag, FiTruck, FiCheckCircle, FiClock, FiSmartphone, FiArrowRight, FiShield, FiAlertTriangle } from "react-icons/fi";
+import { resolveMediaUrl } from "../lib/media";
 
 const MyOrders = () => {
   const { data: orders, isLoading } = useQuery({
@@ -101,7 +102,7 @@ const MyOrders = () => {
                   {order.items?.map((item) => (
                     <div key={item.id} className="flex items-center gap-3 bg-[color:var(--surface-soft)] p-3 rounded-2xl border border-[color:var(--border-color)]">
                       <img
-                        src={item.product?.images?.[0] || "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=100&auto=format"}
+                        src={resolveMediaUrl(item.product?.images?.[0]) || "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=100&auto=format"}
                         alt={item.product?.name}
                         className="w-12 h-12 rounded-xl object-cover"
                       />

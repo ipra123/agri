@@ -7,6 +7,7 @@ import {
   FiArrowLeft, FiShield, FiLock, FiSmartphone,
   FiMapPin, FiAlertCircle, FiCheckCircle, FiTag, FiShoppingBag
 } from "react-icons/fi";
+import { resolveMediaUrl } from "../lib/media";
 
 const Checkout = () => {
   const { items, getTotal, clearCart } = useCartStore();
@@ -247,7 +248,7 @@ const Checkout = () => {
             <div className="space-y-4 max-h-72 overflow-y-auto pr-1">
               {items.map((item) => (
                 <div key={item.id} className="flex items-center gap-3">
-                  <img src={item.images?.[0]} alt={item.name} className="w-12 h-12 rounded-xl object-cover border border-[color:var(--border-color)]" />
+                  <img src={resolveMediaUrl(item.images?.[0])} alt={item.name} className="w-12 h-12 rounded-xl object-cover border border-[color:var(--border-color)]" />
                   <div className="flex-1 text-xs">
                     <p className="font-bold text-[color:var(--text-main)] line-clamp-1">{item.name}</p>
                     <p className="text-[color:var(--text-muted)]">{item.quantity} x ${item.price}</p>

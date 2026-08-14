@@ -4,11 +4,15 @@ import prisma from "../lib/prisma.js";
 export const protect = async (req, res, next) => {
   let token;
 
-  if (req.cookies.token) {
+  if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
+    token = req.headers.authorization.split(" ")[1];
+  } else if (req.cookies?.token) {
     token = req.cookies.token;
+  } else if (req.cookies?.auth_token) {
+    token = req.cookies.auth_token;
   }
 
-  if (!token) {
+  if (!token || token === "null" || token === "undefined") {
     return res.status(401).json({ message: "Not authorized, no token" });
   }
 
@@ -34,6 +38,11 @@ export const protect = async (req, res, next) => {
         approvedAt: true,
       },
     });
+
+    if (!req.user) {
+      return res.status(401).json({ message: "Not authorized, user account not found" });
+    }
+
     next();
   } catch (error) {
     console.error(error);

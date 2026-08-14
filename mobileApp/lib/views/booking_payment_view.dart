@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/custom_button.dart';
 import '../services/api_service.dart';
 import '../models/booking_model.dart';
+import '../providers/auth_provider.dart';
+import 'auth/login_view.dart';
 
 class BookingPaymentView extends StatefulWidget {
   final BookingModel booking;
@@ -258,6 +261,21 @@ class _BookingPaymentViewState extends State<BookingPaymentView> {
 
   Future<void> _handlePaymentSubmit() async {
     if (!_formKey.currentState!.validate()) return;
+
+    final authProvider = context.read<AuthProvider>();
+    if (!authProvider.isAuthenticated) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please log in first to process your payment.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginView()),
+      );
+      return;
+    }
 
     final payAmt = double.parse(_amountController.text);
 
