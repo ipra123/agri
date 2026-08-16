@@ -1,8 +1,33 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import api from "../../lib/api";
 import toast from "react-hot-toast";
-import { FiRefreshCw, FiCheckCircle, FiLoader, FiAlertCircle, FiTrash2, FiPlus, FiX, FiEye, FiDollarSign } from "react-icons/fi";
+import {
+  FiRefreshCw,
+  FiCheckCircle,
+  FiLoader,
+  FiAlertCircle,
+  FiPlus,
+  FiX,
+  FiDollarSign,
+  FiTrendingUp,
+  FiPieChart,
+} from "react-icons/fi";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  Legend,
+} from "recharts";
+
+const CHART_COLORS = ["#10b981", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#14b8a6", "#f97316"];
 
 const AdminOrders = () => {
   const queryClient = useQueryClient();
@@ -35,7 +60,7 @@ const AdminOrders = () => {
     queryFn: async () => {
       const { data } = await api.get("/admin/users");
       return data;
-    }
+    },
   });
 
   const { data: products } = useQuery({
@@ -43,8 +68,39 @@ const AdminOrders = () => {
     queryFn: async () => {
       const { data } = await api.get("/products");
       return data;
-    }
+    },
   });
+
+  // ---- Chart data (categories ordered + order rate over time) ----
+  const categoryData = useMemo(() => {
+    if (!orders?.length) return [];
+    const map = {};
+    orders.forEach((order) => {
+      order.items?.forEach((item) => {
+        const cat =
+          item.product?.category?.name ||
+          item.product?.category ||
+          item.product?.supplier?.supplierBusinessName ||
+          "Other";
+        const qty = item.quantity || 0;
+        map[cat] = (map[cat] || 0) + qty;
+      });
+    });
+    return Object.entries(map).map(([name, value]) => ({ name, value }));
+  }, [orders]);
+
+  const orderRateData = useMemo(() => {
+    if (!orders?.length) return [];
+    const map = {};
+    orders.forEach((order) => {
+      const date = new Date(order.createdAt).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
+      map[date] = (map[date] || 0) + 1;
+    });
+    return Object.entries(map).map(([date, count]) => ({ date, count }));
+  }, [orders]);
 
   const createOrderMutation = useMutation({
     mutationFn: (data) => api.post("/orders", data),
@@ -56,7 +112,7 @@ const AdminOrders = () => {
     },
     onError: (err) => {
       toast.error(err?.response?.data?.message || "Failed to create order");
-    }
+    },
   });
 
   const updateStatusMutation = useMutation({
@@ -67,7 +123,7 @@ const AdminOrders = () => {
     },
     onError: (err) => {
       toast.error(err?.response?.data?.message || "Failed to update order status");
-    }
+    },
   });
 
   const resolveComplaintMutation = useMutation({
@@ -78,7 +134,7 @@ const AdminOrders = () => {
     },
     onError: (err) => {
       toast.error(err?.response?.data?.message || "Failed to resolve complaint");
-    }
+    },
   });
 
   const deleteOrderMutation = useMutation({
@@ -89,7 +145,7 @@ const AdminOrders = () => {
     },
     onError: (err) => {
       toast.error(err?.response?.data?.message || "Failed to delete order");
-    }
+    },
   });
 
   const cancelOrderWithRefundMutation = useMutation({
@@ -102,7 +158,7 @@ const AdminOrders = () => {
     },
     onError: (err) => {
       toast.error(err?.response?.data?.message || "Failed to cancel order");
-    }
+    },
   });
 
   const confirmRefundMutation = useMutation({
@@ -110,14 +166,13 @@ const AdminOrders = () => {
     onSuccess: () => {
       queryClient.invalidateQueries(["admin-orders"]);
       queryClient.invalidateQueries(["admin-refunds"]);
-      queryClient.invalidateQueries(["admin-[#finance-summary]"]);
       queryClient.invalidateQueries(["admin-finance-summary"]);
       toast.success("Refund confirmed!");
       setConfirmRefundModal(null);
     },
     onError: (err) => {
       toast.error(err?.response?.data?.message || "Failed to confirm refund");
-    }
+    },
   });
 
   const handleStatusChange = (order, newStatus) => {
@@ -195,11 +250,11 @@ const AdminOrders = () => {
       last4Digits: "MANUAL",
       comment,
       items: validItems,
-      isOffline: true
+      isOffline: true,
     });
   };
 
-  const pendingComplaints = orders?.filter(o => o.complaintStatus === 'PENDING')?.length || 0;
+  const pendingComplaints = orders?.filter((o) => o.complaintStatus === "PENDING")?.length || 0;
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
@@ -235,6 +290,55 @@ const AdminOrders = () => {
         </div>
       )}
 
+      {/* ===== Analytics: Category breakdown + Order rate ===== */}
+      {!isLoading && !error && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-[color:var(--bg-card-solid)] border border-[color:var(--border-color)] rounded-2xl p-6 shadow-sm">
+            <div className="flex items-center gap-2 mb-4">
+              <FiPieChart className="text-[color:var(--primary)] text-xl" />
+              <h3 className="text-lg font-bold text-[color:var(--text-main)]">Orders by Category</h3>
+              <span className="text-xs text-[color:var(--text-muted)] ml-auto">🥧 breakdown</span>
+            </div>
+            {categoryData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={260}>
+                <PieChart>
+                  <Pie data={categoryData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label>
+                    {categoryData.map((entry, index) => (
+                      <Cell key={entry.name} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-center text-[color:var(--text-muted)] text-sm py-16">No category data yet.</p>
+            )}
+          </div>
+
+          <div className="bg-[color:var(--bg-card-solid)] border border-[color:var(--border-color)] rounded-2xl p-6 shadow-sm">
+            <div className="flex items-center gap-2 mb-4">
+              <FiTrendingUp className="text-[color:var(--primary)] text-xl" />
+              <h3 className="text-lg font-bold text-[color:var(--text-main)]">Order Rate</h3>
+              <span className="text-xs text-[color:var(--text-muted)] ml-auto">📈 daily trend</span>
+            </div>
+            {orderRateData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={260}>
+                <LineChart data={orderRateData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                  <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="count" stroke="#10b981" strokeWidth={3} dot={{ r: 4 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-center text-[color:var(--text-muted)] text-sm py-16">No order data yet.</p>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Loading State */}
       {isLoading ? (
         <div className="flex items-center justify-center h-64">
@@ -249,156 +353,159 @@ const AdminOrders = () => {
           Failed to load orders. Please try again.
         </div>
       ) : (
-        <div className="bg-[color:var(--bg-card-solid)] border border-[color:var(--border-color)] rounded-2xl overflow-hidden shadow-sm">
-          <div className="p-6 border-b border-[color:var(--border-color)]">
-            <h3 className="text-lg font-bold text-[color:var(--text-main)]">
-              All Orders {orders?.length > 0 && `(${orders.length})`}
-            </h3>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead className="bg-[color:var(--surface-soft)] border-b border-[color:var(--border-color)]">
-                <tr>
-                  <th className="p-6 text-[color:var(--primary)] uppercase text-xs font-bold tracking-wider">Order ID</th>
-                  <th className="p-6 text-[color:var(--primary)] uppercase text-xs font-bold tracking-wider">Customer</th>
-                  <th className="p-6 text-[color:var(--primary)] uppercase text-xs font-bold tracking-wider">Amount</th>
-                  <th className="p-6 text-[color:var(--primary)] uppercase text-xs font-bold tracking-wider">Status</th>
-                  <th className="p-6 text-[color:var(--primary)] uppercase text-xs font-bold tracking-wider">Complaints</th>
-                  <th className="p-6 text-[color:var(--primary)] uppercase text-xs font-bold tracking-wider">Cancellation</th>
-                  <th className="p-6 text-[color:var(--primary)] uppercase text-xs font-bold tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[color:var(--border-color)]">
-                {orders?.length > 0 ? (
-                  orders.map((order) => (
-                    <tr key={order.id} className="hover:bg-[color:var(--surface-soft)] transition-all">
-                      <td className="p-6 font-mono text-[color:var(--text-muted)] text-sm">#{order.id.slice(0, 8)}</td>
-                      <td className="p-6">
-                        <div className="text-[color:var(--text-main)] font-semibold text-sm">{order.user?.name || "Unknown"}</div>
-                        <div className="text-[color:var(--text-muted)] text-xs">{order.user?.email || "-"}</div>
-                      </td>
-                      <td className="p-6 text-[color:var(--text-main)] font-bold">${parseFloat(order.totalAmount || 0).toFixed(2)}</td>
-                      <td className="p-6">
-                        <select
-                          className={`bg-[color:var(--surface-soft)] border border-[color:var(--border-color)] rounded-lg px-3 py-2 text-xs font-bold outline-none cursor-pointer transition-all ${order.status === 'DELIVERED' ? 'text-emerald-500' :
-                            order.status === 'PENDING' ? 'text-blue-500' : 'text-[color:var(--text-muted)]'
-                            }`}
-                          value={order.status}
-                          onChange={(e) => handleStatusChange(order, e.target.value)}
-                          disabled={updateStatusMutation.isPending || order.refund?.status === "REFUNDED"}
-                        >
-                          <option value="PENDING" className="bg-[color:var(--bg-card-solid)] text-[color:var(--text-main)]">PENDING</option>
-                          <option value="SHIPPED" className="bg-[color:var(--bg-card-solid)] text-[color:var(--text-main)]">SHIPPED</option>
-                          <option value="DELIVERED" className="bg-[color:var(--bg-card-solid)] text-[color:var(--text-main)]">DELIVERED</option>
-                          <option value="CANCELLED" className="bg-[color:var(--bg-card-solid)] text-[color:var(--text-main)]">CANCELLED</option>
-                        </select>
-                        {order.refund?.status === "REFUNDED" && (
-                          <div className="text-[10px] text-emerald-400 mt-1 font-semibold">Locked (Refunded)</div>
-                        )}
-                      </td>
-                      <td className="p-6">
-                        {order.comment ? (
-                          <div className="flex flex-col gap-2">
-                            <span className={`inline-flex text-[10px] px-2 py-0.5 rounded-full font-bold uppercase w-fit ${order.complaintStatus === 'RESOLVED' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500 animate-pulse'
-                              }`}>
-                              {order.complaintStatus}
-                            </span>
-                            <p className="text-xs text-[color:var(--text-muted)] line-clamp-2 italic max-w-[200px]">"{order.comment}"</p>
-                          </div>
-                        ) : (
-                          <span className="text-[color:var(--text-muted)] text-xs">None</span>
-                        )}
-                      </td>
-                      <td className="p-6">
-                        {order.status === "CANCELLED" ? (
-                          <div className="flex flex-col gap-1">
-                            <span className="inline-flex w-fit rounded-full border border-red-500/20 bg-red-500/10 px-2.5 py-1 text-[10px] font-black uppercase text-red-500">
-                              {order.refund?.status || "CANCELLED"}
-                            </span>
-                            <p className="max-w-[220px] text-[10px] text-[color:var(--text-muted)] line-clamp-2">
-                              {order.refund?.reason || "Cancelled order"}
-                            </p>
-                          </div>
-                        ) : (
-                          <span className="text-[10px] text-[color:var(--text-muted)]">-</span>
-                        )}
-                      </td>
-                      <td className="p-6">
-                        <div className="flex gap-2 items-center flex-wrap">
-                          <button
-                            onClick={() => setViewingOrder(order)}
-                            className="flex items-center gap-1 bg-blue-500/10 text-blue-400 px-3 py-1 rounded-lg text-xs font-bold hover:bg-blue-500/20 transition-all"
-                            title="View Payment Details"
-                          >
-                            <FiEye size={12} /> View
-                          </button>
+        <div className="space-y-4">
+          <h3 className="text-base font-bold text-[color:var(--text-main)]">
+            All Orders {orders?.length > 0 && `(${orders.length})`}
+          </h3>
 
-                          {/* Conditional Money Returned button */}
-                          {order.status === "CANCELLED" && order.refund?.status === "PENDING" && (
-                            <button
-                              onClick={() => {
-                                setConfirmRefundModal(order.refund);
-                                setCancelAmount(order.refund.amount);
-                                setCancelReason(order.refund.reason || "");
-                                setCancelRefundedNow(true);
-                              }}
-                              className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-lg text-xs font-bold hover:bg-emerald-500/20 transition-all flex items-center gap-1"
-                              title="Confirm Money Returned to Customer"
-                            >
-                              <FiDollarSign size={12} /> Money Returned
-                            </button>
-                          )}
-                          {order.comment && order.complaintStatus === 'PENDING' && (
-                            <>
-                              <button
-                                onClick={() => resolveComplaintMutation.mutate({ id: order.id, resolution: 'REFUND' })}
-                                disabled={resolveComplaintMutation.isPending}
-                                className="bg-red-500/10 text-red-500 px-3 py-1 rounded-lg text-xs font-bold hover:bg-red-500/20 transition-all flex items-center gap-1 disabled:opacity-50"
-                              >
-                                {resolveComplaintMutation.isPending ? <FiLoader className="animate-spin" size={12} /> : <FiRefreshCw size={12} />}
-                                Refund
-                              </button>
-                              <button
-                                onClick={() => resolveComplaintMutation.mutate({ id: order.id, resolution: 'REPLACE' })}
-                                disabled={resolveComplaintMutation.isPending}
-                                className="bg-[color:var(--primary)]/10 text-[color:var(--primary)] px-3 py-1 rounded-lg text-xs font-bold hover:bg-[color:var(--primary)]/20 transition-all flex items-center gap-1 disabled:opacity-50"
-                              >
-                                {resolveComplaintMutation.isPending ? <FiLoader className="animate-spin" size={12} /> : <FiCheckCircle size={12} />}
-                                Replace
-                              </button>
-                            </>
-                          )}
-                          <button
-                            onClick={() => window.confirm("Delete this order?") && deleteOrderMutation.mutate(order.id)}
-                            disabled={deleteOrderMutation.isPending}
-                            className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
-                            title="Delete Order"
-                          >
-                            <FiTrash2 />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="6" className="p-20 text-center text-[color:var(--text-muted)] italic">
-                      No orders found in the system.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+          {orders?.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+              {orders.map((order) => (
+                <div
+                  key={order.id}
+                  className="bg-[color:var(--bg-card-solid)] border border-[color:var(--border-color)] rounded-2xl p-5 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col gap-4"
+                >
+                  {/* Header: order id + amount */}
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-[10px] uppercase tracking-widest text-[color:var(--text-muted)] font-bold">Order ID</p>
+                      <p className="font-mono font-bold text-[color:var(--text-main)] text-sm">#{order.id.slice(0, 8)}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[10px] uppercase tracking-widest text-[color:var(--text-muted)] font-bold">Total Amount</p>
+                      <p className="text-[color:var(--text-main)] font-black text-lg">${parseFloat(order.totalAmount || 0).toFixed(2)}</p>
+                    </div>
+                  </div>
+
+                  {/* Customer */}
+                  <div>
+                    <p className="text-[10px] uppercase tracking-widest text-[color:var(--text-muted)] font-bold">👤 Customer</p>
+                    <p className="text-[color:var(--text-main)] font-semibold text-xs mt-0.5">{order.user?.name || "Unknown"}</p>
+                    <p className="text-[color:var(--text-muted)] text-[11px]">{order.user?.email || "-"}</p>
+                  </div>
+
+                  {/* Status */}
+                  <div>
+                    <p className="text-[10px] uppercase tracking-widest text-[color:var(--text-muted)] font-bold mb-1">Order Status</p>
+                    <select
+                      className={`w-full bg-[color:var(--surface-soft)] border border-[color:var(--border-color)] rounded-lg px-2.5 py-1.5 text-[11px] font-bold outline-none cursor-pointer transition-all ${
+                        order.status === "DELIVERED"
+                          ? "text-emerald-500"
+                          : order.status === "PENDING"
+                          ? "text-blue-500"
+                          : "text-[color:var(--text-muted)]"
+                      }`}
+                      value={order.status}
+                      onChange={(e) => handleStatusChange(order, e.target.value)}
+                      disabled={updateStatusMutation.isPending || order.refund?.status === "REFUNDED"}
+                    >
+                      <option value="PENDING" className="bg-[color:var(--bg-card-solid)] text-[color:var(--text-main)]">PENDING</option>
+                      <option value="SHIPPED" className="bg-[color:var(--bg-card-solid)] text-[color:var(--text-main)]">SHIPPED</option>
+                      <option value="DELIVERED" className="bg-[color:var(--bg-card-solid)] text-[color:var(--text-main)]">DELIVERED</option>
+                      <option value="CANCELLED" className="bg-[color:var(--bg-card-solid)] text-[color:var(--text-main)]">CANCELLED</option>
+                    </select>
+                    {order.status === "CANCELLED" && (
+                      <div className="text-[10px] mt-1 font-semibold text-red-400">🚫 {order.refund?.status || "CANCELLED"}</div>
+                    )}
+                    {order.refund?.status === "REFUNDED" && (
+                      <div className="text-[10px] text-emerald-400 mt-0.5 font-semibold">🔒 Locked (Refunded)</div>
+                    )}
+                  </div>
+
+                  {/* Feedback */}
+                  <div>
+                    <p className="text-[10px] uppercase tracking-widest text-[color:var(--text-muted)] font-bold mb-1">Customer Feedback</p>
+                    {order.comment ? (
+                      <div className="flex flex-col gap-1.5">
+                        <span
+                          className={`inline-flex text-[9px] px-2 py-0.5 rounded-full font-bold uppercase w-fit ${
+                            order.complaintStatus === "RESOLVED"
+                              ? "bg-emerald-500/10 text-emerald-500"
+                              : "bg-red-500/10 text-red-500 animate-pulse"
+                          }`}
+                        >
+                          {order.complaintStatus === "RESOLVED" ? "✅ " : "⚠️ "}
+                          {order.complaintStatus}
+                        </span>
+                        <p className="text-[11px] text-[color:var(--text-muted)] line-clamp-2 italic">"{order.comment}"</p>
+                      </div>
+                    ) : (
+                      <span className="text-[color:var(--text-muted)] text-[11px]">None</span>
+                    )}
+                  </div>
+
+                  {/* Manage: actions */}
+                  <div className="pt-3 border-t border-[color:var(--border-color)] flex gap-1.5 items-center flex-wrap">
+                    <button
+                      onClick={() => setViewingOrder(order)}
+                      className="w-8 h-8 flex items-center justify-center bg-blue-500/10 text-blue-400 rounded-lg hover:bg-blue-500/20 transition-all text-base"
+                      title="View order"
+                    >
+                      🔍
+                    </button>
+                    <button
+                      onClick={() => window.confirm("Delete this order?") && deleteOrderMutation.mutate(order.id)}
+                      disabled={deleteOrderMutation.isPending}
+                      className="w-8 h-8 flex items-center justify-center bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-all text-base disabled:opacity-50"
+                      title="Delete order"
+                    >
+                      ❌
+                    </button>
+
+                    {order.status === "CANCELLED" && order.refund?.status === "PENDING" && (
+                      <button
+                        onClick={() => {
+                          setConfirmRefundModal(order.refund);
+                          setCancelAmount(order.refund.amount);
+                          setCancelReason(order.refund.reason || "");
+                          setCancelRefundedNow(true);
+                        }}
+                        className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1.5 rounded-lg text-[11px] font-bold hover:bg-emerald-500/20 transition-all flex items-center gap-1"
+                        title="Confirm money returned to customer"
+                      >
+                        <FiDollarSign size={12} /> Refunded?
+                      </button>
+                    )}
+
+                    {order.comment && order.complaintStatus === "PENDING" && (
+                      <>
+                        <button
+                          onClick={() => resolveComplaintMutation.mutate({ id: order.id, resolution: "REFUND" })}
+                          disabled={resolveComplaintMutation.isPending}
+                          className="bg-red-500/10 text-red-500 px-2.5 py-1.5 rounded-lg text-[11px] font-bold hover:bg-red-500/20 transition-all flex items-center gap-1 disabled:opacity-50"
+                        >
+                          {resolveComplaintMutation.isPending ? <FiLoader className="animate-spin" size={12} /> : "💸"}
+                          Refund
+                        </button>
+                        <button
+                          onClick={() => resolveComplaintMutation.mutate({ id: order.id, resolution: "REPLACE" })}
+                          disabled={resolveComplaintMutation.isPending}
+                          className="bg-[color:var(--primary)]/10 text-[color:var(--primary)] px-2.5 py-1.5 rounded-lg text-[11px] font-bold hover:bg-[color:var(--primary)]/20 transition-all flex items-center gap-1 disabled:opacity-50"
+                        >
+                          {resolveComplaintMutation.isPending ? <FiLoader className="animate-spin" size={12} /> : <FiCheckCircle size={12} />}
+                          Replace
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-[color:var(--bg-card-solid)] border border-[color:var(--border-color)] rounded-2xl p-20 text-center text-[color:var(--text-muted)] italic shadow-sm">
+              No orders found in the system.
+            </div>
+          )}
         </div>
       )}
-      {/* Payment Details View Modal */}
+
+      {/* Payment Details View Modal — horizontal layout */}
       {viewingOrder && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex justify-center items-start z-[2000] p-10 overflow-y-auto">
-          <div className="w-full max-w-2xl bg-[color:var(--bg-card-solid)] border border-[color:var(--border-color)] rounded-3xl p-10 shadow-2xl animate-in zoom-in-95 duration-300">
-            <div className="flex justify-between items-center mb-8">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex justify-center items-start z-[2000] p-6 overflow-y-auto">
+          <div className="w-full max-w-6xl bg-[color:var(--bg-card-solid)] border border-[color:var(--border-color)] rounded-3xl p-8 shadow-2xl animate-in zoom-in-95 duration-300">
+            <div className="flex justify-between items-center mb-6">
               <div>
-                <h3 className="text-2xl font-bold text-[color:var(--text-main)]">Order Details</h3>
+                <h3 className="text-2xl font-bold text-[color:var(--text-main)]">📦 Order Details</h3>
                 <p className="text-[color:var(--text-muted)] text-sm mt-1">#{viewingOrder.id.slice(0, 8).toUpperCase()}</p>
               </div>
               <button onClick={() => setViewingOrder(null)} className="p-2 hover:bg-[color:var(--surface-soft)] rounded-full text-[color:var(--text-muted)]">
@@ -406,11 +513,14 @@ const AdminOrders = () => {
               </button>
             </div>
 
-            <div className="space-y-6">
+            {/* Horizontal 3-column layout */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               {/* Order Summary */}
-              <div className="bg-[color:var(--surface-soft)] rounded-2xl p-6 border border-[color:var(--border-color)] space-y-3">
-                <h4 className="text-[color:var(--primary)] font-bold text-xs uppercase tracking-widest mb-4">Order Summary</h4>
-                <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="bg-[color:var(--surface-soft)] rounded-2xl p-5 border border-[color:var(--border-color)] space-y-3">
+                <h4 className="text-[color:var(--primary)] font-bold text-xs uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                  🧑‍💼 Summary
+                </h4>
+                <div className="space-y-2.5 text-xs">
                   <div>
                     <span className="text-[color:var(--text-muted)]">Customer:</span>
                     <p className="text-[color:var(--text-main)] font-semibold mt-0.5">{viewingOrder.user?.name || "N/A"}</p>
@@ -420,48 +530,46 @@ const AdminOrders = () => {
                     <p className="text-[color:var(--text-main)] font-semibold mt-0.5">{viewingOrder.user?.email || "N/A"}</p>
                   </div>
                   <div>
-                    <span className="text-[color:var(--text-muted)]">Total Amount:</span>
+                    <span className="text-[color:var(--text-muted)]">💰 Total:</span>
                     <p className="text-[color:var(--primary)] font-bold text-lg mt-0.5">${parseFloat(viewingOrder.totalAmount || 0).toFixed(2)}</p>
                   </div>
                   <div>
-                    <span className="text-[color:var(--text-muted)]">Status:</span>
+                    <span className="text-[color:var(--text-muted)]">📌 Status:</span>
                     <p className="text-[color:var(--text-main)] font-semibold mt-0.5">{viewingOrder.status}</p>
                   </div>
                   <div>
-                    <span className="text-[color:var(--text-muted)]">Payment Method:</span>
-                    <p className="text-[color:var(--text-main)] font-semibold mt-0.5">{viewingOrder.paymentMethod || "N/A"}</p>
+                    <span className="text-[color:var(--text-muted)]">💳 Payment:</span>
+                    <p className={`font-bold mt-0.5 ${["PAID", "FULLY_PAID", "DEPOSIT_PAID"].includes(viewingOrder.paymentStatus) ? "text-emerald-400" : "text-red-400"}`}>
+                      {viewingOrder.paymentStatus}
+                    </p>
                   </div>
                   <div>
-                    <span className="text-[color:var(--text-muted)]">Payment Status:</span>
-                    <p className={`font-bold mt-0.5 ${['PAID', 'FULLY_PAID', 'DEPOSIT_PAID'].includes(viewingOrder.paymentStatus) ? 'text-emerald-400' : 'text-red-400'}`}>{viewingOrder.paymentStatus}</p>
-                  </div>
-                  <div className="col-span-2">
-                    <span className="text-[color:var(--text-muted)]">Shipping Address:</span>
+                    <span className="text-[color:var(--text-muted)]">🏠 Ship to:</span>
                     <p className="text-[color:var(--text-main)] font-semibold mt-0.5">{viewingOrder.shippingAddress || "N/A"}</p>
                   </div>
                   <div>
-                    <span className="text-[color:var(--text-muted)]">Placed On:</span>
+                    <span className="text-[color:var(--text-muted)]">🗓️ Placed:</span>
                     <p className="text-[color:var(--text-main)] font-semibold mt-0.5">{new Date(viewingOrder.createdAt).toLocaleString()}</p>
                   </div>
                 </div>
               </div>
 
               {/* Order Items & Supplier Attribution */}
-              <div className="bg-[color:var(--surface-soft)] rounded-2xl p-6 border border-[color:var(--border-color)] space-y-4 text-left">
-                <h4 className="text-[color:var(--primary)] font-bold text-xs uppercase tracking-widest">Ordered Items & Supplier Attribution</h4>
+              <div className="bg-[color:var(--surface-soft)] rounded-2xl p-5 border border-[color:var(--border-color)] space-y-3">
+                <h4 className="text-[color:var(--primary)] font-bold text-xs uppercase tracking-widest flex items-center gap-1.5">
+                  🧾 Items & Suppliers
+                </h4>
                 {viewingOrder.items && viewingOrder.items.length > 0 ? (
-                  <div className="space-y-3">
+                  <div className="space-y-2.5 max-h-[360px] overflow-y-auto pr-1">
                     {viewingOrder.items.map((item, i) => (
-                      <div key={i} className="flex items-center justify-between p-3.5 bg-[color:var(--bg-card-solid)] border border-[color:var(--border-color)] rounded-xl text-xs">
-                        <div>
-                          <p className="text-[color:var(--text-main)] font-bold text-sm">{item.product?.name || "Agricultural Item"}</p>
-                          <p className="text-[color:var(--text-muted)] text-[11px] mt-0.5">
-                            Supplier: <span className="text-[color:var(--primary)] font-bold">{item.product?.supplier?.supplierBusinessName || item.product?.supplier?.name || "Direct Wholesale"}</span>
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-[color:var(--text-main)] font-bold">{item.quantity} x ${item.price}</p>
-                          <p className="text-[color:var(--primary)] font-extrabold text-xs mt-0.5">${(item.quantity * item.price).toFixed(2)}</p>
+                      <div key={i} className="p-3 bg-[color:var(--bg-card-solid)] border border-[color:var(--border-color)] rounded-xl text-xs">
+                        <p className="text-[color:var(--text-main)] font-bold text-sm">{item.product?.name || "Agricultural Item"}</p>
+                        <p className="text-[color:var(--text-muted)] text-[11px] mt-0.5">
+                          🚚 <span className="text-[color:var(--primary)] font-bold">{item.product?.supplier?.supplierBusinessName || item.product?.supplier?.name || "Direct Wholesale"}</span>
+                        </p>
+                        <div className="flex justify-between items-center mt-2">
+                          <span className="text-[color:var(--text-main)] font-semibold">{item.quantity} × ${item.price}</span>
+                          <span className="text-[color:var(--primary)] font-extrabold">${(item.quantity * item.price).toFixed(2)}</span>
                         </div>
                       </div>
                     ))}
@@ -472,58 +580,50 @@ const AdminOrders = () => {
               </div>
 
               {/* Payment History */}
-              <div className="bg-[color:var(--surface-soft)] rounded-2xl p-6 border border-[color:var(--border-color)] space-y-4">
-                <h4 className="text-[color:var(--primary)] font-bold text-xs uppercase tracking-widest">Payment Transactions</h4>
+              <div className="bg-[color:var(--surface-soft)] rounded-2xl p-5 border border-[color:var(--border-color)] space-y-3">
+                <h4 className="text-[color:var(--primary)] font-bold text-xs uppercase tracking-widest flex items-center gap-1.5">
+                  💳 Payment Transactions
+                </h4>
                 {viewingOrder.payments && viewingOrder.payments.length > 0 ? (
-                  <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
+                  <div className="space-y-3 max-h-[360px] overflow-y-auto pr-1">
                     {viewingOrder.payments.map((p, index) => (
-                      <div key={p.id || index} className="bg-[color:var(--bg-card-solid)] border border-[color:var(--border-color)] rounded-xl p-4 text-xs space-y-2">
+                      <div key={p.id || index} className="bg-[color:var(--bg-card-solid)] border border-[color:var(--border-color)] rounded-xl p-3 text-xs space-y-1.5">
                         <div className="flex justify-between items-center">
-                          <span className="text-[color:var(--primary)] font-bold uppercase tracking-wider">{p.type} PAYMENT</span>
-                          <span className={`px-2 py-0.5 rounded font-bold uppercase ${p.status === 'APPROVED' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
-                            {p.status}
+                          <span className="text-[color:var(--primary)] font-bold uppercase tracking-wider">{p.type} 💵</span>
+                          <span className={`px-2 py-0.5 rounded font-bold uppercase text-[10px] ${p.status === "APPROVED" ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400"}`}>
+                            {p.status === "APPROVED" ? "✅" : "⏳"} {p.status}
                           </span>
                         </div>
-                        <div className="grid grid-cols-2 gap-2 text-[color:var(--text-muted)]">
+                        <div className="grid grid-cols-2 gap-1.5 text-[color:var(--text-muted)]">
                           <div>
-                            <span className="text-[color:var(--text-muted)] block">Amount:</span>
+                            <span className="block">Amount:</span>
                             <span className="font-bold text-[color:var(--text-main)]">${parseFloat(p.amount || 0).toFixed(2)}</span>
                           </div>
                           <div>
-                            <span className="text-[color:var(--text-muted)] block">Method:</span>
+                            <span className="block">Method:</span>
                             <span className="font-bold text-[color:var(--text-main)]">{p.method} {p.manualType ? `(${p.manualType})` : ""}</span>
                           </div>
                           {p.phoneNumber && (
                             <div>
-                              <span className="text-[color:var(--text-muted)] block">Phone Charged:</span>
+                              <span className="block">📱 Phone:</span>
                               <span className="font-semibold text-[color:var(--text-main)]">{p.phoneNumber}</span>
                             </div>
                           )}
                           <div>
-                            <span className="text-[color:var(--text-muted)] block">Date:</span>
-                            <span>{new Date(p.createdAt).toLocaleString()}</span>
+                            <span className="block">🗓️ Date:</span>
+                            <span>{new Date(p.createdAt).toLocaleDateString()}</span>
                           </div>
                         </div>
-                        {p.paymentInfo && (
-                          <div className="pt-2 border-t border-[color:var(--border-color)]">
-                            <span className="text-[color:var(--text-muted)] block mb-1">Details/Proof Info:</span>
-                            <pre className="bg-[color:var(--surface-soft)] border border-[color:var(--border-color)] rounded-lg p-2 font-mono text-[10px] text-[color:var(--primary)] overflow-x-auto max-h-32">
-                              {JSON.stringify(p.paymentInfo, null, 2)}
-                            </pre>
-                          </div>
-                        )}
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-6 text-[color:var(--text-muted)] text-sm">
-                    No payment records found for this order.
-                  </div>
+                  <div className="text-center py-6 text-[color:var(--text-muted)] text-sm">No payment records found for this order.</div>
                 )}
               </div>
             </div>
 
-            <div className="mt-8 flex justify-end">
+            <div className="mt-6 flex justify-end">
               <button
                 onClick={() => setViewingOrder(null)}
                 className="px-8 py-3 bg-[color:var(--surface-soft)] border border-[color:var(--border-color)] text-[color:var(--text-main)] font-bold rounded-xl hover:border-[color:var(--primary)] transition-all"
@@ -661,7 +761,7 @@ const AdminOrders = () => {
                           onClick={() => handleRemoveProductRow(index)}
                           className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg transition-all self-center"
                         >
-                          <FiTrash2 size={14} />
+                          ❌
                         </button>
                       )}
                     </div>
@@ -697,13 +797,14 @@ const AdminOrders = () => {
           </div>
         </div>
       )}
+
       {/* ===== Confirm Money Returned Modal ===== */}
       {confirmRefundModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex justify-center items-center z-[3000] p-6">
           <div className="w-full max-w-md bg-[color:var(--bg-card-solid)] border border-emerald-500/30 rounded-3xl p-8 shadow-2xl animate-in zoom-in-95 duration-300">
             <div className="flex justify-between items-center mb-6">
               <div>
-                <h3 className="text-xl font-bold text-[color:var(--text-main)]">Money Returned</h3>
+                <h3 className="text-xl font-bold text-[color:var(--text-main)]">💵 Money Returned</h3>
                 <p className="text-[color:var(--text-muted)] text-xs mt-0.5">Confirm customer refund payment receipt.</p>
               </div>
               <button onClick={() => setConfirmRefundModal(null)} className="p-2 hover:bg-[color:var(--surface-soft)] rounded-full text-[color:var(--text-muted)]">
@@ -741,7 +842,7 @@ const AdminOrders = () => {
                       onChange={() => setCancelRefundedNow(true)}
                       className="accent-[color:var(--primary)]"
                     />
-                    Yes (Confirm REFUNDED)
+                    ✅ Yes (Confirm REFUNDED)
                   </label>
                   <label className="flex items-center gap-2 text-sm text-[color:var(--text-main)] cursor-pointer">
                     <input
@@ -751,7 +852,7 @@ const AdminOrders = () => {
                       onChange={() => setCancelRefundedNow(false)}
                       className="accent-[color:var(--primary)]"
                     />
-                    No (Keep PENDING)
+                    ⏳ No (Keep PENDING)
                   </label>
                 </div>
               </div>
@@ -802,5 +903,3 @@ const AdminOrders = () => {
 };
 
 export default AdminOrders;
-
-

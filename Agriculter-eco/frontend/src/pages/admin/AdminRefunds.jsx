@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import api from "../../lib/api";
 import toast from "react-hot-toast";
-import { FiRefreshCw, FiLoader, FiAlertCircle, FiCheckCircle, FiX, FiDollarSign, FiClock, FiEdit2, FiTrash2, FiAlertTriangle } from "react-icons/fi";
+import { FiLoader, FiX } from "react-icons/fi";
 
 const AdminRefunds = () => {
   const queryClient = useQueryClient();
@@ -12,12 +12,7 @@ const AdminRefunds = () => {
   const [confirmRefundType, setConfirmRefundType] = useState("FULL");
   const [confirmReason, setConfirmReason] = useState("");
 
-  const [editingRefund, setEditingRefund] = useState(null);
-  const [editAmount, setEditAmount] = useState("");
-  const [editRefundType, setEditRefundType] = useState("FULL");
-  const [editReason, setEditReason] = useState("");
-
-  const { data: refunds, isLoading, error } = useQuery({
+  const { data: refunds, isLoading } = useQuery({
     queryKey: ["admin-refunds"],
     queryFn: async () => {
       const { data } = await api.get("/refunds");
@@ -36,26 +31,6 @@ const AdminRefunds = () => {
     },
     onError: (err) => {
       toast.error(err?.response?.data?.message || "Failed to process refund");
-    },
-  });
-
-  const updateRefundMutation = useMutation({
-    mutationFn: ({ id, payload }) => api.put(`/refunds/${id}`, payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries(["admin-refunds"]);
-      toast.success("Refund record updated!");
-      setEditingRefund(null);
-    },
-    onError: (err) => {
-      toast.error(err?.response?.data?.message || "Failed to update refund");
-    },
-  });
-
-  const deleteRefundMutation = useMutation({
-    mutationFn: (id) => api.delete(`/refunds/${id}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries(["admin-refunds"]);
-      toast.success("Refund record deleted!");
     },
   });
 
@@ -81,101 +56,113 @@ const AdminRefunds = () => {
     });
   };
 
+  const pendingCount = refunds?.filter((r) => r.status === "PENDING")?.length || 0;
+
   return (
     <div className="space-y-8 text-left pb-16 transition-colors duration-300">
       <div>
-        <h1 className="text-3xl font-black font-heading text-slate-900 dark:text-white">
+        <h1 className="text-3xl font-black font-heading text-[color:var(--text-main)]">
           Disputes & Refund Management
         </h1>
-        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+        <p className="text-[color:var(--text-muted)] text-sm mt-1">
           Review farmer complaints (wrong delivery, uncertified products, damaged tools) and process refund payouts.
         </p>
       </div>
 
+      {pendingCount > 0 && (
+        <div className="bg-[color:var(--primary)]/10 p-4 flex items-start gap-3 shadow-sm">
+          <span className="text-xl">⏳</span>
+          <div>
+            <p className="text-[color:var(--primary)] font-bold text-sm">{pendingCount} refund request(s) awaiting action</p>
+            <p className="text-[color:var(--text-muted)] text-xs">Process them below to close out the dispute.</p>
+          </div>
+        </div>
+      )}
+
       {isLoading ? (
-        <div className="flex items-center justify-center h-64 text-slate-400">
-          <FiLoader className="text-3xl animate-spin text-emerald-600" />
+        <div className="flex items-center justify-center h-64 text-[color:var(--text-muted)]">
+          <FiLoader className="text-3xl animate-spin text-[color:var(--primary)]" />
+        </div>
+      ) : !refunds || refunds.length === 0 ? (
+        <div className="bg-[color:var(--bg-card-solid)] p-20 text-center text-[color:var(--text-muted)] italic shadow-sm">
+          💸 No active dispute refund requests found.
         </div>
       ) : (
-        <div className="bg-white dark:bg-[#0f172a] rounded-3xl border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 dark:bg-slate-800/60 uppercase tracking-widest text-[10px] text-slate-500 dark:text-slate-400 font-extrabold border-b border-slate-200/80 dark:border-slate-800">
-                <tr>
-                  <th className="p-4">Order ID</th>
-                  <th className="p-4">Farmer Account</th>
-                  <th className="p-4">Dispute Reason</th>
-                  <th className="p-4">Refund Amount</th>
-                  <th className="p-4">Status</th>
-                  <th className="p-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-bold">
-                {refunds?.map((r) => (
-                  <tr key={r.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                    <td className="p-4 font-mono font-bold text-slate-900 dark:text-white">
-                      #{r.orderId?.slice(0, 10)}
-                    </td>
-                    <td className="p-4 text-slate-600 dark:text-slate-300">
-                      {r.order?.user?.name || "Farmer"}
-                    </td>
-                    <td className="p-4 text-slate-500 dark:text-slate-400">
-                      <span className="line-clamp-1">{r.reason || "Dispute request"}</span>
-                    </td>
-                    <td className="p-4 font-black text-slate-900 dark:text-amber-400">
-                      ${r.amount}
-                    </td>
-                    <td className="p-4">
-                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${
-                        r.status === "REFUNDED"
-                          ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                          : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                      }`}>
-                        {r.status}
-                      </span>
-                    </td>
-                    <td className="p-4 text-right">
-                      {r.status === "PENDING" ? (
-                        <button
-                          onClick={() => handleOpenConfirmModal(r)}
-                          className="px-3 py-1 bg-emerald-600 text-white font-bold text-[10px] uppercase tracking-wider rounded-xl shadow-md"
-                        >
-                          Process Refund
-                        </button>
-                      ) : (
-                        <span className="text-[10px] text-emerald-500 font-bold">Completed</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-
-            {(!refunds || refunds.length === 0) && (
-              <div className="p-12 text-center text-slate-400 text-xs font-bold">
-                No active dispute refund requests found.
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+          {refunds.map((r) => (
+            <div
+              key={r.id}
+              className="bg-[color:var(--bg-card-solid)] shadow-md hover:shadow-xl transition-all duration-300 p-5 flex flex-col gap-4"
+            >
+              {/* Header: order id + status */}
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-[color:var(--text-muted)] font-bold">Order</p>
+                  <p className="font-mono font-black text-[color:var(--text-main)] text-sm">#{r.orderId?.slice(0, 10)}</p>
+                </div>
+                <span
+                  className={`px-2.5 py-1 text-[10px] font-black uppercase ${
+                    r.status === "REFUNDED"
+                      ? "bg-[color:var(--primary)]/10 text-[color:var(--primary)]"
+                      : "bg-amber-500/10 text-amber-500"
+                  }`}
+                >
+                  {r.status === "REFUNDED" ? "✅ " : "⏳ "}
+                  {r.status}
+                </span>
               </div>
-            )}
-          </div>
+
+              {/* Farmer */}
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-[color:var(--text-muted)] font-bold">🧑‍🌾 Farmer Account</p>
+                <p className="text-[color:var(--text-main)] font-bold text-sm mt-0.5">{r.order?.user?.name || "Farmer"}</p>
+              </div>
+
+              {/* Reason */}
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-[color:var(--text-muted)] font-bold">📝 Dispute Reason</p>
+                <p className="text-[color:var(--text-muted)] text-xs mt-0.5 line-clamp-2 italic">{r.reason || "Dispute request"}</p>
+              </div>
+
+              {/* Amount */}
+              <div className="flex items-center justify-between pt-2">
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-[color:var(--text-muted)] font-bold">💰 Refund Amount</p>
+                  <p className="font-black text-[color:var(--primary)] text-lg mt-0.5">${r.amount}</p>
+                </div>
+
+                {r.status === "PENDING" ? (
+                  <button
+                    onClick={() => handleOpenConfirmModal(r)}
+                    className="px-4 py-2.5 bg-[color:var(--primary)] hover:bg-[color:var(--primary-hover)] text-white font-black text-[10px] uppercase tracking-wider shadow-md transition-all"
+                  >
+                    ⚡ Process Refund
+                  </button>
+                ) : (
+                  <span className="text-[10px] text-[color:var(--primary)] font-bold">✅ Completed</span>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
       {/* Confirm Refund Modal */}
       {confirmingRefund && (
-        <div className="fixed inset-0 z-[999] bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#0f172a] rounded-3xl p-6 sm:p-8 max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-6 text-left">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-              <h3 className="text-lg font-black font-heading text-slate-900 dark:text-white">
-                Process Farmer Refund
+        <div className="fixed inset-0 z-[999] bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[color:var(--bg-card-solid)] p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-6 text-left">
+            <div className="flex items-center justify-between pb-4">
+              <h3 className="text-lg font-black font-heading text-[color:var(--text-main)]">
+                💸 Process Farmer Refund
               </h3>
-              <button onClick={() => setConfirmingRefund(null)} className="p-2 text-slate-400 hover:text-slate-600">
+              <button onClick={() => setConfirmingRefund(null)} className="p-2 text-[color:var(--text-muted)] hover:text-[color:var(--text-main)]">
                 <FiX className="text-xl" />
               </button>
             </div>
 
             <form onSubmit={handleConfirmSubmit} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                <label className="text-xs font-bold uppercase tracking-wider text-[color:var(--text-muted)]">
                   Refund Amount ($)
                 </label>
                 <input
@@ -184,19 +171,19 @@ const AdminRefunds = () => {
                   value={confirmAmount}
                   onChange={(e) => setConfirmAmount(e.target.value)}
                   required
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-xs text-slate-900 dark:text-white font-bold focus:outline-none"
+                  className="w-full bg-[color:var(--surface-soft)] px-4 py-3 text-xs text-[color:var(--text-main)] font-bold focus:outline-none"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                <label className="text-xs font-bold uppercase tracking-wider text-[color:var(--text-muted)]">
                   Resolution Reason
                 </label>
                 <textarea
                   rows="3"
                   value={confirmReason}
                   onChange={(e) => setConfirmReason(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-3 text-xs text-slate-900 dark:text-white focus:outline-none"
+                  className="w-full bg-[color:var(--surface-soft)] p-3 text-xs text-[color:var(--text-main)] focus:outline-none"
                   required
                 />
               </div>
@@ -204,7 +191,7 @@ const AdminRefunds = () => {
               <button
                 type="submit"
                 disabled={confirmRefundMutation.isPending}
-                className="w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-widest shadow-md transition-all"
+                className="w-full py-3.5 bg-[color:var(--primary)] hover:bg-[color:var(--primary-hover)] text-white font-black text-xs uppercase tracking-widest shadow-md transition-all"
               >
                 {confirmRefundMutation.isPending ? "Confirming..." : "Approve & Confirm Refund"}
               </button>

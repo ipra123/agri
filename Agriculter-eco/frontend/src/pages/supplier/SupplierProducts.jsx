@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { AlertTriangle, Edit3, LoaderCircle, PackagePlus, Plus, Trash2, X } from "lucide-react";
 import api from "../../lib/api";
 import toast from "react-hot-toast";
-import { FiPlus, FiEdit2, FiTrash2, FiX, FiLoader, FiBox, FiAlertTriangle, FiCheckCircle } from "react-icons/fi";
 import { resolveMediaUrl } from "../../lib/media";
 
 const AGRICULTURAL_CATEGORIES = [
@@ -153,27 +153,29 @@ const SupplierProducts = () => {
   };
 
   return (
-    <div className="space-y-8 text-left pb-16 transition-colors duration-300">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-8 pb-16 text-left transition-colors duration-300">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-3xl font-black font-heading text-slate-900 dark:text-white">
+          <h1 className="text-3xl font-black font-heading text-[color:var(--text-main)]">
             My Farm Input Catalog
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-            Manage your listed seeds, fertilizers, sprayers, and irrigation inventory.
+          <p className="mt-1 text-sm text-[color:var(--text-muted)]">
+            Manage your listed seeds, fertilizers, tools, and irrigation inventory.
           </p>
         </div>
+
         <button
           onClick={() => openModal()}
-          className="px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 dark:bg-amber-500 dark:hover:bg-amber-400 text-white dark:text-slate-950 font-black text-xs uppercase tracking-widest rounded-2xl shadow-md transition-all flex items-center gap-2"
+          className="inline-flex items-center gap-2 rounded-2xl bg-[color:var(--primary)] px-6 py-3.5 text-xs font-black uppercase tracking-[0.16em] text-white shadow-md transition-all hover:bg-[color:var(--primary-hover)]"
         >
-          <FiPlus className="text-base" /> + Add New Farm Input
+          <PackagePlus size={16} />
+          Add New Farm Input
         </button>
       </div>
 
       {!isApproved && (
-        <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 text-amber-800 dark:text-amber-300 text-xs flex items-center gap-3">
-          <FiAlertTriangle className="text-xl shrink-0" />
+        <div className="flex items-start gap-3 rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4 text-sm text-amber-600">
+          <AlertTriangle className="mt-0.5 shrink-0" size={18} />
           <span>
             Your supplier profile is currently pending admin KYC approval. Once approved, your listed inputs will be visible to farmers nationwide.
           </span>
@@ -181,14 +183,14 @@ const SupplierProducts = () => {
       )}
 
       {isLoading ? (
-        <div className="flex items-center justify-center h-64 text-slate-400">
-          <FiLoader className="text-3xl animate-spin text-emerald-600" />
+        <div className="flex h-64 items-center justify-center text-[color:var(--text-muted)]">
+          <LoaderCircle className="animate-spin text-3xl text-[color:var(--primary)]" />
         </div>
       ) : (
-        <div className="bg-white dark:bg-[#0f172a] rounded-3xl border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-sm">
+        <div className="overflow-hidden rounded-3xl border border-[color:var(--border-color)] bg-[color:var(--bg-card-solid)] shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 dark:bg-slate-800/60 uppercase tracking-widest text-[10px] text-slate-500 dark:text-slate-400 font-extrabold border-b border-slate-200/80 dark:border-slate-800">
+              <thead className="border-b border-[color:var(--border-color)] bg-[color:var(--surface-soft)] text-[10px] font-extrabold uppercase tracking-[0.15em] text-[color:var(--primary)]">
                 <tr>
                   <th className="p-4">Input Name</th>
                   <th className="p-4">Category</th>
@@ -197,33 +199,37 @@ const SupplierProducts = () => {
                   <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-bold">
+              <tbody className="divide-y divide-[color:var(--border-color)] font-bold">
                 {data?.products?.map((p) => {
                   const isLow = p.stock < (p.lowStockThreshold || 10);
                   return (
-                    <tr key={p.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40">
-                      <td className="p-4 flex items-center gap-3">
-                        <img
-                          src={resolveMediaUrl(p.images?.[0]) || "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=100&auto=format"}
-                          alt={p.name}
-                          className="w-10 h-10 rounded-xl object-cover"
-                        />
-                        <div>
-                          <p className="font-extrabold text-slate-900 dark:text-white">{p.name}</p>
-                          <p className="text-[10px] text-slate-400 line-clamp-1">{p.description}</p>
+                    <tr key={p.id} className="transition-colors hover:bg-[color:var(--surface-soft)]">
+                      <td className="p-4">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={resolveMediaUrl(p.images?.[0]) || "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=100&auto=format"}
+                            alt={p.name}
+                            className="h-10 w-10 rounded-xl object-cover ring-1 ring-[color:var(--border-color)]"
+                          />
+                          <div>
+                            <p className="font-extrabold text-[color:var(--text-main)]">{p.name}</p>
+                            <p className="line-clamp-1 text-[10px] text-[color:var(--text-muted)]">{p.description}</p>
+                          </div>
                         </div>
                       </td>
                       <td className="p-4">
-                        <span className="px-2.5 py-1 bg-emerald-50 dark:bg-slate-800 text-emerald-700 dark:text-emerald-300 rounded-full text-[10px] font-black uppercase">
+                        <span className="inline-flex rounded-full border border-[color:var(--border-color)] bg-[color:var(--surface-soft)] px-2.5 py-1 text-[10px] font-black uppercase text-[color:var(--primary)]">
                           {p.category}
                         </span>
                       </td>
-                      <td className="p-4 text-slate-900 dark:text-amber-400 font-black">
-                        ${p.price} <span className="text-[10px] text-slate-400">/ {p.unit}</span>
+                      <td className="p-4 font-black text-[color:var(--text-main)]">
+                        ${p.price} <span className="text-[10px] text-[color:var(--text-muted)]">/ {p.unit}</span>
                       </td>
                       <td className="p-4">
-                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${
-                          isLow ? "bg-amber-500/10 text-amber-600 dark:text-amber-400" : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                        <span className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-black uppercase ${
+                          isLow
+                            ? "border border-amber-500/20 bg-amber-500/10 text-amber-600"
+                            : "border border-emerald-500/20 bg-emerald-500/10 text-emerald-600"
                         }`}>
                           {p.stock} {p.unit}s {isLow && "(Low Stock)"}
                         </span>
@@ -232,15 +238,15 @@ const SupplierProducts = () => {
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => openModal(p)}
-                            className="p-2 rounded-xl text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-800"
+                            className="rounded-xl p-2 text-blue-500 transition-colors hover:bg-[color:var(--surface-soft)]"
                           >
-                            <FiEdit2 />
+                            <Edit3 size={16} />
                           </button>
                           <button
                             onClick={() => deleteMutation.mutate(p.id)}
-                            className="p-2 rounded-xl text-red-600 hover:bg-red-50 dark:hover:bg-slate-800"
+                            className="rounded-xl p-2 text-red-500 transition-colors hover:bg-[color:var(--surface-soft)]"
                           >
-                            <FiTrash2 />
+                            <Trash2 size={16} />
                           </button>
                         </div>
                       </td>
@@ -253,60 +259,51 @@ const SupplierProducts = () => {
         </div>
       )}
 
-      {/* Add / Edit Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[999] bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-[#0f172a] rounded-3xl p-6 sm:p-8 max-w-xl w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-6 text-left max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-              <h3 className="text-lg font-black font-heading text-slate-900 dark:text-white">
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/70 p-4 backdrop-blur-md">
+          <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-3xl border border-[color:var(--border-color)] bg-[color:var(--bg-card-solid)] p-6 shadow-2xl sm:p-8">
+            <div className="flex items-center justify-between border-b border-[color:var(--border-color)] pb-4">
+              <h3 className="text-lg font-black text-[color:var(--text-main)]">
                 {editingProduct ? "Edit Input Listing" : "Add Agricultural Input"}
               </h3>
-              <button onClick={closeModal} className="p-2 text-slate-400 hover:text-slate-600">
-                <FiX className="text-xl" />
+              <button onClick={closeModal} className="rounded-xl p-2 text-[color:var(--text-muted)] hover:text-[color:var(--text-main)]">
+                <X size={20} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4 pt-4">
               <div className="space-y-1">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                  Input Name
-                </label>
+                <label className="text-[10px] font-black uppercase tracking-[0.15em] text-[color:var(--text-muted)]">Input Name</label>
                 <input
                   type="text"
                   placeholder="e.g. High-Yield Sorghum Seed 50kg"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-xs text-slate-900 dark:text-white font-bold focus:outline-none"
+                  className="w-full rounded-2xl border border-[color:var(--border-color)] bg-[color:var(--surface-soft)] px-4 py-3 text-xs font-bold text-[color:var(--text-main)] placeholder:text-[color:var(--text-muted)] focus:outline-none"
                 />
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-4">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-1">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                    Category
-                  </label>
+                  <label className="text-[10px] font-black uppercase tracking-[0.15em] text-[color:var(--text-muted)]">Category</label>
                   <select
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-xs font-bold text-slate-900 dark:text-white focus:outline-none"
+                    className="w-full rounded-2xl border border-[color:var(--border-color)] bg-[color:var(--surface-soft)] px-4 py-3 text-xs font-bold text-[color:var(--text-main)] focus:outline-none"
                   >
                     {AGRICULTURAL_CATEGORIES.map((cat) => (
-                      <option key={cat.value} value={cat.value}>
-                        {cat.label}
-                      </option>
+                      <option key={cat.value} value={cat.value}>{cat.label}</option>
                     ))}
                   </select>
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                    Unit of Measure
-                  </label>
+                  <label className="text-[10px] font-black uppercase tracking-[0.15em] text-[color:var(--text-muted)]">Unit of Measure</label>
                   <select
                     value={formData.unit}
                     onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-xs font-bold text-slate-900 dark:text-white focus:outline-none"
+                    className="w-full rounded-2xl border border-[color:var(--border-color)] bg-[color:var(--surface-soft)] px-4 py-3 text-xs font-bold text-[color:var(--text-main)] focus:outline-none"
                   >
                     {UNITS.map((u) => (
                       <option key={u} value={u}>{u}</option>
@@ -315,11 +312,9 @@ const SupplierProducts = () => {
                 </div>
               </div>
 
-              <div className="grid sm:grid-cols-3 gap-4">
+              <div className="grid gap-4 sm:grid-cols-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                    Price ($)
-                  </label>
+                  <label className="text-[10px] font-black uppercase tracking-[0.15em] text-[color:var(--text-muted)]">Price ($)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -327,68 +322,60 @@ const SupplierProducts = () => {
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                     required
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-xs font-bold text-slate-900 dark:text-white focus:outline-none"
+                    className="w-full rounded-2xl border border-[color:var(--border-color)] bg-[color:var(--surface-soft)] px-4 py-3 text-xs font-bold text-[color:var(--text-main)] placeholder:text-[color:var(--text-muted)] focus:outline-none"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                    Stock Quantity
-                  </label>
+                  <label className="text-[10px] font-black uppercase tracking-[0.15em] text-[color:var(--text-muted)]">Stock Quantity</label>
                   <input
                     type="number"
                     placeholder="50"
                     value={formData.stock}
                     onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
                     required
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-xs font-bold text-slate-900 dark:text-white focus:outline-none"
+                    className="w-full rounded-2xl border border-[color:var(--border-color)] bg-[color:var(--surface-soft)] px-4 py-3 text-xs font-bold text-[color:var(--text-main)] placeholder:text-[color:var(--text-muted)] focus:outline-none"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                    Low Stock Alert
-                  </label>
+                  <label className="text-[10px] font-black uppercase tracking-[0.15em] text-[color:var(--text-muted)]">Low Stock Alert</label>
                   <input
                     type="number"
                     placeholder="10"
                     value={formData.lowStockThreshold}
                     onChange={(e) => setFormData({ ...formData, lowStockThreshold: e.target.value })}
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-xs font-bold text-slate-900 dark:text-white focus:outline-none"
+                    className="w-full rounded-2xl border border-[color:var(--border-color)] bg-[color:var(--surface-soft)] px-4 py-3 text-xs font-bold text-[color:var(--text-main)] placeholder:text-[color:var(--text-muted)] focus:outline-none"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                  Description & Usage Guidelines
-                </label>
+                <label className="text-[10px] font-black uppercase tracking-[0.15em] text-[color:var(--text-muted)]">Description & Usage Guidelines</label>
                 <textarea
                   rows="3"
                   placeholder="Germination percentage, dosage rate per hectare..."
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-3 text-xs text-slate-900 dark:text-white focus:outline-none"
+                  className="w-full rounded-2xl border border-[color:var(--border-color)] bg-[color:var(--surface-soft)] p-3 text-xs text-[color:var(--text-main)] placeholder:text-[color:var(--text-muted)] focus:outline-none"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                  Product Image File
-                </label>
+                <label className="text-[10px] font-black uppercase tracking-[0.15em] text-[color:var(--text-muted)]">Product Image File</label>
                 <input
                   type="file"
                   accept="image/*"
                   onChange={(e) => setFormData({ ...formData, images: e.target.files })}
                   required={!editingProduct}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-3 text-xs text-slate-900 dark:text-white file:mr-4 file:rounded-xl file:border-0 file:bg-emerald-600 file:px-4 file:py-2 file:text-[10px] file:font-black file:uppercase file:tracking-[0.16em] file:text-white"
+                  className="w-full rounded-2xl border border-[color:var(--border-color)] bg-[color:var(--surface-soft)] p-3 text-xs text-[color:var(--text-main)] file:mr-4 file:rounded-xl file:border-0 file:bg-[color:var(--primary)] file:px-4 file:py-2 file:text-[10px] file:font-black file:uppercase file:tracking-[0.16em] file:text-white"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={createMutation.isPending || updateMutation.isPending}
-                className="w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 dark:bg-amber-500 dark:hover:bg-amber-400 text-white dark:text-slate-950 font-black text-xs uppercase tracking-widest shadow-md transition-all"
+                className="w-full rounded-2xl bg-[color:var(--primary)] px-4 py-3 text-xs font-black uppercase tracking-[0.16em] text-white transition-all hover:bg-[color:var(--primary-hover)] disabled:opacity-70"
               >
                 {createMutation.isPending || updateMutation.isPending
                   ? "Saving..."

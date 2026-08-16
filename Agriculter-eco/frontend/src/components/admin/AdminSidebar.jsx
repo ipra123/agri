@@ -1,28 +1,23 @@
 import { NavLink } from "react-router-dom";
 import {
-  FiGrid,
-  FiBox,
-  FiShoppingBag,
-  FiUsers,
-  FiArrowLeft,
-  FiDollarSign,
-  FiArchive,
-  FiRefreshCw,
-  FiSettings,
-  FiMessageSquare,
-} from "react-icons/fi";
+  ArrowLeftToLine,
+  CircleDollarSign,
+  LayoutGrid,
+  MessageSquareText,
+  Package2,
+  ShoppingCart,
+  Users,
+} from "lucide-react";
 import brandLogo from "../../assets/logo.png";
 
 const NAV_ITEMS = [
-  { to: "/admin", end: true, icon: <FiGrid />, label: "Overview" },
-  { to: "/admin/products", icon: <FiBox />, label: "Products" },
-  { to: "/admin/orders", icon: <FiShoppingBag />, label: "Orders" },
-  { to: "/admin/reviews", icon: <FiMessageSquare />, label: "Pending Reviews" },
-  { to: "/admin/refunds", icon: <FiRefreshCw />, label: "Cancel orders" },
-  { to: "/admin/customers", icon: <FiUsers />, label: "Customers" },
-  { to: "/admin/finance", icon: <FiDollarSign />, label: "Finance" },
-  // { to: "/admin/inventory", icon: <FiArchive />, label: "Inventory" },
-  // { to: "/admin/settings", icon: <FiSettings />, label: "Settings" },
+  { to: "/admin", end: true, icon: LayoutGrid, label: "Overview" },
+  { to: "/admin/products", icon: Package2, label: "Catalog" },
+   { to: "/admin/customers", icon: Users, label: "Customers" },
+  { to: "/admin/orders", icon: ShoppingCart, label: "Orders" },
+  { to: "/admin/reviews", icon: MessageSquareText, label: "Reviews" },
+  { to: "/admin/finance", icon: CircleDollarSign, label: "Finance" },
+  { to: "/admin/refunds", icon: CircleDollarSign, label: "Canceled Order" },
 ];
 
 const AdminSidebar = () => {
@@ -37,20 +32,22 @@ const AdminSidebar = () => {
       </div>
 
       <nav className="flex-1 space-y-2 p-4 text-left">
-        {NAV_ITEMS.map(({ to, end, icon, label }) => (
+        {NAV_ITEMS.map(({ to, end, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}
             end={end}
             className={({ isActive }) =>
-              `flex items-center gap-3 rounded-2xl px-4 py-3 text-[11px] font-black uppercase tracking-[0.18em] transition ${
+              `flex items-center gap-3  px-4 py-3 text-[11px] font-black uppercase tracking-[0.18em] transition ${
                 isActive
                   ? "bg-[color:var(--primary)] text-white shadow-lg shadow-emerald-900/10"
                   : "bg-[color:var(--surface-soft)] text-[color:var(--text-muted)] border border-[color:var(--border-color)] hover:border-[color:var(--primary)] hover:text-[color:var(--text-main)]"
               }`
             }
           >
-            <span className="text-base">{icon}</span>
+            <span className="flex h-6 w-6 items-center justify-center">
+              <Icon className="h-4 w-4" />
+            </span>
             <span>{label}</span>
           </NavLink>
         ))}
@@ -61,7 +58,7 @@ const AdminSidebar = () => {
           to="/"
           className="flex items-center gap-3 rounded-2xl bg-[color:var(--surface-soft)] border border-[color:var(--border-color)] px-4 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-[color:var(--text-muted)] transition hover:border-[color:var(--primary)] hover:text-[color:var(--primary)]"
         >
-          <FiArrowLeft className="text-base" />
+          <ArrowLeftToLine className="h-4 w-4" />
           <span>Exit to market</span>
         </NavLink>
       </div>

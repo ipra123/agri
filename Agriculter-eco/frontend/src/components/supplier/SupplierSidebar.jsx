@@ -1,13 +1,19 @@
 import { NavLink } from "react-router-dom";
-import { FiGrid, FiBox, FiShoppingBag, FiUser, FiArrowLeft, FiBriefcase } from "react-icons/fi";
+import {
+  ArrowLeftToLine,
+  Box,
+  LayoutGrid,
+  ShoppingCart,
+  UserRound,
+} from "lucide-react";
 import useAuthStore from "../../store/useAuthStore";
 import brandLogo from "../../assets/logo.png";
 
 const NAV_ITEMS = [
-  { to: "/supplier", end: true, icon: <FiGrid />, label: "Overview" },
-  { to: "/supplier/products", icon: <FiBox />, label: "My Products" },
-  { to: "/supplier/orders", icon: <FiShoppingBag />, label: "Orders" },
-  { to: "/supplier/profile", icon: <FiUser />, label: "Profile" },
+  { to: "/supplier", end: true, icon: LayoutGrid, label: "Overview" },
+  { to: "/supplier/products", icon: Box, label: "Products" },
+  { to: "/supplier/orders", icon: ShoppingCart, label: "Orders" },
+  { to: "/supplier/profile", icon: UserRound, label: "Profile" },
 ];
 
 const SupplierSidebar = () => {
@@ -31,7 +37,7 @@ const SupplierSidebar = () => {
       </div>
 
       <nav className="flex-1 space-y-2 p-4 text-left">
-        {NAV_ITEMS.map(({ to, end, icon, label }) => (
+        {NAV_ITEMS.map(({ to, end, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}
@@ -44,7 +50,9 @@ const SupplierSidebar = () => {
               }`
             }
           >
-            <span className="text-base">{icon}</span>
+            <span className="flex h-6 w-6 items-center justify-center">
+              <Icon className="h-4 w-4" />
+            </span>
             <span>{label}</span>
           </NavLink>
         ))}
@@ -55,7 +63,7 @@ const SupplierSidebar = () => {
           to="/"
           className="flex items-center gap-3 rounded-2xl bg-[color:var(--surface-soft)] border border-[color:var(--border-color)] px-4 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-[color:var(--text-muted)] transition hover:border-[color:var(--primary)] hover:text-[color:var(--primary)]"
         >
-          <FiArrowLeft className="text-base" />
+          <ArrowLeftToLine className="h-4 w-4" />
           <span>Exit to market</span>
         </NavLink>
       </div>

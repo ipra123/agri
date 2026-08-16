@@ -33,8 +33,8 @@ const ChatFileMessage = ({ msg, socketUrl }) => {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-1.5 text-slate-400 italic text-[11px] py-1.5">
-        <FiLoader className="animate-spin text-[#16a34a]" /> Loading attachment...
+      <div className="flex items-center gap-2 text-slate-400 italic text-xs py-2 px-1">
+        <FiLoader className="animate-spin text-[#16a34a]" size={13} /> Loading attachment...
       </div>
     );
   }
@@ -42,7 +42,7 @@ const ChatFileMessage = ({ msg, socketUrl }) => {
   if (!resolvedUrl) {
     if (msg.fileUrl === "indexeddb" || msg.fileUrl === "localstorage") {
       return (
-        <div className="text-slate-500 italic text-[10px] py-1 border border-dashed border-white/5 rounded px-3 bg-black/10 mt-1">
+        <div className="text-slate-500 italic text-[11px] py-1.5 border border-dashed border-white/10 rounded-xl px-3.5 bg-black/20 mt-2">
           [Attachment unavailable in browser storage]
         </div>
       );
@@ -56,11 +56,11 @@ const ChatFileMessage = ({ msg, socketUrl }) => {
 
   if (isImage) {
     return (
-      <div className="mt-2 rounded-2xl overflow-hidden border border-white/10 shadow-lg group max-w-[280px]">
+      <div className="mt-3 rounded-3xl overflow-hidden border border-white/10 shadow-2xl group max-w-[300px] ring-1 ring-black/20">
         <img
           src={resolvedUrl}
           alt={msg.fileName || "Image"}
-          className="max-w-full max-h-[220px] object-cover hover:scale-102 transition-transform duration-300 cursor-pointer w-full"
+          className="max-w-full max-h-[260px] object-cover hover:scale-[1.03] transition-transform duration-500 cursor-pointer w-full"
           onClick={() => window.open(resolvedUrl, "_blank")}
         />
       </div>
@@ -69,19 +69,19 @@ const ChatFileMessage = ({ msg, socketUrl }) => {
 
   if (isVideo) {
     return (
-      <div className="mt-2 rounded-2xl overflow-hidden border border-white/10 max-w-[320px] bg-black shadow-lg">
-        <video src={resolvedUrl} controls className="max-w-full max-h-[220px] w-full" />
+      <div className="mt-3 rounded-3xl overflow-hidden border border-white/10 max-w-[340px] bg-black shadow-2xl">
+        <video src={resolvedUrl} controls className="max-w-full max-h-[240px] w-full" />
       </div>
     );
   }
 
   if (isAudio) {
     return (
-      <div className="mt-2 w-full min-w-[240px] max-w-[320px] bg-slate-900/60 p-3 rounded-2xl border border-white/5 flex flex-col gap-1 shadow-md">
-        <span className="text-[10px] text-slate-400 truncate flex items-center gap-1.5 font-mono">
-          <FiMusic className="text-[#16a34a]" /> {msg.fileName || "Audio snippet"}
+      <div className="mt-3 w-full min-w-[260px] max-w-[340px] bg-slate-900/70 p-4 rounded-3xl border border-white/10 flex flex-col gap-1.5 shadow-lg">
+        <span className="text-[11px] text-slate-400 truncate flex items-center gap-2 font-mono">
+          <FiMusic className="text-[#16a34a]" size={13} /> {msg.fileName || "Audio snippet"}
         </span>
-        <audio src={resolvedUrl} controls className="w-full h-8 mt-1.5 scale-95 origin-left" />
+        <audio src={resolvedUrl} controls className="w-full h-9 mt-1" />
       </div>
     );
   }
@@ -90,12 +90,14 @@ const ChatFileMessage = ({ msg, socketUrl }) => {
     <a
       href={resolvedUrl}
       download={msg.fileName || "download"}
-      className="mt-2 flex items-center gap-2.5 p-3 rounded-2xl border border-white/5 bg-slate-900/40 hover:bg-slate-800/40 transition-colors text-white font-medium group"
+      className="mt-3 flex items-center gap-3 p-3.5 rounded-3xl border border-white/10 bg-slate-900/50 hover:bg-slate-800/60 transition-colors text-white font-medium group"
     >
-      <FiFile className="text-lg text-[#16a34a] group-hover:scale-110 transition-transform flex-shrink-0" />
+      <div className="w-9 h-9 rounded-2xl bg-[#16a34a]/10 flex items-center justify-center flex-shrink-0">
+        <FiFile className="text-base text-[#16a34a] group-hover:scale-110 transition-transform" />
+      </div>
       <div className="flex-1 min-w-0">
-        <p className="text-[11px] font-bold truncate text-white">{msg.fileName || "Download Attachment"}</p>
-        <p className="text-[9px] text-slate-400 uppercase tracking-wider font-semibold">
+        <p className="text-xs font-bold truncate text-white">{msg.fileName || "Download Attachment"}</p>
+        <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">
           {(msg.fileType?.split("/")[1] || "File")}
         </p>
       </div>
@@ -103,8 +105,8 @@ const ChatFileMessage = ({ msg, socketUrl }) => {
   );
 };
 
-const socketUrl = import.meta.env.VITE_API_URL 
-  ? import.meta.env.VITE_API_URL.replace("/api", "") 
+const socketUrl = import.meta.env.VITE_API_URL
+  ? import.meta.env.VITE_API_URL.replace("/api", "")
   : "http://localhost:5000";
 
 const AdminChat = () => {
@@ -276,27 +278,30 @@ const AdminChat = () => {
   };
 
   return (
-    <div className="h-[calc(100vh-140px)] flex border border-white/5 rounded-3xl overflow-hidden bg-slate-950/40 backdrop-blur-xl">
-      
+    <div className="h-[calc(100vh-120px)] flex gap-3 p-3 bg-slate-950/20">
+
       {/* --- User List Sidebar --- */}
-      <div className="w-80 border-r border-white/5 flex flex-col bg-slate-900/30">
-        <div className="p-6 border-b border-white/5">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <FiMessageSquare className="text-[#16a34a]" /> Inbox
+      <div className="w-[340px] flex flex-col bg-slate-900/40 rounded-[28px] border border-white/5 overflow-hidden shadow-2xl">
+        <div className="p-7 pb-5">
+          <h2 className="text-2xl font-extrabold text-white flex items-center gap-2.5 tracking-tight">
+            <span className="w-9 h-9 rounded-2xl bg-[#16a34a]/15 flex items-center justify-center">
+              <FiMessageSquare className="text-[#16a34a]" size={18} />
+            </span>
+            Inbox
           </h2>
-          <p className="text-xs text-slate-500 mt-1">Real-time customer inquiries</p>
+          <p className="text-[11px] text-slate-500 mt-2 ml-[46px] uppercase tracking-widest font-semibold">Real-time customer inquiries</p>
         </div>
 
-        <div className="flex-1 overflow-y-auto divide-y divide-white/5 scrollbar-hide">
+        <div className="flex-1 overflow-y-auto px-3 pb-3 space-y-2 scrollbar-hide">
           {loadingUsers ? (
-            <div className="p-8 text-center text-slate-400 text-xs">Loading conversations...</div>
+            <div className="p-10 text-center text-slate-400 text-xs">Loading conversations...</div>
           ) : chatUsers?.length === 0 ? (
-            <div className="p-8 text-center text-slate-500 text-xs italic">No messages received yet.</div>
+            <div className="p-10 text-center text-slate-500 text-xs italic">No messages received yet.</div>
           ) : (
             chatUsers?.map((chat) => {
               const isActive = chat.userId === activeUserId;
               const isLastMessageFromAdmin = chat.lastMessageSenderRole === "ADMIN";
-              
+
               return (
                 <button
                   key={chat.userId}
@@ -304,32 +309,32 @@ const AdminChat = () => {
                     setActiveUserId(chat.userId);
                     setActiveUserName(chat.userName);
                   }}
-                  className={`w-full p-5 text-left transition-all flex gap-4 items-start ${
-                    isActive 
-                      ? "bg-[#16a34a]/10 border-l-4 border-[#16a34a]" 
-                      : "hover:bg-white/[0.02]"
+                  className={`w-full p-4 text-left transition-all duration-200 flex gap-3.5 items-start rounded-3xl ${
+                    isActive
+                      ? "bg-[#16a34a]/10 ring-1 ring-[#16a34a]/40 shadow-lg shadow-[#16a34a]/5"
+                      : "hover:bg-white/[0.03] border border-transparent"
                   }`}
                 >
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#16a34a]/20 to-[#166534]/20 border border-white/10 flex items-center justify-center text-[#16a34a] font-bold flex-shrink-0 uppercase">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#16a34a]/25 to-[#166534]/25 border border-white/10 flex items-center justify-center text-[#16a34a] font-extrabold flex-shrink-0 uppercase text-sm">
                     {chat.userName?.slice(0, 2)}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-baseline mb-1">
-                      <h4 className="text-sm font-bold text-white truncate">{chat.userName}</h4>
-                      <span className="text-[10px] text-slate-500 font-medium">
+                  <div className="flex-1 min-w-0 pt-0.5">
+                    <div className="flex justify-between items-baseline mb-1.5">
+                      <h4 className="text-[13px] font-bold text-white truncate">{chat.userName}</h4>
+                      <span className="text-[10px] text-slate-500 font-medium flex-shrink-0 ml-2">
                         {chat.lastMessageTime ? new Date(chat.lastMessageTime).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) : ""}
                       </span>
                     </div>
-                    <p className="text-xs text-slate-400 truncate mb-2">{chat.lastMessage}</p>
-                    
+                    <p className="text-[11px] text-slate-400 truncate mb-2.5 leading-relaxed">{chat.lastMessage}</p>
+
                     {/* Status Badge */}
                     <div className="flex items-center gap-1.5">
                       {isLastMessageFromAdmin ? (
-                        <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1">
-                          <FiCheck size={10} /> Replied by {chat.lastMessageSenderName?.split(" ")[0]}
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1 bg-emerald-400/5 px-2.5 py-1 rounded-full">
+                          <FiCheck size={9} /> Replied by {chat.lastMessageSenderName?.split(" ")[0]}
                         </span>
                       ) : (
-                        <span className="text-[9px] font-bold uppercase tracking-wider text-[#16a34a] bg-[#16a34a]/10 px-2 py-0.5 rounded-full animate-pulse flex items-center gap-1">
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-[#16a34a] bg-[#16a34a]/10 px-2.5 py-1 rounded-full animate-pulse flex items-center gap-1">
                           <FiClock size={9} /> Pending Reply
                         </span>
                       )}
@@ -343,31 +348,31 @@ const AdminChat = () => {
       </div>
 
       {/* --- Chat Workspace Area --- */}
-      <div className="flex-1 flex flex-col bg-slate-900/10">
+      <div className="flex-1 flex flex-col bg-slate-900/25 rounded-[28px] border border-white/5 overflow-hidden shadow-2xl">
         {activeUserId ? (
           <>
             {/* Workspace Header */}
-            <div className="p-6 border-b border-white/5 bg-slate-900/20 flex items-center justify-between">
+            <div className="px-8 py-5 border-b border-white/5 bg-slate-900/30 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center gap-4">
-                <div className="w-11 h-11 rounded-full bg-gradient-to-br from-[#16a34a] to-[#166534] text-black font-bold flex items-center justify-center uppercase">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#16a34a] to-[#166534] text-black font-extrabold flex items-center justify-center uppercase text-sm shadow-lg shadow-[#16a34a]/20">
                   {getPageInitials(activeUserName)}
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white">{activeUserName}</h3>
-                  <span className="text-xs text-emerald-400 flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]"></span> Active Chat Session
+                  <h3 className="text-[15px] font-bold text-white">{activeUserName}</h3>
+                  <span className="text-[11px] text-emerald-400 flex items-center gap-1.5 mt-0.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span> Active Chat Session
                   </span>
                 </div>
               </div>
 
               {/* Mode Selector Toggle */}
-              <div className="flex bg-slate-950/80 p-1 rounded-xl border border-white/5 flex-shrink-0">
+              <div className="flex bg-slate-950/60 p-1.5 rounded-2xl border border-white/5 flex-shrink-0 gap-1">
                 <button
                   type="button"
                   onClick={() => setIsEmailMode(false)}
-                  className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${
-                    !isEmailMode 
-                      ? "bg-[#16a34a] text-black shadow-md shadow-[#16a34a]/10" 
+                  className={`px-5 py-2.5 text-[11px] font-bold rounded-xl transition-all duration-200 ${
+                    !isEmailMode
+                      ? "bg-[#16a34a] text-black shadow-md shadow-[#16a34a]/25"
                       : "text-slate-400 hover:text-white"
                   }`}
                 >
@@ -376,9 +381,9 @@ const AdminChat = () => {
                 <button
                   type="button"
                   onClick={() => setIsEmailMode(true)}
-                  className={`px-4 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${
-                    isEmailMode 
-                      ? "bg-[#16a34a] text-black shadow-md shadow-[#16a34a]/10" 
+                  className={`px-5 py-2.5 text-[11px] font-bold rounded-xl transition-all duration-200 flex items-center gap-1.5 ${
+                    isEmailMode
+                      ? "bg-[#16a34a] text-black shadow-md shadow-[#16a34a]/25"
                       : "text-slate-400 hover:text-white"
                   }`}
                 >
@@ -388,26 +393,26 @@ const AdminChat = () => {
             </div>
 
             {/* Message Stream */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-hide">
+            <div className="flex-1 overflow-y-auto px-8 py-6 space-y-5 scrollbar-hide">
               {messages.map((msg) => {
                 const isAdmin = msg.senderRole === "ADMIN";
                 return (
-                  <div 
-                    key={msg.id} 
+                  <div
+                    key={msg.id}
                     className={`flex ${isAdmin ? "justify-end" : "justify-start"}`}
                   >
-                    <div className={`max-w-[70%] rounded-2xl px-5 py-3 text-sm shadow-xl ${
-                      isAdmin 
-                        ? "bg-[#16a34a] text-black font-medium rounded-tr-none" 
-                        : "bg-white/5 border border-white/10 text-white rounded-tl-none backdrop-blur-md"
+                    <div className={`max-w-[65%] rounded-[26px] px-6 py-4 text-[13px] shadow-xl ${
+                      isAdmin
+                        ? "bg-[#16a34a] text-black font-medium rounded-tr-lg"
+                        : "bg-white/[0.04] border border-white/10 text-white rounded-tl-lg backdrop-blur-md"
                     }`}>
                       {!isAdmin && (
-                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">
+                        <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-1.5">
                           {msg.senderName}
                         </p>
                       )}
                       {isAdmin && msg.senderId !== user.id && (
-                        <p className="text-[10px] text-black/50 font-bold uppercase tracking-wider mb-1">
+                        <p className="text-[9px] text-black/50 font-bold uppercase tracking-widest mb-1.5">
                           {msg.senderName} (Admin)
                         </p>
                       )}
@@ -417,11 +422,11 @@ const AdminChat = () => {
                           const subjectLine = emailParts[0] || "No Subject";
                           const bodyContent = emailParts.slice(1).join("\n\n") || "";
                           return (
-                            <div className={`space-y-1.5 border-l-2 pl-3 py-0.5 ${isAdmin ? "border-slate-950/20" : "border-[#16a34a]/40"}`}>
-                              <div className={`flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider ${isAdmin ? "text-black/80" : "text-[#16a34a]"}`}>
+                            <div className={`space-y-2 border-l-2 pl-4 py-1 ${isAdmin ? "border-slate-950/20" : "border-[#16a34a]/40"}`}>
+                              <div className={`flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest ${isAdmin ? "text-black/80" : "text-[#16a34a]"}`}>
                                 <FiMail size={11} /> Sent via Email
                               </div>
-                              <p className={`text-xs font-bold font-mono truncate ${isAdmin ? "text-black/80" : "text-white"}`}>{subjectLine}</p>
+                              <p className={`text-[13px] font-bold font-mono truncate ${isAdmin ? "text-black/80" : "text-white"}`}>{subjectLine}</p>
                               <p className={`text-[13px] whitespace-pre-wrap leading-relaxed ${isAdmin ? "text-black/70" : "text-slate-300"}`}>{bodyContent}</p>
                             </div>
                           );
@@ -432,7 +437,7 @@ const AdminChat = () => {
                       {msg.fileUrl && (
                         <ChatFileMessage msg={msg} socketUrl={socketUrl} />
                       )}
-                      <span className={`text-[9px] block mt-1 text-right ${
+                      <span className={`text-[9px] block mt-2 text-right ${
                         isAdmin ? "text-black/60" : "text-slate-500"
                       }`}>
                         {new Date(msg.createdAt).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
@@ -445,15 +450,15 @@ const AdminChat = () => {
             </div>
 
             {/* Message Input Box */}
-            <div className="border-t border-white/5 bg-slate-900/20">
-              
+            <div className="border-t border-white/5 bg-slate-900/30 flex-shrink-0">
+
               {/* Subject box for Email Mode */}
               {isEmailMode && (
-                <div className="px-6 pt-4 pb-1 border-b border-white/5">
+                <div className="px-8 pt-5 pb-1">
                   <input
                     type="text"
                     placeholder="Email Subject..."
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-3 text-xs font-semibold focus:outline-none focus:border-[#16a34a] transition-all text-white placeholder-slate-500"
+                    className="w-full bg-white/[0.04] border border-white/10 rounded-2xl px-6 py-3.5 text-[13px] font-semibold focus:outline-none focus:ring-2 focus:ring-[#16a34a]/40 focus:border-[#16a34a] transition-all text-white placeholder-slate-500"
                     value={emailSubject}
                     onChange={(e) => setEmailSubject(e.target.value)}
                     disabled={sending}
@@ -464,23 +469,25 @@ const AdminChat = () => {
 
               {/* Selected file preview */}
               {!isEmailMode && selectedFile && (
-                <div className="px-6 py-3 bg-white/[0.02] border-b border-white/5 flex items-center justify-between text-xs text-white">
-                  <div className="flex items-center gap-2 truncate">
-                    <FiPaperclip className="text-[#16a34a] flex-shrink-0 animate-bounce" />
+                <div className="mx-8 mt-4 px-4 py-3 bg-white/[0.03] border border-white/5 rounded-2xl flex items-center justify-between text-xs text-white">
+                  <div className="flex items-center gap-2.5 truncate">
+                    <span className="w-7 h-7 rounded-xl bg-[#16a34a]/10 flex items-center justify-center flex-shrink-0">
+                      <FiPaperclip className="text-[#16a34a]" size={13} />
+                    </span>
                     <span className="truncate max-w-[300px] font-medium">{selectedFile.name}</span>
                     <span className="text-[10px] text-slate-500 font-mono">({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)</span>
                   </div>
                   <button
                     type="button"
                     onClick={() => setSelectedFile(null)}
-                    className="text-slate-400 hover:text-white transition-colors p-1"
+                    className="text-slate-400 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-white/5"
                   >
-                    <FiX />
+                    <FiX size={14} />
                   </button>
                 </div>
               )}
 
-              <form onSubmit={handleSendMessage} className="p-6 flex gap-4 items-center">
+              <form onSubmit={handleSendMessage} className="p-8 flex gap-3 items-center">
                 {!isEmailMode && (
                   <>
                     <input
@@ -496,10 +503,10 @@ const AdminChat = () => {
                     <button
                       type="button"
                       onClick={() => document.getElementById("admin-chat-file-input").click()}
-                      className="p-4 rounded-2xl border border-white/10 hover:border-[#16a34a]/40 hover:bg-white/[0.02] text-slate-400 hover:text-white transition-all flex items-center justify-center flex-shrink-0"
+                      className="p-4 rounded-2xl border border-white/10 hover:border-[#16a34a]/40 hover:bg-white/[0.03] text-slate-400 hover:text-white transition-all duration-200 flex items-center justify-center flex-shrink-0 w-12 h-12"
                       disabled={sending}
                     >
-                      <FiPaperclip className="text-lg" />
+                      <FiPaperclip size={16} />
                     </button>
                   </>
                 )}
@@ -507,21 +514,21 @@ const AdminChat = () => {
                 <input
                   type="text"
                   placeholder={sending ? "Processing..." : (isEmailMode ? `Write email content to send...` : `Type a response to ${activeUserName}...`)}
-                  className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-[#16a34a] transition-all text-white disabled:opacity-50"
+                  className="flex-1 bg-white/[0.04] border border-white/10 rounded-2xl px-6 py-4 text-[13px] focus:outline-none focus:ring-2 focus:ring-[#16a34a]/40 focus:border-[#16a34a] transition-all text-white disabled:opacity-50"
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   disabled={sending}
                   required={!selectedFile}
                 />
-                <button 
+                <button
                   type="submit"
                   disabled={sending || (!inputMessage.trim() && !selectedFile)}
-                  className="bg-[#16a34a] hover:opacity-90 disabled:opacity-40 transition-all text-black font-bold p-4 rounded-2xl flex items-center justify-center shadow-lg shadow-[#16a34a]/20 w-14 h-14 flex-shrink-0"
+                  className="bg-[#16a34a] hover:opacity-90 active:scale-95 disabled:opacity-40 transition-all duration-200 text-black font-bold rounded-2xl flex items-center justify-center shadow-lg shadow-[#16a34a]/25 w-[52px] h-[52px] flex-shrink-0"
                 >
                   {sending ? (
-                    <FiLoader className="text-lg animate-spin" />
+                    <FiLoader className="animate-spin" size={17} />
                   ) : (
-                    <FiSend className="text-lg" />
+                    <FiSend size={17} />
                   )}
                 </button>
               </form>
@@ -529,11 +536,11 @@ const AdminChat = () => {
           </>
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-            <div className="w-16 h-16 bg-[#16a34a]/10 rounded-2xl flex items-center justify-center text-[#16a34a] text-2xl mb-4 border border-[#16a34a]/20">
+            <div className="w-20 h-20 bg-[#16a34a]/10 rounded-[26px] flex items-center justify-center text-[#16a34a] text-3xl mb-5 border border-[#16a34a]/20 shadow-inner">
               <FiMail />
             </div>
-            <h3 className="text-lg font-bold text-white">Select a Conversation</h3>
-            <p className="text-slate-400 text-sm max-w-sm mt-1">
+            <h3 className="text-xl font-bold text-white">Select a Conversation</h3>
+            <p className="text-slate-400 text-[13px] max-w-sm mt-2 leading-relaxed">
               Select a customer on the left sidebar to view their message history and reply in real-time.
             </p>
           </div>
@@ -544,4 +551,3 @@ const AdminChat = () => {
 };
 
 export default AdminChat;
-

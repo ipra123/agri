@@ -2,15 +2,16 @@ import { useQuery } from "@tanstack/react-query";
 import api from "../../lib/api";
 import { Link } from "react-router-dom";
 import {
-  FiBox,
-  FiShoppingBag,
-  FiTrendingUp,
-  FiDollarSign,
-  FiArrowRight,
-  FiCheckCircle,
-  FiFileText,
-  FiShield,
-} from "react-icons/fi";
+  ArrowRight,
+  BadgeCheck,
+  BarChart3,
+  Boxes,
+  CircleDollarSign,
+  Package2,
+  ShieldCheck,
+  ShoppingCart,
+  TrendingUp,
+} from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
 const SupplierDashboard = () => {
@@ -64,10 +65,10 @@ const SupplierDashboard = () => {
   ];
 
   const cards = [
-    { label: "Gross revenue", value: `$${grossRevenue.toFixed(2)}`, note: "Total business sales", icon: FiDollarSign, accent: "text-[color:var(--primary)]" },
-    { label: "Net earnings", value: `$${netEarnings.toFixed(2)}`, note: "After estimated commission", icon: FiTrendingUp, accent: "text-[color:var(--accent)]" },
-    { label: "Received orders", value: stats?.ordersCount || 0, note: "Customer fulfillments", icon: FiShoppingBag, accent: "text-[color:var(--primary)]" },
-    { label: "Active products", value: productsData?.length || 0, note: "Listed and searchable", icon: FiBox, accent: "text-[color:var(--accent)]" },
+    { label: "Gross revenue", value: `$${grossRevenue.toFixed(2)}`, note: "Total business sales", icon: CircleDollarSign, accent: "text-[color:var(--primary)]" },
+    { label: "Net earnings", value: `$${netEarnings.toFixed(2)}`, note: "After estimated commission", icon: TrendingUp, accent: "text-[color:var(--accent)]" },
+    { label: "Orders", value: stats?.ordersCount || 0, note: "Customer fulfillments", icon: ShoppingCart, accent: "text-[color:var(--primary)]" },
+    { label: "Products", value: productsData?.length || 0, note: "Listed and searchable", icon: Boxes, accent: "text-[color:var(--accent)]" },
   ];
 
   return (
@@ -75,20 +76,20 @@ const SupplierDashboard = () => {
       <div className="dashboard-toolbar">
         <div className="text-left">
           <span className="section-eyebrow">
-            <FiShield />
+            <ShieldCheck className="h-3.5 w-3.5" />
             Supplier workspace
           </span>
           <h1 className="mt-4">Business reports and product performance</h1>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-[color:var(--text-muted)]">
-            A redesigned supplier dashboard with the same warm palette, cleaner surfaces, and stronger hierarchy.
+            Monitor daily sales, fulfillment activity, and catalog momentum from a single, simplified dashboard.
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <Link to="/supplier/products" className="inline-flex items-center gap-2 rounded-full bg-[color:var(--primary)] px-5 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-white">
+          <Link to="/supplier/products" className="inline-flex items-center gap-2 rounded-full bg-[color:var(--primary)] px-5 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-white transition hover:bg-[color:var(--primary-hover)]">
             Add product
-            <FiArrowRight />
+            <ArrowRight className="h-4 w-4" />
           </Link>
-          <Link to="/supplier/orders" className="inline-flex items-center gap-2 rounded-full border border-[color:var(--border-color)] bg-white px-5 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-[color:var(--text-main)]">
+          <Link to="/supplier/orders" className="inline-flex items-center gap-2 rounded-full border border-[color:var(--border-color)] bg-white px-5 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-[color:var(--text-main)] transition hover:border-[color:var(--primary)]">
             View orders
           </Link>
         </div>
@@ -101,7 +102,7 @@ const SupplierDashboard = () => {
             <div key={card.label} className="dashboard-card">
               <div className="metric-row">
                 <div className="stat-card__icon">
-                  <Icon />
+                  <Icon className="h-5 w-5" />
                 </div>
                 <span className="brand-pill">{card.label}</span>
               </div>
@@ -120,7 +121,7 @@ const SupplierDashboard = () => {
               <h3 className="text-xl font-black text-[color:var(--text-main)]">Revenue flow</h3>
               <p className="text-xs text-[color:var(--text-muted)]">Monthly sales trajectory</p>
             </div>
-            <FiFileText className="text-2xl text-[color:var(--primary)]" />
+            <BarChart3 className="h-6 w-6 text-[color:var(--primary)]" />
           </div>
 
           <div className="h-80 pt-5">
@@ -154,12 +155,12 @@ const SupplierDashboard = () => {
 
           <div className="space-y-4">
             <div className="rounded-3xl border border-[color:var(--border-color)] bg-[color:var(--surface-soft)] p-4">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-3">
                 <div className="text-left">
                   <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[color:var(--primary)]">Verification</p>
                   <p className="text-sm text-[color:var(--text-muted)]">Business profile active</p>
                 </div>
-                <FiCheckCircle className="text-xl text-emerald-500" />
+                <BadgeCheck className="h-6 w-6 text-emerald-500" />
               </div>
             </div>
 
@@ -174,7 +175,7 @@ const SupplierDashboard = () => {
               className="flex items-center justify-between rounded-3xl bg-[color:var(--primary)] px-4 py-4 text-white transition hover:bg-[color:var(--primary-hover)]"
             >
               <span className="text-sm font-black uppercase tracking-[0.18em]">Update profile</span>
-              <FiArrowRight />
+              <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>

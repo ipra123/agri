@@ -2,7 +2,14 @@ import { Outlet, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import AdminSidebar from "./AdminSidebar";
 import useAuthStore from "../../store/useAuthStore";
-import { FiLogOut, FiUser, FiArrowLeft, FiShield, FiSun, FiMoon } from "react-icons/fi";
+import {
+  ArrowLeft,
+  LogOut,
+  MoonStar,
+  ShieldCheck,
+  SunMedium,
+  UserRound,
+} from "lucide-react";
 import brandLogo from "../../assets/logo.png";
 
 const AdminLayout = () => {
@@ -39,38 +46,45 @@ const AdminLayout = () => {
 
             <div className="flex items-center gap-3 sm:gap-4">
               <button
+                type="button"
                 onClick={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}
-                className="grid h-11 w-11 place-items-center rounded-full border border-[color:var(--border-color)] bg-[color:var(--surface-soft)] text-[color:var(--text-main)] transition hover:border-[color:var(--primary)]"
+                aria-label="Toggle color theme"
+                className="grid h-11 w-11 place-items-center rounded-full border border-[color:var(--border-color)] bg-[color:var(--surface-soft)] text-[color:var(--text-main)] transition hover:border-[color:var(--primary)] hover:text-[color:var(--primary)]"
                 title="Toggle theme"
               >
-                {theme === "dark" ? <FiSun className="text-lg text-[color:var(--accent)]" /> : <FiMoon className="text-lg text-[color:var(--primary)]" />}
+                {theme === "dark" ? (
+                  <SunMedium className="h-4 w-4 text-[color:var(--accent)]" />
+                ) : (
+                  <MoonStar className="h-4 w-4 text-[color:var(--primary)]" />
+                )}
               </button>
 
               <Link
                 to="/"
-                className="hidden items-center gap-2 rounded-full border border-[color:var(--border-color)] bg-[color:var(--surface-soft)] px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-[color:var(--text-main)] transition hover:border-[color:var(--primary)] sm:inline-flex"
+                className="hidden items-center gap-2 rounded-full border border-[color:var(--border-color)] bg-[color:var(--surface-soft)] px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-[color:var(--text-main)] transition hover:border-[color:var(--primary)] hover:text-[color:var(--primary)] sm:inline-flex"
               >
-                <FiArrowLeft />
+                <ArrowLeft className="h-4 w-4" />
                 Market home
               </Link>
 
               <div className="hidden items-center gap-3 rounded-full border border-[color:var(--border-color)] bg-[color:var(--surface-soft)] px-4 py-2 md:flex">
                 <div className="grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-[color:var(--bg-card-solid)] text-[color:var(--primary)]">
-                  {photoUrl ? <img src={photoUrl} alt={user?.name} className="h-full w-full object-cover" /> : <FiUser className="text-lg" />}
+                  {photoUrl ? <img src={photoUrl} alt={user?.name} className="h-full w-full object-cover" /> : <UserRound className="h-4 w-4" />}
                 </div>
                 <div className="text-left">
                   <p className="text-xs font-black text-[color:var(--text-main)]">{user?.name || "System Admin"}</p>
                   <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.18em] text-[color:var(--primary)]">
-                    <FiShield className="text-[9px]" /> Administrator
+                    <ShieldCheck className="h-3 w-3" /> Administrator
                   </span>
                 </div>
               </div>
 
               <button
+                type="button"
                 onClick={logout}
-                className="inline-flex items-center gap-2 rounded-full bg-[color:var(--primary)] px-4 py-2.5 text-[10px] font-black uppercase tracking-[0.22em] text-white shadow-lg shadow-emerald-900/10"
+                className="inline-flex items-center gap-2 rounded-full bg-[color:var(--primary)] px-4 py-2.5 text-[10px] font-black uppercase tracking-[0.22em] text-white shadow-lg shadow-emerald-900/10 transition hover:bg-[color:var(--primary-hover)]"
               >
-                <FiLogOut className="text-sm" />
+                <LogOut className="h-4 w-4" />
                 <span className="hidden sm:inline">Logout</span>
               </button>
             </div>
