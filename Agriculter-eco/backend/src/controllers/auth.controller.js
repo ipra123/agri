@@ -1,28 +1,15 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import fs from "fs/promises";
-import path from "path";
-import { fileURLToPath } from "url";
 import prisma from "../lib/prisma.js";
 import { sendOtpEmail, sendForgotPasswordEmail } from "../lib/sendEmails.js";
 import { uploadToSupabase } from "../lib/upload.js";
 
 // In-memory store for OTPs: { [email]: { otp, expires } }
 const otpStore = new Map();
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const buildLocalProfilePhotoUrl = (filename) => `/uploads/profile-photos/${filename}`;
-const buildLocalVerificationDocumentUrl = (filename) => `/uploads/verification-documents/${filename}`;
 
 const getUploadedFile = (files, fieldName) => {
   if (!files || !files[fieldName]) return null;
   return Array.isArray(files[fieldName]) ? files[fieldName][0] : files[fieldName];
-};
-
-const getProfilePhotoFilePath = (profilePhotoUrl) => {
-  if (!profilePhotoUrl || !profilePhotoUrl.startsWith("/uploads/profile-photos/")) return null;
-  return path.join(__dirname, "../../", profilePhotoUrl.replace(/^\//, ""));
 };
 
 const generateToken = (id) => {
@@ -331,15 +318,8 @@ export const getProfilePhoto = async (req, res) => {
       return res.status(404).send("Not found");
     }
 
-    const localPath = getProfilePhotoFilePath(user.profilePhotoUrl);
-    if (localPath) {
-      try {
-        const file = await fs.readFile(localPath);
-        res.setHeader("Content-Type", user.profilePhotoMime || "image/jpeg");
-        return res.send(file);
-      } catch {
-        // Fall through to the legacy blob path below.
-      }
+    if (user.profilePhotoUrl && /^https?:\/\//i.test(user.profilePhotoUrl)) {
+      return res.redirect(user.profilePhotoUrl);
     }
 
     if (!user.profilePhotoBlob) {
