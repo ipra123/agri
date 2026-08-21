@@ -5,6 +5,7 @@ import 'theme/app_theme.dart';
 import 'views/home_view.dart';
 import 'views/catalog_view.dart';
 import 'views/cart_view.dart';
+import 'views/my_bookings_view.dart';
 import 'views/profile_view.dart';
 import 'views/suppliers_view.dart';
 import 'providers/auth_provider.dart';
@@ -16,7 +17,9 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => DecorationProvider()..fetchDecorations()),
+        ChangeNotifierProvider(
+          create: (_) => DecorationProvider()..fetchDecorations(),
+        ),
         ChangeNotifierProvider(create: (_) => CartProvider()),
       ],
       child: const MyApp(),
@@ -54,6 +57,7 @@ class _MainNavigationState extends State<MainNavigation> {
     const CatalogView(),
     const SuppliersView(),
     const CartView(),
+    const MyBookingsView(),
     const ProfileView(),
   ];
 
@@ -122,18 +126,35 @@ class _MainNavigationState extends State<MainNavigation> {
                 ),
                 NavigationDestination(
                   icon: Icon(LucideIcons.search),
-                  selectedIcon: Icon(LucideIcons.search, color: AppTheme.primary),
+                  selectedIcon: Icon(
+                    LucideIcons.search,
+                    color: AppTheme.primary,
+                  ),
                   label: 'Explore',
                 ),
                 NavigationDestination(
                   icon: Icon(LucideIcons.store),
-                  selectedIcon: Icon(LucideIcons.store, color: AppTheme.primary),
+                  selectedIcon: Icon(
+                    LucideIcons.store,
+                    color: AppTheme.primary,
+                  ),
                   label: 'Suppliers',
                 ),
                 NavigationDestination(
                   icon: Icon(LucideIcons.shoppingBag),
-                  selectedIcon: Icon(LucideIcons.shoppingBag, color: AppTheme.primary),
+                  selectedIcon: Icon(
+                    LucideIcons.shoppingBag,
+                    color: AppTheme.primary,
+                  ),
                   label: 'Cart',
+                ),
+                NavigationDestination(
+                  icon: Icon(LucideIcons.receipt),
+                  selectedIcon: Icon(
+                    LucideIcons.receipt,
+                    color: AppTheme.primary,
+                  ),
+                  label: 'Orders',
                 ),
                 NavigationDestination(
                   icon: Icon(LucideIcons.user),

@@ -25,29 +25,45 @@ class BookingSuccessView extends StatelessWidget {
                   color: Colors.amberAccent,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(LucideIcons.checkCircle, color: Colors.amber, size: 48),
+                child: const Icon(
+                  LucideIcons.checkCircle,
+                  color: Colors.amber,
+                  size: 48,
+                ),
               ),
               const SizedBox(height: 32),
               const Text(
-                "Booking Successful!",
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+                "Payment Successful!",
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimary,
+                ),
               ),
               const SizedBox(height: 12),
               const Text(
-                "Your deposit payment has been received. Your reservation is pending review, and we have sent you a confirmation email.",
+                "Your WaafiPay payment was received successfully. Your order has been created and is now being processed.",
                 textAlign: TextAlign.center,
-                style: TextStyle(color: AppTheme.textSecondary, height: 1.5, fontSize: 15),
+                style: TextStyle(
+                  color: AppTheme.textSecondary,
+                  height: 1.5,
+                  fontSize: 15,
+                ),
               ),
               const SizedBox(height: 48),
               CustomButton(
-                text: "View My Bookings",
+                text: "View My Orders",
                 onPressed: () {
-                  // Switch MainNavigation tab to My Bookings (Index 3)
-                  MainNavigation.selectedTabNotifier.value = 3;
+                  // Switch MainNavigation tab to Orders (Index 4)
+                  MainNavigation.selectedTabNotifier.value = 4;
                   // Pop back to root MainNavigation
                   Navigator.popUntil(context, (route) => route.isFirst);
                 },
-                icon: const Icon(LucideIcons.calendar, color: Colors.white, size: 18),
+                icon: const Icon(
+                  LucideIcons.receipt,
+                  color: Colors.white,
+                  size: 18,
+                ),
               ),
               const SizedBox(height: 16),
               CustomButton(
@@ -59,12 +75,20 @@ class BookingSuccessView extends StatelessWidget {
                   // Pop back to root MainNavigation
                   Navigator.popUntil(context, (route) => route.isFirst);
                 },
-                icon: const Icon(LucideIcons.arrowRight, color: AppTheme.textPrimary, size: 18),
+                icon: const Icon(
+                  LucideIcons.arrowRight,
+                  color: AppTheme.textPrimary,
+                  size: 18,
+                ),
               ),
               const Spacer(),
               const Text(
                 "Need help? Contact support@decorrent.com",
-                style: TextStyle(color: AppTheme.textSecondary, fontSize: 12, fontStyle: FontStyle.italic),
+                style: TextStyle(
+                  color: AppTheme.textSecondary,
+                  fontSize: 12,
+                  fontStyle: FontStyle.italic,
+                ),
               ),
             ],
           ),

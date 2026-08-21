@@ -24,7 +24,13 @@ class _MyBookingsViewState extends State<MyBookingsView> {
   String _selectedFilter = "ALL";
   final Set<String> _expandedBookingIds = {};
 
-  final List<String> _filters = ["ALL", "PENDING", "CONFIRMED", "COMPLETED", "CANCELLED"];
+  final List<String> _filters = [
+    "ALL",
+    "PENDING",
+    "CONFIRMED",
+    "COMPLETED",
+    "CANCELLED",
+  ];
 
   @override
   void initState() {
@@ -56,15 +62,28 @@ class _MyBookingsViewState extends State<MyBookingsView> {
         _isLoading = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load bookings: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to load bookings: $e')));
       }
     }
   }
 
   String _formatDate(DateTime dt) {
-    final monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    final monthNames = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
     return "${dt.day.toString().padLeft(2, '0')} ${monthNames[dt.month - 1]} ${dt.year}";
   }
 
@@ -113,7 +132,12 @@ class _MyBookingsViewState extends State<MyBookingsView> {
           const SizedBox(width: 4),
           Text(
             status,
-            style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 10, letterSpacing: 0.5),
+            style: TextStyle(
+              color: textColor,
+              fontWeight: FontWeight.bold,
+              fontSize: 10,
+              letterSpacing: 0.5,
+            ),
           ),
         ],
       ),
@@ -126,28 +150,36 @@ class _MyBookingsViewState extends State<MyBookingsView> {
       builder: (context, authProvider, child) {
         if (!authProvider.isAuthenticated) {
           return Scaffold(
-            appBar: AppBar(title: const Text("My Bookings"), centerTitle: true),
+            appBar: AppBar(title: const Text("My Orders"), centerTitle: true),
             body: _buildUnauthenticatedView(context),
           );
         }
 
         final filteredBookings = _selectedFilter == "ALL"
             ? _bookings
-            : _bookings.where((b) => b.status.toUpperCase() == _selectedFilter).toList();
+            : _bookings
+                  .where((b) => b.status.toUpperCase() == _selectedFilter)
+                  .toList();
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text("My Bookings"),
+            title: const Text("My Orders"),
             centerTitle: true,
             actions: [
               IconButton(
                 onPressed: _fetchBookings,
-                icon: const Icon(LucideIcons.refreshCw, color: AppTheme.textPrimary, size: 20),
+                icon: const Icon(
+                  LucideIcons.refreshCw,
+                  color: AppTheme.textPrimary,
+                  size: 20,
+                ),
               ),
             ],
           ),
           body: _isLoading
-              ? const Center(child: CircularProgressIndicator(color: AppTheme.primary))
+              ? const Center(
+                  child: CircularProgressIndicator(color: AppTheme.primary),
+                )
               : RefreshIndicator(
                   onRefresh: _fetchBookings,
                   color: AppTheme.primary,
@@ -158,11 +190,15 @@ class _MyBookingsViewState extends State<MyBookingsView> {
                         child: filteredBookings.isEmpty
                             ? _buildEmptyState()
                             : ListView.builder(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
                                 itemCount: filteredBookings.length,
                                 itemBuilder: (context, index) {
                                   final booking = filteredBookings[index];
-                                  final isExpanded = _expandedBookingIds.contains(booking.id);
+                                  final isExpanded = _expandedBookingIds
+                                      .contains(booking.id);
                                   return _buildBookingCard(booking, isExpanded);
                                 },
                               ),
@@ -186,7 +222,9 @@ class _MyBookingsViewState extends State<MyBookingsView> {
         itemBuilder: (context, index) {
           final filter = _filters[index];
           final isSelected = _selectedFilter == filter;
-          int count = filter == "ALL" ? _bookings.length : _bookings.where((b) => b.status.toUpperCase() == filter).length;
+          int count = filter == "ALL"
+              ? _bookings.length
+              : _bookings.where((b) => b.status.toUpperCase() == filter).length;
 
           return Padding(
             padding: const EdgeInsets.only(right: 8),
@@ -207,7 +245,9 @@ class _MyBookingsViewState extends State<MyBookingsView> {
               backgroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
-                side: BorderSide(color: isSelected ? AppTheme.primary : AppTheme.border),
+                side: BorderSide(
+                  color: isSelected ? AppTheme.primary : AppTheme.border,
+                ),
               ),
             ),
           );
@@ -223,15 +263,23 @@ class _MyBookingsViewState extends State<MyBookingsView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(LucideIcons.calendar, size: 80, color: AppTheme.textSecondary.withOpacity(0.3)),
+            Icon(
+              LucideIcons.calendar,
+              size: 80,
+              color: AppTheme.textSecondary.withOpacity(0.3),
+            ),
             const SizedBox(height: 24),
             const Text(
-              "Access Bookings",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+              "Access Orders",
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.textPrimary,
+              ),
             ),
             const SizedBox(height: 8),
             const Text(
-              "Please log in to view and track your decoration reservations, payments, and cancellations.",
+              "Please log in to view and track your orders, payments, and cancellations.",
               textAlign: TextAlign.center,
               style: TextStyle(color: AppTheme.textSecondary),
             ),
@@ -239,7 +287,10 @@ class _MyBookingsViewState extends State<MyBookingsView> {
             CustomButton(
               text: "Login Now",
               onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginView())).then((_) => _fetchBookings());
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LoginView()),
+                ).then((_) => _fetchBookings());
               },
             ),
           ],
@@ -258,17 +309,25 @@ class _MyBookingsViewState extends State<MyBookingsView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(LucideIcons.calendarRange, size: 64, color: AppTheme.textSecondary.withOpacity(0.25)),
+            Icon(
+              LucideIcons.calendarRange,
+              size: 64,
+              color: AppTheme.textSecondary.withOpacity(0.25),
+            ),
             const SizedBox(height: 20),
             const Text(
-              "No Bookings Found",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+              "No Orders Found",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.textPrimary,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               _selectedFilter == "ALL"
-                  ? "You haven't made any reservations yet."
-                  : "No bookings matching status $_selectedFilter",
+                  ? "You haven't placed any orders yet."
+                  : "No orders matching status $_selectedFilter",
               textAlign: TextAlign.center,
               style: const TextStyle(color: AppTheme.textSecondary),
             ),
@@ -281,8 +340,15 @@ class _MyBookingsViewState extends State<MyBookingsView> {
   Widget _buildBookingCard(BookingModel booking, bool isExpanded) {
     final diffMinutes = DateTime.now().difference(booking.createdAt).inMinutes;
     final timeExpired = diffMinutes > 30;
-    final showCancelBtn = !booking.hasCancelRequest && booking.status != "CANCELLED" && booking.status != "COMPLETED";
-    final canCancel = (booking.status == "REQUEST" || booking.status == "PENDING" || booking.status == "CONFIRMED") && !timeExpired;
+    final showCancelBtn =
+        !booking.hasCancelRequest &&
+        booking.status != "CANCELLED" &&
+        booking.status != "COMPLETED";
+    final canCancel =
+        (booking.status == "REQUEST" ||
+            booking.status == "PENDING" ||
+            booking.status == "CONFIRMED") &&
+        !timeExpired;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -322,7 +388,12 @@ class _MyBookingsViewState extends State<MyBookingsView> {
                     children: [
                       Text(
                         "ID: ${booking.id.toUpperCase()}",
-                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primary, letterSpacing: 0.5),
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primary,
+                          letterSpacing: 0.5,
+                        ),
                       ),
                       _buildStatusBadge(booking.status),
                     ],
@@ -331,12 +402,20 @@ class _MyBookingsViewState extends State<MyBookingsView> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(LucideIcons.mapPin, size: 16, color: AppTheme.primary),
+                      const Icon(
+                        LucideIcons.mapPin,
+                        size: 16,
+                        color: AppTheme.primary,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           booking.location,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.textPrimary),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: AppTheme.textPrimary,
+                          ),
                         ),
                       ),
                     ],
@@ -344,11 +423,18 @@ class _MyBookingsViewState extends State<MyBookingsView> {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(LucideIcons.calendar, size: 14, color: AppTheme.textSecondary),
+                      const Icon(
+                        LucideIcons.calendar,
+                        size: 14,
+                        color: AppTheme.textSecondary,
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         "${_formatDate(booking.eventDate)} → ${_formatDate(booking.endDate)}",
-                        style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppTheme.textSecondary,
+                        ),
                       ),
                     ],
                   ),
@@ -362,23 +448,41 @@ class _MyBookingsViewState extends State<MyBookingsView> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text("Total Price", style: TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+                          const Text(
+                            "Total Price",
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: AppTheme.textSecondary,
+                            ),
+                          ),
                           Text(
                             "\$${booking.totalPrice.toStringAsFixed(2)}",
-                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primary),
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.primary,
+                            ),
                           ),
                         ],
                       ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          const Text("Remaining Balance", style: TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+                          const Text(
+                            "Remaining Balance",
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: AppTheme.textSecondary,
+                            ),
+                          ),
                           Text(
                             "\$${booking.balance.toStringAsFixed(2)}",
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: booking.balance > 0 ? const Color(0xFFD97706) : Colors.greenAccent,
+                              color: booking.balance > 0
+                                  ? const Color(0xFFD97706)
+                                  : Colors.greenAccent,
                             ),
                           ),
                         ],
@@ -391,11 +495,17 @@ class _MyBookingsViewState extends State<MyBookingsView> {
                     children: [
                       Text(
                         "${booking.bookingItems.length} item${booking.bookingItems.length != 1 ? 's' : ''} reserved",
-                        style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppTheme.textSecondary,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const Spacer(),
                       Icon(
-                        isExpanded ? LucideIcons.chevronUp : LucideIcons.chevronDown,
+                        isExpanded
+                            ? LucideIcons.chevronUp
+                            : LucideIcons.chevronDown,
                         size: 18,
                         color: AppTheme.textSecondary,
                       ),
@@ -412,7 +522,9 @@ class _MyBookingsViewState extends State<MyBookingsView> {
               padding: const EdgeInsets.all(16),
               decoration: const BoxDecoration(
                 color: Color(0xFFFAFAFA),
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(20),
+                ),
                 border: Border(top: BorderSide(color: AppTheme.border)),
               ),
               child: Column(
@@ -421,33 +533,50 @@ class _MyBookingsViewState extends State<MyBookingsView> {
                   // Reserved Items Title
                   const Text(
                     "RESERVED ITEMS",
-                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.textSecondary, letterSpacing: 1),
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.textSecondary,
+                      letterSpacing: 1,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   // Reserved Items List
-                  ...booking.bookingItems.map((item) => _buildBookingItemRow(item)),
-                  
+                  ...booking.bookingItems.map(
+                    (item) => _buildBookingItemRow(item),
+                  ),
+
                   if (booking.payments.isNotEmpty) ...[
                     const SizedBox(height: 20),
                     const Text(
                       "PAYMENT HISTORY",
-                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.textSecondary, letterSpacing: 1),
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.textSecondary,
+                        letterSpacing: 1,
+                      ),
                     ),
                     const SizedBox(height: 12),
-                    ...booking.payments.map((payment) => _buildPaymentHistoryRow(payment)),
+                    ...booking.payments.map(
+                      (payment) => _buildPaymentHistoryRow(payment),
+                    ),
                   ],
 
                   const SizedBox(height: 20),
                   Row(
                     children: [
-                      if (booking.balance > 0 && (booking.status == "PENDING" || booking.status == "REQUEST"))
+                      if (booking.balance > 0 &&
+                          (booking.status == "PENDING" ||
+                              booking.status == "REQUEST"))
                         Expanded(
                           child: ElevatedButton.icon(
                             onPressed: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => BookingPaymentView(booking: booking),
+                                  builder: (_) =>
+                                      BookingPaymentView(booking: booking),
                                 ),
                               ).then((_) => _fetchBookings());
                             },
@@ -457,30 +586,43 @@ class _MyBookingsViewState extends State<MyBookingsView> {
                               backgroundColor: AppTheme.primary,
                               foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
                           ),
                         ),
-                      if (booking.balance > 0 && (booking.status == "PENDING" || booking.status == "REQUEST"))
+                      if (booking.balance > 0 &&
+                          (booking.status == "PENDING" ||
+                              booking.status == "REQUEST"))
                         const SizedBox(width: 12),
                       if (showCancelBtn)
                         Expanded(
                           child: OutlinedButton.icon(
-                            onPressed: canCancel ? () => _handleCancelBooking(booking.id) : null,
+                            onPressed: canCancel
+                                ? () => _handleCancelBooking(booking.id)
+                                : null,
                             icon: const Icon(LucideIcons.xCircle, size: 16),
                             label: Text(
-                              booking.hasCancelRequest 
-                                ? "Cancel Requested" 
-                                : !canCancel 
-                                    ? "Cancel (Expired)" 
-                                    : "Cancel Booking"
+                              booking.hasCancelRequest
+                                  ? "Cancel Requested"
+                                  : !canCancel
+                                  ? "Cancel (Expired)"
+                                  : "Cancel Booking",
                             ),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: Colors.redAccent,
-                              side: BorderSide(color: canCancel ? Colors.redAccent.withOpacity(0.5) : AppTheme.border),
+                              side: BorderSide(
+                                color: canCancel
+                                    ? Colors.redAccent.withOpacity(0.5)
+                                    : AppTheme.border,
+                              ),
                               padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              disabledForegroundColor: AppTheme.textSecondary.withOpacity(0.5),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              disabledForegroundColor: AppTheme.textSecondary
+                                  .withOpacity(0.5),
                             ),
                           ),
                         ),
@@ -501,22 +643,30 @@ class _MyBookingsViewState extends State<MyBookingsView> {
       child: Row(
         children: [
           ClipRRect(
-  borderRadius: BorderRadius.circular(10),
-  child: item.decoration.image != null
-      ? Image.network(
-          item.decoration.image!,
-          width: 44,
-          height: 44,
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => Container(width: 44, height: 44, color: Colors.grey[200]),
-        )
-      : Container(
-          width: 44,
-          height: 44,
-          color: Colors.grey[200],
-          child: const Icon(LucideIcons.package, color: Colors.grey, size: 20),
-        ),
-),
+            borderRadius: BorderRadius.circular(10),
+            child: item.decoration.image != null
+                ? Image.network(
+                    item.decoration.image!,
+                    width: 44,
+                    height: 44,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      width: 44,
+                      height: 44,
+                      color: Colors.grey[200],
+                    ),
+                  )
+                : Container(
+                    width: 44,
+                    height: 44,
+                    color: Colors.grey[200],
+                    child: const Icon(
+                      LucideIcons.package,
+                      color: Colors.grey,
+                      size: 20,
+                    ),
+                  ),
+          ),
 
           const SizedBox(width: 12),
           Expanded(
@@ -525,14 +675,21 @@ class _MyBookingsViewState extends State<MyBookingsView> {
               children: [
                 Text(
                   item.decoration.name,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppTheme.textPrimary),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: AppTheme.textPrimary,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
                 Text(
                   "Qty: ${item.quantity} · \$${item.price.toStringAsFixed(2)} / unit",
-                  style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppTheme.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -540,7 +697,11 @@ class _MyBookingsViewState extends State<MyBookingsView> {
           const SizedBox(width: 8),
           Text(
             "\$${(item.price * item.quantity).toStringAsFixed(2)}",
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppTheme.textPrimary),
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              color: AppTheme.textPrimary,
+            ),
           ),
         ],
       ),
@@ -548,7 +709,9 @@ class _MyBookingsViewState extends State<MyBookingsView> {
   }
 
   Widget _buildPaymentHistoryRow(PaymentModel payment) {
-    Color statusColor = payment.status.toUpperCase() == "SUCCESS" ? Colors.black : Colors.red;
+    Color statusColor = payment.status.toUpperCase() == "SUCCESS"
+        ? Colors.black
+        : Colors.red;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -559,7 +722,11 @@ class _MyBookingsViewState extends State<MyBookingsView> {
               color: AppTheme.primary.withOpacity(0.05),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(LucideIcons.creditCard, color: AppTheme.primary, size: 18),
+            child: const Icon(
+              LucideIcons.creditCard,
+              color: AppTheme.primary,
+              size: 18,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -568,14 +735,21 @@ class _MyBookingsViewState extends State<MyBookingsView> {
               children: [
                 Text(
                   payment.transactionId,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.textPrimary),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: AppTheme.textPrimary,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
                 Text(
                   "${payment.method.replaceAll('_', ' ')} · ${_formatDate(payment.createdAt)}",
-                  style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppTheme.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -586,12 +760,20 @@ class _MyBookingsViewState extends State<MyBookingsView> {
             children: [
               Text(
                 "\$${payment.amount.toStringAsFixed(2)}",
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppTheme.textPrimary),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: AppTheme.textPrimary,
+                ),
               ),
               const SizedBox(height: 2),
               Text(
                 payment.status,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 9, color: statusColor),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 9,
+                  color: statusColor,
+                ),
               ),
             ],
           ),
@@ -604,16 +786,30 @@ class _MyBookingsViewState extends State<MyBookingsView> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Cancel Booking", style: TextStyle(fontWeight: FontWeight.bold)),
-        content: const Text("Are you sure you want to request cancellation for this booking? This will submit a cancellation request to our admin."),
+        title: const Text(
+          "Cancel Booking",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: const Text(
+          "Are you sure you want to request cancellation for this booking? This will submit a cancellation request to our admin.",
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text("No", style: TextStyle(color: AppTheme.textSecondary)),
+            child: const Text(
+              "No",
+              style: TextStyle(color: AppTheme.textSecondary),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text("Yes, Cancel", style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+            child: const Text(
+              "Yes, Cancel",
+              style: TextStyle(
+                color: Colors.redAccent,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
@@ -629,7 +825,9 @@ class _MyBookingsViewState extends State<MyBookingsView> {
       await _apiService.cancelBooking(bookingId);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Cancellation request submitted successfully!')),
+          const SnackBar(
+            content: Text('Cancellation request submitted successfully!'),
+          ),
         );
       }
       _fetchBookings();
@@ -639,7 +837,11 @@ class _MyBookingsViewState extends State<MyBookingsView> {
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to submit request: ${e.toString().replaceAll("Exception: ", "")}')),
+          SnackBar(
+            content: Text(
+              'Failed to submit request: ${e.toString().replaceAll("Exception: ", "")}',
+            ),
+          ),
         );
       }
     }

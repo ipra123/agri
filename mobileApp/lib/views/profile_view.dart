@@ -24,7 +24,10 @@ class ProfileView extends StatelessWidget {
               if (authProvider.isAuthenticated)
                 IconButton(
                   onPressed: () {},
-                  icon: const Icon(LucideIcons.settings, color: AppTheme.textPrimary),
+                  icon: const Icon(
+                    LucideIcons.settings,
+                    color: AppTheme.textPrimary,
+                  ),
                 ),
             ],
           ),
@@ -65,16 +68,24 @@ class ProfileView extends StatelessWidget {
                   color: AppTheme.primary.withOpacity(0.12),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(LucideIcons.userX, color: AppTheme.primary, size: 42),
+                child: const Icon(
+                  LucideIcons.userX,
+                  color: AppTheme.primary,
+                  size: 42,
+                ),
               ),
               const SizedBox(height: 20),
               const Text(
                 "Not Logged In",
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppTheme.textPrimary),
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                  color: AppTheme.textPrimary,
+                ),
               ),
               const SizedBox(height: 10),
               const Text(
-                "Sign in to manage your bookings, saved items, and profile details.",
+                "Sign in to manage your orders, saved items, and profile details.",
                 textAlign: TextAlign.center,
                 style: TextStyle(color: AppTheme.textSecondary, height: 1.5),
               ),
@@ -82,17 +93,26 @@ class ProfileView extends StatelessWidget {
               CustomButton(
                 text: "Login",
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginView()));
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const LoginView()),
+                  );
                 },
               ),
               const SizedBox(height: 12),
               TextButton(
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const RegisterView()));
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const RegisterView()),
+                  );
                 },
                 child: const Text(
                   'Create an Account',
-                  style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.w800),
+                  style: TextStyle(
+                    color: AppTheme.primary,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
             ],
@@ -102,7 +122,10 @@ class ProfileView extends StatelessWidget {
     );
   }
 
-  Widget _buildAuthenticatedProfile(BuildContext context, AuthProvider authProvider) {
+  Widget _buildAuthenticatedProfile(
+    BuildContext context,
+    AuthProvider authProvider,
+  ) {
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 96),
@@ -153,7 +176,11 @@ class ProfileView extends StatelessWidget {
                   ),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(LucideIcons.user, size: 48, color: AppTheme.primary),
+                child: const Icon(
+                  LucideIcons.user,
+                  size: 48,
+                  color: AppTheme.primary,
+                ),
               ),
               Positioned(
                 bottom: 0,
@@ -164,7 +191,11 @@ class ProfileView extends StatelessWidget {
                     color: AppTheme.primary,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(LucideIcons.camera, color: Colors.white, size: 14),
+                  child: const Icon(
+                    LucideIcons.camera,
+                    color: Colors.white,
+                    size: 14,
+                  ),
                 ),
               ),
             ],
@@ -172,7 +203,11 @@ class ProfileView extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             user?.fullName ?? "User",
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppTheme.textPrimary),
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w900,
+              color: AppTheme.textPrimary,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
@@ -186,7 +221,7 @@ class ProfileView extends StatelessWidget {
 
   Widget _buildQuickStats() {
     final stats = [
-      {"label": "Bookings", "value": "12", "icon": LucideIcons.calendar},
+      {"label": "Orders", "value": "12", "icon": LucideIcons.receipt},
       {"label": "Active", "value": "2", "icon": LucideIcons.clock},
       {"label": "Spent", "value": "\$1.2k", "icon": LucideIcons.creditCard},
     ];
@@ -204,16 +239,27 @@ class ProfileView extends StatelessWidget {
             ),
             child: Column(
               children: [
-                Icon(stat['icon'] as IconData, size: 20, color: AppTheme.primary),
+                Icon(
+                  stat['icon'] as IconData,
+                  size: 20,
+                  color: AppTheme.primary,
+                ),
                 const SizedBox(height: 10),
                 Text(
                   stat['value'] as String,
-                  style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: AppTheme.textPrimary),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 18,
+                    color: AppTheme.textPrimary,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   stat['label'] as String,
-                  style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppTheme.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -225,11 +271,31 @@ class ProfileView extends StatelessWidget {
 
   Widget _buildActionList() {
     final actions = [
-      {"title": "My Bookings", "subtitle": "Track your reservations", "icon": LucideIcons.calendarRange},
-      {"title": "Financial Report", "subtitle": "View statements and metrics", "icon": LucideIcons.fileSpreadsheet},
-      {"title": "Notifications", "subtitle": "Updates and alerts", "icon": LucideIcons.bellRing},
-      {"title": "Manage Payments", "subtitle": "Cards and billing info", "icon": LucideIcons.wallet},
-      {"title": "Support Center", "subtitle": "Get help with orders", "icon": LucideIcons.headphones},
+      {
+        "title": "Account Activity",
+        "subtitle": "Review your account updates",
+        "icon": LucideIcons.activity,
+      },
+      {
+        "title": "Financial Report",
+        "subtitle": "View statements and metrics",
+        "icon": LucideIcons.fileSpreadsheet,
+      },
+      {
+        "title": "Notifications",
+        "subtitle": "Updates and alerts",
+        "icon": LucideIcons.bellRing,
+      },
+      {
+        "title": "Manage Payments",
+        "subtitle": "Cards and billing info",
+        "icon": LucideIcons.wallet,
+      },
+      {
+        "title": "Support Center",
+        "subtitle": "Get help with orders",
+        "icon": LucideIcons.headphones,
+      },
     ];
 
     return ListView.separated(
@@ -241,10 +307,11 @@ class ProfileView extends StatelessWidget {
         final action = actions[index];
         return ListTile(
           onTap: () {
-            if (action['title'] == "My Bookings") {
-              MainNavigation.selectedTabNotifier.value = 3;
-            } else if (action['title'] == "Financial Report") {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const ReportView()));
+            if (action['title'] == "Financial Report") {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ReportView()),
+              );
             }
           },
           tileColor: AppTheme.surface,
@@ -258,17 +325,29 @@ class ProfileView extends StatelessWidget {
               color: AppTheme.background,
               borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(action['icon'] as IconData, color: AppTheme.primary, size: 20),
+            child: Icon(
+              action['icon'] as IconData,
+              color: AppTheme.primary,
+              size: 20,
+            ),
           ),
           title: Text(
             action['title'] as String,
-            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: AppTheme.textPrimary),
+            style: const TextStyle(
+              fontWeight: FontWeight.w800,
+              fontSize: 15,
+              color: AppTheme.textPrimary,
+            ),
           ),
           subtitle: Text(
             action['subtitle'] as String,
             style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
           ),
-          trailing: const Icon(LucideIcons.chevronRight, size: 18, color: AppTheme.textSecondary),
+          trailing: const Icon(
+            LucideIcons.chevronRight,
+            size: 18,
+            color: AppTheme.textSecondary,
+          ),
         );
       },
     );
