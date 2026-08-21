@@ -5,6 +5,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import prisma from "../lib/prisma.js";
 import { sendOtpEmail, sendForgotPasswordEmail } from "../lib/sendEmails.js";
+import { uploadToSupabase } from "../lib/upload.js";
 
 // In-memory store for OTPs: { [email]: { otp, expires } }
 const otpStore = new Map();
@@ -154,11 +155,11 @@ export const register = async (req, res) => {
 
     if (profilePhotoFile) {
       profilePhotoMime = profilePhotoFile.mimetype;
-      profilePhotoUrl = buildLocalProfilePhotoUrl(profilePhotoFile.filename);
+      profilePhotoUrl = await uploadToSupabase(profilePhotoFile, "profile-photos");
     }
 
     if (verificationDocumentFile) {
-      licenseDocumentUrl = buildLocalVerificationDocumentUrl(verificationDocumentFile.filename);
+      licenseDocumentUrl = await uploadToSupabase(verificationDocumentFile, "verification-documents");
     }
 
     const user = await prisma.user.create({
@@ -268,7 +269,7 @@ export const updateProfile = async (req, res) => {
 
     if (profilePhotoFile) {
       data.profilePhotoMime = profilePhotoFile.mimetype;
-      data.profilePhotoUrl = buildLocalProfilePhotoUrl(profilePhotoFile.filename);
+      data.profilePhotoUrl = await uploadToSupabase(profilePhotoFile, "profile-photos");
     } else if (profilePhotoUrl !== undefined) {
       data.profilePhotoUrl = profilePhotoUrl;
     }
@@ -279,7 +280,7 @@ export const updateProfile = async (req, res) => {
       if (supplierLicenseNumber !== undefined) data.supplierLicenseNumber = supplierLicenseNumber;
 
       if (verificationDocumentFile) {
-        data.licenseDocumentUrl = buildLocalVerificationDocumentUrl(verificationDocumentFile.filename);
+        data.licenseDocumentUrl = await uploadToSupabase(verificationDocumentFile, "verification-documents");
         data.verificationStatus = "PENDING";
         data.verificationNotes = null;
       } else if (licenseDocumentUrl !== undefined) {
