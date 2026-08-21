@@ -8,7 +8,7 @@ import { supabase } from "./supabase.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const localUploadDir = path.join(__dirname, "../../uploads");
-const supabaseBucket = process.env.SUPABASE_STORAGE_BUCKET || "product-images";
+const supabaseBucket = process.env.SUPABASE_STORAGE_BUCKET || "agr";
 
 const getExtension = (file) => {
   const fromName = path.extname(file.originalname || "").replace(".", "").trim();
@@ -36,14 +36,11 @@ export const uploadToSupabase = async (file, folder = "products") => {
   const filePath = `${folder}/${fileName}`;
 
   if (!supabase) {
-    await ensureLocalUploadDir();
-    const localFilePath = path.join(localUploadDir, fileName);
-    await fs.writeFile(localFilePath, file.buffer);
-    return `/uploads/${fileName}`;
+    throw new Error("Supabase storage is not configured for file uploads");
   }
 
   const { data, error } = await supabase.storage
-    .from("agr") // Make sure this bucket exists in your Supabase project
+    .from(supabaseBucket)
     .upload(filePath, file.buffer, {
       contentType: file.mimetype,
       upsert: false,
@@ -54,7 +51,7 @@ export const uploadToSupabase = async (file, folder = "products") => {
   }
 
   const { data: publicUrlData } = supabase.storage
-    .from("agr")
+    .from(supabaseBucket)
     .getPublicUrl(filePath);
 
   return publicUrlData.publicUrl;
