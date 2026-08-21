@@ -188,21 +188,29 @@ class ApiService {
     Map<String, dynamic> bookingData,
   ) async {
     final headers = await _getHeaders();
-    final payload = {...bookingData, 'isOffline': true};
-    final response = await http.post(
-      Uri.parse('$baseUrl/orders'),
-      headers: headers,
-      body: json.encode(payload),
-    );
+    final response = await http
+        .post(
+          Uri.parse('$baseUrl/orders'),
+          headers: headers,
+          body: json.encode(bookingData),
+        )
+        .timeout(const Duration(seconds: 60));
     if (response.statusCode >= 400) {
       await _handleErrorResponse(response);
     }
-    final data = json.decode(response.body);
+    final data = _decodeObject(response);
     if (response.statusCode == 200 || response.statusCode == 201) {
       return data;
     } else {
+      final waafiResponse = data['waafiResponse'];
+      final waafiMessage = waafiResponse is Map
+          ? waafiResponse['responseMsg']?.toString()
+          : null;
       throw Exception(
-        data['message'] ?? data['error'] ?? 'Failed to create order',
+        waafiMessage ??
+            data['message'] ??
+            data['error'] ??
+            'Failed to create order',
       );
     }
   }
