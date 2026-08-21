@@ -8,6 +8,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ApiService {
   final String baseUrl = ApiConfig.baseUrl;
 
+  Map<String, dynamic> _decodeObject(http.Response response) {
+    try {
+      final decoded = json.decode(response.body);
+      if (decoded is Map) return Map<String, dynamic>.from(decoded);
+    } catch (_) {
+      // The deployment can return an HTML or empty body when the function crashes.
+    }
+    return {'message': 'Server returned an invalid response (${response.statusCode})'};
+  }
+
   String? _readToken(Map<String, Object?> values) {
     final candidates = [
       values['auth_token'],
@@ -77,8 +87,8 @@ class ApiService {
       Uri.parse('$baseUrl/auth/login'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({'email': email, 'password': password}),
-    );
-    final data = json.decode(response.body);
+    ).timeout(const Duration(seconds: 20));
+    final data = _decodeObject(response);
     if (response.statusCode == 200) {
       return data;
     } else {
@@ -91,8 +101,8 @@ class ApiService {
       Uri.parse('$baseUrl/auth/register'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({'name': fullName, 'email': email, 'password': password}),
-    );
-    final data = json.decode(response.body);
+    ).timeout(const Duration(seconds: 20));
+    final data = _decodeObject(response);
     if (response.statusCode == 200 || response.statusCode == 201) {
       return data;
     } else {
@@ -105,8 +115,8 @@ class ApiService {
       Uri.parse('$baseUrl/auth/send-otp'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({'email': email}),
-    );
-    final data = json.decode(response.body);
+    ).timeout(const Duration(seconds: 20));
+    final data = _decodeObject(response);
     if (response.statusCode == 200) {
       return data;
     } else {
@@ -119,8 +129,8 @@ class ApiService {
       Uri.parse('$baseUrl/auth/verify-otp'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({'email': email, 'otp': code}),
-    );
-    final data = json.decode(response.body);
+    ).timeout(const Duration(seconds: 20));
+    final data = _decodeObject(response);
     if (response.statusCode == 200) {
       return data;
     } else {

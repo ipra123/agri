@@ -28,7 +28,7 @@ import {
   Legend,
 } from "recharts";
 
-const GOLD = ["#d4af37", "#b8860b", "#f2c14e", "#c9a227", "#e6b325", "#a67c00"];
+const GREEN = ["#166534", "#15803d", "#16a34a", "#22c55e", "#4ade80", "#86efac"];
 
 const STATS = [
   { label: "Sales revenue", icon: Coins },
@@ -51,7 +51,7 @@ const AdminDashboard = () => {
   if (isLoading) {
     return (
       <div className="flex h-[420px] flex-col items-center justify-center gap-5 bg-[color:var(--bg-card-solid)] animate-in fade-in duration-500">
-        <div className="h-14 w-14 animate-spin border-[5px] border-[color:var(--border-color)] border-t-[#d4af37] rounded-full" />
+        <div className="h-14 w-14 animate-spin border-[5px] border-[color:var(--border-color)] border-t-[color:var(--primary)] rounded-full" />
         <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[color:var(--text-muted)]">
           ✨ Crunching platform analytics
         </p>
@@ -115,7 +115,7 @@ const AdminDashboard = () => {
       {/* ===== Header — fully redesigned ===== */}
       <div className="bg-[color:var(--bg-card-solid)] p-8 shadow-lg flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 animate-in slide-in-from-top-4 duration-700">
         <div className="text-left">
-          <span className="inline-flex items-center gap-2 bg-[#d4af37]/10 text-[#b8860b] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.25em]">
+          <span className="inline-flex items-center gap-2 bg-emerald-500/10 text-[color:var(--primary)] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.25em]">
             <Crown className="h-3.5 w-3.5" />
             Command Center
           </span>
@@ -123,20 +123,20 @@ const AdminDashboard = () => {
             Marketplace Control Deck
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-[color:var(--text-muted)]">
-            ⚡ Real-time pulse on revenue, growth, and catalog health — all in one gold-standard view.
+            Real-time pulse on revenue, growth, and catalog health.
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
           <Link
             to="/admin/orders"
-            className="inline-flex items-center gap-2 bg-[#b8860b] px-6 py-3.5 text-[10px] font-black uppercase tracking-[0.22em] text-white transition-all hover:bg-[#a67c00] hover:-translate-y-0.5 active:scale-95"
+            className="inline-flex items-center gap-2 bg-[color:var(--primary)] px-6 py-3.5 text-[10px] font-black uppercase tracking-[0.22em] text-white transition-all hover:bg-[color:var(--primary-hover)] hover:-translate-y-0.5 active:scale-95"
           >
             🧾 View Orders
             <ArrowUpRight className="h-4 w-4" />
           </Link>
           <Link
             to="/admin/customers"
-            className="inline-flex items-center gap-2 bg-[color:var(--surface-soft)] px-6 py-3.5 text-[10px] font-black uppercase tracking-[0.22em] text-[color:var(--text-main)] transition-all hover:bg-[#d4af37]/10 hover:-translate-y-0.5 active:scale-95"
+            className="inline-flex items-center gap-2 bg-[color:var(--surface-soft)] px-6 py-3.5 text-[10px] font-black uppercase tracking-[0.22em] text-[color:var(--text-main)] transition-all hover:bg-emerald-500/10 hover:-translate-y-0.5 active:scale-95"
           >
             👥 User Accounts
           </Link>
@@ -154,7 +154,7 @@ const AdminDashboard = () => {
               className="bg-[color:var(--bg-card-solid)] p-6 shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 animate-in fade-in slide-in-from-bottom-4"
             >
               <div className="flex items-center justify-between">
-                <div className="flex h-11 w-11 items-center justify-center bg-gradient-to-br from-[#d4af37] to-[#b8860b] text-white">
+                <div className="flex h-11 w-11 items-center justify-center bg-[color:var(--primary)] text-white">
                   <Icon className="h-5 w-5" />
                 </div>
                 <span className="bg-[color:var(--surface-soft)] text-[color:var(--text-muted)] text-[9px] font-black uppercase tracking-wider px-2.5 py-1">
@@ -171,30 +171,30 @@ const AdminDashboard = () => {
 
       {/* ===== Charts ===== */}
       <div className="grid gap-5 lg:grid-cols-[1.5fr_0.5fr]">
-        {/* Revenue trend — line chart, gold */}
+        {/* Revenue trend */}
         <div className="bg-[color:var(--bg-card-solid)] p-7 shadow-md animate-in fade-in duration-700">
           <div className="flex items-center justify-between gap-4 border-b border-[color:var(--border-color)] pb-5">
             <div className="text-left">
               <h3 className="text-lg font-black text-[color:var(--text-main)] flex items-center gap-2">
-                <Flame className="h-4 w-4 text-[#b8860b]" /> Revenue Trend
+                <Flame className="h-4 w-4 text-[color:var(--primary)]" /> Revenue Trend
               </h3>
               <p className="mt-1 text-xs text-[color:var(--text-muted)]">📈 Monthly performance overview</p>
             </div>
-            <div className="flex h-11 w-11 items-center justify-center bg-[#d4af37]/10">
-              <Gauge className="h-5 w-5 text-[#b8860b]" />
+            <div className="flex h-11 w-11 items-center justify-center bg-emerald-500/10">
+              <Gauge className="h-5 w-5 text-[color:var(--primary)]" />
             </div>
           </div>
 
           <div className="h-[340px] pt-6">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(180,140,20,0.15)" />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(22,101,52,0.15)" />
                 <XAxis dataKey="month" stroke="var(--text-muted)" fontSize={11} />
                 <YAxis stroke="var(--text-muted)" fontSize={11} />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: "rgba(255,255,255,0.97)",
-                    borderColor: "#d4af37",
+                    borderColor: "var(--primary)",
                     borderRadius: 0,
                     color: "#142016",
                   }}
@@ -202,9 +202,9 @@ const AdminDashboard = () => {
                 <Line
                   type="monotone"
                   dataKey="revenue"
-                  stroke="#b8860b"
+                  stroke="var(--primary)"
                   strokeWidth={3}
-                  dot={{ r: 5, fill: "#d4af37" }}
+                  dot={{ r: 5, fill: "var(--accent)" }}
                   activeDot={{ r: 8 }}
                   animationDuration={1200}
                 />
@@ -217,7 +217,7 @@ const AdminDashboard = () => {
         <div className="space-y-5">
           <div className="bg-[color:var(--bg-card-solid)] p-6 shadow-md animate-in fade-in duration-700">
             <h3 className="text-sm font-black text-[color:var(--text-main)] flex items-center gap-2 mb-2">
-              <Sparkles className="h-4 w-4 text-[#b8860b]" /> Platform Mix
+              <Sparkles className="h-4 w-4 text-[color:var(--primary)]" /> Platform Mix
             </h3>
             <ResponsiveContainer width="100%" height={190}>
               <PieChart>
@@ -232,7 +232,7 @@ const AdminDashboard = () => {
                   animationDuration={1000}
                 >
                   {compositionData.map((entry, index) => (
-                    <Cell key={entry.name} fill={GOLD[index % GOLD.length]} />
+                    <Cell key={entry.name} fill={GREEN[index % GREEN.length]} />
                   ))}
                 </Pie>
                 <Tooltip />
@@ -244,20 +244,20 @@ const AdminDashboard = () => {
           <div className="bg-[color:var(--bg-card-solid)] p-6 shadow-md space-y-4 animate-in fade-in duration-700">
             <div className="flex items-center justify-between border-b border-[color:var(--border-color)] pb-4">
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[color:var(--text-main)]">Platform Status</p>
-              <span className="h-2.5 w-2.5 bg-[#d4af37] animate-pulse rounded-full" />
+              <span className="h-2.5 w-2.5 bg-[color:var(--primary)] animate-pulse rounded-full" />
             </div>
 
             <div className="bg-[color:var(--surface-soft)] p-5">
               <div className="flex items-center justify-between gap-3">
                 <div className="text-left">
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#b8860b]">System Health</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[color:var(--primary)]">System Health</p>
                   <p className="mt-1.5 text-[13px] text-[color:var(--text-muted)]">✅ Database and API operational</p>
                 </div>
               </div>
             </div>
 
             <div className="bg-[color:var(--surface-soft)] p-5">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#b8860b]">Top Line</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[color:var(--primary)]">Top Line</p>
               <p className="mt-2.5 text-2xl font-black font-mono leading-none text-[color:var(--text-main)]">
                 ${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </p>
@@ -266,7 +266,7 @@ const AdminDashboard = () => {
 
             <Link
               to="/admin/products"
-              className="flex items-center justify-between bg-gradient-to-r from-[#b8860b] to-[#d4af37] px-5 py-4 text-white transition-all hover:brightness-110 hover:-translate-y-0.5 active:scale-[0.98]"
+              className="flex items-center justify-between bg-[color:var(--primary)] px-5 py-4 text-white transition-all hover:bg-[color:var(--primary-hover)] hover:-translate-y-0.5 active:scale-[0.98]"
             >
               <span className="text-[11px] font-black uppercase tracking-[0.2em] flex items-center gap-2">
                 <Wallet className="h-4 w-4" /> Inspect Catalog
@@ -276,6 +276,23 @@ const AdminDashboard = () => {
           </div>
         </div>
       </div>
+
+      <section className="bg-[color:var(--bg-card-solid)] p-7 shadow-md">
+        <div className="flex items-center justify-between border-b border-[color:var(--border-color)] pb-5">
+          <div>
+            <h3 className="text-lg font-black text-[color:var(--text-main)]">Recent transactions</h3>
+            <p className="mt-1 text-xs text-[color:var(--text-muted)]">Payments and refunds recorded by the platform</p>
+          </div>
+          <Link to="/admin/finance" className="text-[10px] font-black uppercase tracking-[0.18em] text-[color:var(--primary)]">Open finance</Link>
+        </div>
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full min-w-[620px] text-left text-xs">
+            <thead className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--text-muted)]"><tr><th className="pb-3">Type</th><th className="pb-3">Order</th><th className="pb-3">Amount</th><th className="pb-3">Status</th><th className="pb-3">Date</th></tr></thead>
+            <tbody>{(stats.recentTransactions || []).map((transaction) => <tr key={transaction.id} className="border-t border-[color:var(--border-color)]"><td className="py-3 font-bold">{transaction.type}</td><td className="py-3">{transaction.orderId ? `#${transaction.orderId.slice(0, 8)}` : "Platform"}</td><td className="py-3 font-black">${Number(transaction.amount || 0).toFixed(2)}</td><td className="py-3">{transaction.status}</td><td className="py-3 text-[color:var(--text-muted)]">{new Date(transaction.createdAt).toLocaleDateString()}</td></tr>)}</tbody>
+          </table>
+          {!stats.recentTransactions?.length && <p className="py-6 text-center text-xs text-[color:var(--text-muted)]">No transactions recorded yet.</p>}
+        </div>
+      </section>
     </div>
   );
 };

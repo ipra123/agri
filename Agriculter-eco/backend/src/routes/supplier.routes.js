@@ -4,6 +4,7 @@ import {
   getSupplierDashboard,
   getSupplierOrders,
   getSupplierProducts,
+  getSupplierTransactions,
   updateOrderStatus,
   cancelOrderWithRefund,
   resolveComplaint,
@@ -22,6 +23,7 @@ router.get("/public/:id", getPublicSupplierById);
 router.get("/dashboard", protect, supplierOnly, getSupplierDashboard);
 router.get("/orders", protect, supplierOnly, getSupplierOrders);
 router.get("/products", protect, supplierOnly, getSupplierProducts);
+router.get("/transactions", protect, supplierOnly, getSupplierTransactions);
 
 router.put(
   "/orders/:id/status",

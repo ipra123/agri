@@ -53,8 +53,7 @@ const SupplierDashboard = () => {
   }
 
   const grossRevenue = parseFloat(stats?.revenue || 0);
-  const estimatedCommission = grossRevenue * 0.05;
-  const netEarnings = grossRevenue - estimatedCommission;
+  const netEarnings = Number(stats?.netRevenue ?? grossRevenue);
   const areaData = stats?.monthlyRevenue || [
     { month: "Jan", revenue: 900 },
     { month: "Feb", revenue: 1500 },
@@ -154,7 +153,7 @@ const SupplierDashboard = () => {
           </div>
 
           <div className="space-y-4">
-            <div className="rounded-3xl border border-[color:var(--border-color)] bg-[color:var(--surface-soft)] p-4">
+            <div className="border border-[color:var(--border-color)] bg-[color:var(--surface-soft)] p-4">
               <div className="flex items-center justify-between gap-3">
                 <div className="text-left">
                   <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[color:var(--primary)]">Verification</p>
@@ -164,7 +163,7 @@ const SupplierDashboard = () => {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-[color:var(--border-color)] bg-[color:var(--surface-soft)] p-4">
+            <div className="border border-[color:var(--border-color)] bg-[color:var(--surface-soft)] p-4">
               <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[color:var(--primary)]">Net earnings</p>
               <p className="mt-2 text-3xl font-black text-[color:var(--text-main)]">${netEarnings.toFixed(2)}</p>
               <p className="mt-2 text-sm text-[color:var(--text-muted)]">Estimated 95% payout rate.</p>
@@ -172,7 +171,7 @@ const SupplierDashboard = () => {
 
             <Link
               to="/supplier/profile"
-              className="flex items-center justify-between rounded-3xl bg-[color:var(--primary)] px-4 py-4 text-white transition hover:bg-[color:var(--primary-hover)]"
+              className="flex items-center justify-between bg-[color:var(--primary)] px-4 py-4 text-white transition hover:bg-[color:var(--primary-hover)]"
             >
               <span className="text-sm font-black uppercase tracking-[0.18em]">Update profile</span>
               <ArrowRight className="h-4 w-4" />
@@ -180,6 +179,15 @@ const SupplierDashboard = () => {
           </div>
         </div>
       </div>
+
+      <section className="dashboard-panel">
+        <div className="flex items-center justify-between border-b border-[color:var(--border-color)] pb-4">
+          <div className="text-left"><h3 className="text-xl font-black text-[color:var(--text-main)]">Transactions and finance</h3><p className="text-xs text-[color:var(--text-muted)]">Your recorded payments, refunds, and net earnings</p></div>
+          <CircleDollarSign className="h-5 w-5 text-[color:var(--primary)]" />
+        </div>
+        <div className="mt-5 grid gap-3 sm:grid-cols-3"><div><p className="dashboard-card__label">Payments</p><p className="dashboard-card__value text-[color:var(--primary)]">${grossRevenue.toFixed(2)}</p></div><div><p className="dashboard-card__label">Refunds</p><p className="dashboard-card__value text-red-500">${Number(stats?.refunds || 0).toFixed(2)}</p></div><div><p className="dashboard-card__label">Net</p><p className="dashboard-card__value text-[color:var(--accent)]">${netEarnings.toFixed(2)}</p></div></div>
+        <div className="mt-5 overflow-x-auto"><table className="w-full min-w-[560px] text-left text-xs"><thead className="text-[10px] uppercase tracking-[0.16em] text-[color:var(--text-muted)]"><tr><th className="pb-3">Type</th><th className="pb-3">Order</th><th className="pb-3">Amount</th><th className="pb-3">Date</th></tr></thead><tbody>{(stats?.transactions || []).map((transaction) => <tr key={transaction.id} className="border-t border-[color:var(--border-color)]"><td className="py-3 font-bold">{transaction.type}</td><td className="py-3">#{transaction.orderId?.slice(0, 8)}</td><td className="py-3 font-black">${Number(transaction.amount || 0).toFixed(2)}</td><td className="py-3 text-[color:var(--text-muted)]">{new Date(transaction.createdAt).toLocaleDateString()}</td></tr>)}</tbody></table></div>
+      </section>
     </div>
   );
 };

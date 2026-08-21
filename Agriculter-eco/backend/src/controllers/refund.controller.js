@@ -148,6 +148,23 @@ export const cancelOrderWithRefund = async (req, res) => {
       await restoreStockForFullRefund(refund.id);
     }
 
+    if (refund.status === "REFUNDED") {
+      const existingRefundTransaction = await prisma.transaction.findFirst({
+        where: { orderId: id, type: "REFUND" },
+      });
+      if (!existingRefundTransaction) {
+        await prisma.transaction.create({
+          data: {
+            orderId: id,
+            type: "REFUND",
+            amount: refundAmount,
+            description: `Refund for cancelled Order #${id.slice(0, 8)}`,
+            status: "COMPLETED",
+          },
+        });
+      }
+    }
+
     const io = req.app.get("io");
     if (io) {
       io.to(id).emit("statusUpdate", { status: "CANCELLED" });

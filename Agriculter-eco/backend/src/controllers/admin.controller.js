@@ -35,6 +35,17 @@ export const getDashboardStats = async (req, res) => {
       include: { user: { select: { name: true } } },
     });
 
+    const [paymentTotals, recentTransactions] = await Promise.all([
+      prisma.transaction.aggregate({
+        where: { type: "PAYMENT", status: "COMPLETED" },
+        _sum: { amount: true },
+      }),
+      prisma.transaction.findMany({
+        take: 8,
+        orderBy: { createdAt: "desc" },
+      }),
+    ]);
+
     const rawOrdersByStatus = await prisma.order.groupBy({
       by: ["status"],
       _count: { id: true },
@@ -90,6 +101,8 @@ export const getDashboardStats = async (req, res) => {
       openDisputes,
       totalProducts,
       totalRevenue: revenue._sum.totalAmount || 0,
+      transactionRevenue: paymentTotals._sum.amount || 0,
+      recentTransactions,
       pendingComplaints,
       recentOrders,
       ordersByStatus,

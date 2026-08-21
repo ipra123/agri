@@ -286,7 +286,7 @@
 }
 
 .dashboard-card {
-  border-radius: 28px;
+  border-radius: 0;
   border: 1px solid var(--border-color);
   background: var(--bg-card-solid);
   box-shadow: var(--shadow-card);
@@ -315,7 +315,7 @@
 }
 
 .dashboard-panel {
-  border-radius: 32px;
+  border-radius: 0;
   border: 1px solid var(--border-color);
   background: var(--bg-card-solid);
   box-shadow: var(--shadow-card);

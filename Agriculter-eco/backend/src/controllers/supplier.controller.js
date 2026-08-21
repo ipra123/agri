@@ -1,4 +1,3 @@
-import { log } from "console";
 import prisma from "../lib/prisma.js";
 
 const getSupplierOrder = async (orderId, supplierId) => {
@@ -196,10 +195,19 @@ export const getSupplierDashboard = async (req, res) => {
 
     const orders = await prisma.order.findMany({
       where: ownProductFilter(req.user.id),
-      select: { totalAmount: true },
+      select: { id: true, totalAmount: true, createdAt: true },
     });
-
-    const revenue = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+    const orderIds = orders.map((order) => order.id);
+    const transactions = orderIds.length
+      ? await prisma.transaction.findMany({ where: { orderId: { in: orderIds } }, orderBy: { createdAt: "desc" } })
+      : [];
+    const revenue = transactions.filter((transaction) => transaction.type === "PAYMENT" && transaction.status === "COMPLETED").reduce((sum, transaction) => sum + transaction.amount, 0);
+    const refunds = transactions.filter((transaction) => transaction.type === "REFUND" && transaction.status === "COMPLETED").reduce((sum, transaction) => sum + transaction.amount, 0);
+    const monthlyRevenue = transactions.filter((transaction) => transaction.type === "PAYMENT" && transaction.status === "COMPLETED").reduce((months, transaction) => {
+      const month = new Date(transaction.createdAt).toLocaleDateString(undefined, { month: "short" });
+      months[month] = (months[month] || 0) + transaction.amount;
+      return months;
+    }, {});
 
     res.json({
       totalProducts,
@@ -207,7 +215,23 @@ export const getSupplierDashboard = async (req, res) => {
       totalOrders,
       pendingOrders,
       revenue,
+      refunds,
+      netRevenue: revenue - refunds,
+      monthlyRevenue: Object.entries(monthlyRevenue).map(([month, value]) => ({ month, revenue: value })),
+      transactions: transactions.slice(0, 8),
     });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const getSupplierTransactions = async (req, res) => {
+  try {
+    const orders = await prisma.order.findMany({ where: ownProductFilter(req.user.id), select: { id: true } });
+    const transactions = orders.length
+      ? await prisma.transaction.findMany({ where: { orderId: { in: orders.map(({ id }) => id) } }, orderBy: { createdAt: "desc" } })
+      : [];
+    res.json(transactions);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -219,12 +243,24 @@ export const getSupplierOrders = async (req, res) => {
       where: ownProductFilter(req.user.id),
       orderBy: { createdAt: "desc" },
       include: {
+        refund: true,
+        payments: true,
         user: { select: { name: true, email: true, phoneNumber: true, deliveryAddress: true } },
         items: { include: { product: true } },
       },
     });
 
-    res.json(orders);
+    const transactions = orders.length
+      ? await prisma.transaction.findMany({
+        where: { orderId: { in: orders.map(({ id }) => id) } },
+        orderBy: { createdAt: "desc" },
+      })
+      : [];
+
+    res.json(orders.map((order) => ({
+      ...order,
+      transactions: transactions.filter((transaction) => transaction.orderId === order.id),
+    })));
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -234,6 +270,11 @@ export const getSupplierOrders = async (req, res) => {
 export const updateOrderStatus = async (req, res) => {
   const { status } = req.body;
   try {
+    const supplierOrder = await getSupplierOrder(req.params.id, req.user.id);
+    if (!supplierOrder) {
+      return res.status(404).json({ message: "Order not found or not assigned to your products." });
+    }
+
     const existingRefund = await prisma.refund.findUnique({
       where: { orderId: req.params.id },
     });
@@ -268,10 +309,7 @@ export const cancelOrderWithRefund = async (req, res) => {
   }
 
   try {
-    const order = await prisma.order.findUnique({
-      where: { id },
-      include: { payments: true, refund: true },
-    });
+    const order = await getSupplierOrder(id, req.user.id);
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });

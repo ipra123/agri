@@ -3,7 +3,7 @@ import {
   ArrowLeftToLine,
   CircleDollarSign,
   LayoutGrid,
-  MessageSquareText,
+  Star,
   Package2,
   ShoppingCart,
   Users,
@@ -15,7 +15,7 @@ const NAV_ITEMS = [
   { to: "/admin/products", icon: Package2, label: "Catalog" },
    { to: "/admin/customers", icon: Users, label: "Customers" },
   { to: "/admin/orders", icon: ShoppingCart, label: "Orders" },
-  { to: "/admin/reviews", icon: MessageSquareText, label: "Reviews" },
+  { to: "/admin/reviews", icon: Star, label: "Reviews" },
   { to: "/admin/finance", icon: CircleDollarSign, label: "Finance" },
   { to: "/admin/refunds", icon: CircleDollarSign, label: "Canceled Order" },
 ];

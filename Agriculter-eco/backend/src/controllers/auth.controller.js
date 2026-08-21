@@ -420,7 +420,8 @@ const seedAdmin = async () => {
     process.exit(1);
   } finally {
     await prisma.$disconnect();
-  }
+  } 
 };
 
 //seedAdmin();
+

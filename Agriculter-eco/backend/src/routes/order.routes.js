@@ -24,7 +24,7 @@ const router = express.Router();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const uploadDir = path.join(__dirname, "../../userchatingfiles");
+const uploadDir = path.join(__dirname, "../../uploads/payment-proofs");
 
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
@@ -54,7 +54,7 @@ router.post("/upload-proof", protect, upload.single("proof"), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: "No file uploaded" });
   }
-  const fileUrl = `/userchatingfiles/${req.file.filename}`;
+  const fileUrl = `/uploads/payment-proofs/${req.file.filename}`;
   res.json({ fileUrl });
 });
 

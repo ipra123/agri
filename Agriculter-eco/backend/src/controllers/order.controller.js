@@ -54,7 +54,6 @@ export const createOrder = async (req, res) => {
   }
 
   const targetUserId = (req.user.role === "ADMIN" && userId) ? userId : req.user.id;
-  const activePaymentPlan = "FULL";
   const baseTotal = parseFloat(totalAmount);
   const coupon = await getValidCoupon(couponCode, baseTotal);
   const discountAmount = coupon
@@ -111,7 +110,6 @@ export const createOrder = async (req, res) => {
           paymentMethod,
           last4Digits,
           paymentStatus,
-        paymentPlan: activePaymentPlan,
           comment,
           items: {
             create: items.map((item) => ({
@@ -272,9 +270,8 @@ export const cancelOrder = async (req, res) => {
       data: { status: "CANCELLED" },
     });
 
-    const io = req.app.get("io");
-    io.to(order.id).emit("statusUpdate", { status: "CANCELLED" });
     await createNotification(order.userId, "ORDER_CANCELLED", `Your order #${order.id.slice(0, 8)} was cancelled.`);
+    await notifyAdmins("ORDER_CANCELLED", `Order #${order.id.slice(0, 8)} was cancelled by the customer.`);
 
     res.json(updatedOrder);
   } catch (error) {

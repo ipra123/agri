@@ -2,8 +2,6 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
-import { createServer } from "http";
-import { Server } from "socket.io";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -24,14 +22,6 @@ dotenv.config();
 
 
 const app = express();
-const httpServer = createServer(app);
-const io = new Server(httpServer, {
-  cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
-  },
-});
 
 app.use(cors({
   origin: process.env.FRONTEND_URL || "http://localhost:5173",
@@ -43,25 +33,7 @@ app.use(cookieParser());
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-app.use("/userchatingfiles", express.static(path.join(__dirname, "../userchatingfiles")));
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
-
-// Socket.io for order updates
-io.on("connection", (socket) => {
-  console.log("A user connected:", socket.id);
-
-  socket.on("join-order", (orderId) => {
-    socket.join(orderId);
-    console.log(`User joined order: ${orderId}`);
-  });
-
-  socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
-  });
-});
-
-// Make io accessible to routers
-app.set("io", io);
 
 // Basic health check
 app.get("/", (req, res) => {
@@ -96,7 +68,11 @@ app.use("/api/suppliers", supplierRoutes);
 
 
 
-const PORT = process.env.PORT || 5000;
-httpServer.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== "production") {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
+
+export default app;

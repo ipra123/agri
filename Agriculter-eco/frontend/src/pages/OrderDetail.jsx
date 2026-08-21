@@ -1,14 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { io } from "socket.io-client";
 import toast from "react-hot-toast";
 import api from "../lib/api";
 import useAuthStore from "../store/useAuthStore";
 import {
   FiArrowLeft,
   FiClock,
-  FiMessageSquare,
   FiPackage,
   FiRefreshCw,
   FiShield,
@@ -38,8 +36,12 @@ const OrderDetail = () => {
   });
 
   const cancelMutation = useMutation({
-    mutationFn: () => api.put(`/orders/${id}/cancel`),
-    onSuccess: () => {
+    mutationFn: () => {
+      if (!window.confirm("Cancel this order? This action cannot be undone.")) return null;
+      return api.put(`/orders/${id}/cancel`);
+    },
+    onSuccess: (response) => {
+      if (!response) return;
       queryClient.invalidateQueries({ queryKey: ["order", id] });
       toast.success("Order cancelled");
     },
@@ -55,21 +57,6 @@ const OrderDetail = () => {
     },
     onError: (err) => toast.error(err?.response?.data?.message || "Failed to submit dispute"),
   });
-
-  useEffect(() => {
-    if (!id) return;
-
-    const socket = io(import.meta.env.VITE_SOCKET_URL || "http://localhost:5000", {
-      withCredentials: true,
-    });
-
-    socket.emit("join-order", id);
-    socket.on("statusUpdate", ({ status }) => {
-      queryClient.setQueryData(["order", id], (old) => (old ? { ...old, status } : old));
-    });
-
-    return () => socket.disconnect();
-  }, [id, queryClient]);
 
   const timeline = useMemo(() => {
     const steps = ["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED"];

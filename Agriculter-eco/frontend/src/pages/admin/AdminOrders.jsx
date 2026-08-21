@@ -152,6 +152,7 @@ const AdminOrders = () => {
     mutationFn: ({ id, payload }) => api.post(`/orders/${id}/cancel`, payload),
     onSuccess: () => {
       queryClient.invalidateQueries(["admin-orders"]);
+      queryClient.invalidateQueries(["admin-stats"]);
       queryClient.invalidateQueries(["admin-refunds"]);
       queryClient.invalidateQueries(["admin-finance-summary"]);
       toast.success("Order cancelled and refund logged successfully!");
@@ -165,6 +166,7 @@ const AdminOrders = () => {
     mutationFn: ({ id, payload }) => api.patch(`/refunds/${id}/confirm`, payload),
     onSuccess: () => {
       queryClient.invalidateQueries(["admin-orders"]);
+      queryClient.invalidateQueries(["admin-stats"]);
       queryClient.invalidateQueries(["admin-refunds"]);
       queryClient.invalidateQueries(["admin-finance-summary"]);
       toast.success("Refund confirmed!");

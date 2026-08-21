@@ -11,6 +11,7 @@ import {
   UserRound,
 } from "lucide-react";
 import brandLogo from "../../assets/logo.png";
+import NotificationBell from "../NotificationBell";
 
 const AdminLayout = () => {
   const { user, logout } = useAuthStore();
@@ -45,6 +46,7 @@ const AdminLayout = () => {
             </div>
 
             <div className="flex items-center gap-3 sm:gap-4">
+              <NotificationBell />
               <button
                 type="button"
                 onClick={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}

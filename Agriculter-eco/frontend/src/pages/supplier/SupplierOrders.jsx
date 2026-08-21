@@ -89,6 +89,7 @@ const SupplierOrders = () => {
     mutationFn: ({ id, status }) => api.put(`/supplier/orders/${id}/status`, { status }),
     onSuccess: () => {
       queryClient.invalidateQueries(["supplier-orders"]);
+      queryClient.invalidateQueries(["supplier-dashboard"]);
       toast.success("Order status updated!");
     },
     onError: (err) => {
@@ -100,6 +101,7 @@ const SupplierOrders = () => {
     mutationFn: ({ id, resolution }) => api.put(`/supplier/orders/${id}/resolve`, { resolution }),
     onSuccess: () => {
       queryClient.invalidateQueries(["supplier-orders"]);
+      queryClient.invalidateQueries(["supplier-dashboard"]);
       toast.success("Complaint resolved!");
     },
     onError: (err) => {
@@ -122,6 +124,7 @@ const SupplierOrders = () => {
     mutationFn: ({ id, payload }) => api.post(`/supplier/orders/${id}/cancel`, payload),
     onSuccess: () => {
       queryClient.invalidateQueries(["supplier-orders"]);
+      queryClient.invalidateQueries(["supplier-dashboard"]);
       queryClient.invalidateQueries(["supplier-refunds"]);
       toast.success("Order cancelled and refund logged successfully!");
       setCancelModalOrder(null);
@@ -135,6 +138,7 @@ const SupplierOrders = () => {
     mutationFn: ({ id, payload }) => api.patch(`/supplier/refunds/${id}/confirm`, payload),
     onSuccess: () => {
       queryClient.invalidateQueries(["supplier-orders"]);
+      queryClient.invalidateQueries(["supplier-dashboard"]);
       queryClient.invalidateQueries(["supplier-refunds"]);
       toast.success("Refund confirmed!");
       setConfirmRefundModal(null);
@@ -216,6 +220,12 @@ const SupplierOrders = () => {
   };
 
   const pendingComplaints = orders?.filter((o) => o.complaintStatus === "PENDING")?.length || 0;
+  const statusTone = (status) => {
+    if (status === "DELIVERED") return "text-[color:var(--primary)] bg-emerald-50 dark:bg-emerald-500/10";
+    if (status === "CANCELLED" || status === "RETURNED") return "text-red-600 bg-red-50 dark:bg-red-500/10";
+    if (status === "PENDING") return "text-[color:var(--primary)] bg-emerald-50 dark:bg-emerald-500/10";
+    return "text-[color:var(--text-main)] bg-[color:var(--surface-soft)]";
+  };
 
   if (isLoading)
     return (
@@ -226,26 +236,26 @@ const SupplierOrders = () => {
     );
 
   return (
-    <div className="space-y-8 text-left pb-16 transition-colors duration-300">
+    <div className="space-y-7 text-left pb-16 transition-colors duration-300">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black font-heading text-slate-900 dark:text-white">
+          <h1 className="text-3xl font-black font-heading text-[color:var(--text-main)]">
             Received Farmer Orders
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+          <p className="text-[color:var(--text-muted)] text-sm mt-1">
             Fulfill incoming customer orders for your listed seeds, fertilizers, and farm equipment.
           </p>
         </div>
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 bg-emerald-600 dark:bg-amber-500 text-white dark:text-black px-5 py-2.5 rounded-xl font-black text-sm hover:opacity-90 transition-all shadow-lg shadow-emerald-600/20 dark:shadow-amber-500/20"
+            className="flex items-center gap-2 bg-[color:var(--primary)] text-white px-5 py-2.5 font-black text-sm hover:bg-[color:var(--primary-hover)] transition-all shadow-lg shadow-emerald-900/10"
           >
             <FiPlus /> Log Order
           </button>
           <button
             onClick={() => queryClient.invalidateQueries(["supplier-orders"])}
-            className="flex items-center gap-2 px-4 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-white rounded-xl transition-all font-bold text-sm"
+            className="flex items-center gap-2 px-4 py-2.5 bg-[color:var(--surface-soft)] border border-[color:var(--border-color)] hover:border-[color:var(--primary)] text-[color:var(--text-main)] transition-all font-bold text-sm"
           >
             <FiRefreshCw /> Refresh
           </button>
@@ -275,26 +285,21 @@ const SupplierOrders = () => {
           {orders?.map((order) => (
             <div
               key={order.id}
-              className="rounded-3xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#0f172a] p-6 sm:p-8 space-y-4 shadow-sm"
+              className="border border-[color:var(--border-color)] bg-[color:var(--bg-card-solid)] p-6 sm:p-7 space-y-4 shadow-sm"
             >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[color:var(--border-color)] pb-4">
                 <div>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-[color:var(--text-muted)] block">
                     Order ID #{order.id.slice(0, 10)}
                   </span>
-                  <p className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2 mt-0.5">
-                    <FiUser className="text-emerald-600 dark:text-amber-400" /> {order.user?.name || "Farmer Customer"}
+                  <p className="text-base font-extrabold text-[color:var(--text-main)] flex items-center gap-2 mt-0.5">
+                    <FiUser className="text-[color:var(--primary)]" /> {order.user?.name || "Farmer Customer"}
                   </p>
                   <p className="text-xs text-slate-400">{order.user?.phoneNumber || order.user?.email || "No contact info"}</p>
                 </div>
                 <div className="sm:text-right">
                   <select
-                    className={`bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full px-3 py-1.5 text-xs font-black uppercase tracking-wider focus:ring-1 ring-emerald-500 outline-none cursor-pointer transition-all ${order.status === "DELIVERED"
-                        ? "text-emerald-600 dark:text-emerald-400"
-                        : order.status === "PENDING"
-                          ? "text-blue-500"
-                          : "text-slate-600 dark:text-slate-300"
-                      }`}
+                    className={`border border-[color:var(--border-color)] px-3 py-1.5 text-xs font-black uppercase tracking-wider focus:ring-1 ring-emerald-500 outline-none cursor-pointer transition-all ${statusTone(order.status)}`}
                     value={order.status}
                     onChange={(e) => handleStatusChange(order, e.target.value)}
                     disabled={updateStatusMutation.isPending || order.refund?.status === "REFUNDED"}
@@ -307,19 +312,19 @@ const SupplierOrders = () => {
                   {order.refund?.status === "REFUNDED" && (
                     <div className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-1 font-bold">Locked (Refunded)</div>
                   )}
-                  <p className="text-lg font-black text-slate-900 dark:text-amber-400 mt-1">
+                  <p className="text-lg font-black text-[color:var(--primary)] mt-1">
                     ${parseFloat(order.totalAmount || 0).toFixed(2)}
                   </p>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <p className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Order Items</p>
+                <p className="text-[10px] font-extrabold uppercase tracking-widest text-[color:var(--text-muted)]">Order Items</p>
                 <div className="flex flex-wrap gap-2">
                   {order.items?.map((item) => (
                     <span
                       key={item.id}
-                      className="rounded-xl bg-slate-100 dark:bg-slate-800 px-3 py-1.5 text-xs text-slate-800 dark:text-slate-200 font-bold border border-slate-200 dark:border-slate-700"
+                      className="bg-[color:var(--surface-soft)] px-3 py-1.5 text-xs text-[color:var(--text-main)] font-bold border border-[color:var(--border-color)]"
                     >
                       {item.product?.name} x {item.quantity} (${item.price})
                     </span>
@@ -341,16 +346,34 @@ const SupplierOrders = () => {
                 </div>
               )}
 
-              <div className="pt-2 text-xs text-slate-500 dark:text-slate-400 flex flex-wrap items-center justify-between gap-3">
+              <div className="pt-2 text-xs text-[color:var(--text-muted)] flex flex-wrap items-center justify-between gap-3">
                 <span>Delivery Destination: {order.shippingAddress || "Standard Farm Address"}</span>
-                <span className="font-bold text-amber-500">Payment: {order.paymentMethod || "EVC Plus"}</span>
+                <span className="font-bold text-[color:var(--primary)]">Payment: {order.paymentMethod || "EVC Plus"}</span>
+              </div>
+
+              <div className="border-t border-[color:var(--border-color)] pt-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[color:var(--text-muted)]">Order transactions</p>
+                  {order.status === "CANCELLED" && <span className="text-[10px] font-black uppercase tracking-[0.16em] text-red-600">Cancelled order</span>}
+                </div>
+                {order.transactions?.length ? (
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {order.transactions.map((transaction) => (
+                      <div key={transaction.id} className="flex items-center justify-between gap-3 border border-[color:var(--border-color)] bg-[color:var(--surface-soft)] px-3 py-2 text-xs">
+                        <span className="font-black text-[color:var(--primary)]">{transaction.type}</span>
+                        <span className="font-bold text-[color:var(--text-main)]">${Number(transaction.amount || 0).toFixed(2)}</span>
+                        <span className="text-[color:var(--text-muted)]">{transaction.status}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : <p className="text-xs text-[color:var(--text-muted)]">No transactions recorded for this order.</p>}
               </div>
 
               {/* Actions */}
-              <div className="flex flex-wrap gap-2 items-center pt-2 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex flex-wrap gap-2 items-center pt-2 border-t border-[color:var(--border-color)]">
                 <button
                   onClick={() => setViewingOrder(order)}
-                  className="flex items-center gap-1 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 px-3 py-1.5 rounded-lg text-xs font-bold hover:opacity-80 transition-all"
+                  className="flex items-center gap-1 bg-emerald-50 dark:bg-emerald-500/10 text-[color:var(--primary)] px-3 py-1.5 text-xs font-bold hover:opacity-80 transition-all"
                   title="View Payment Details"
                 >
                   <FiEye size={12} /> View
