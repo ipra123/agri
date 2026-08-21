@@ -15,7 +15,9 @@ class ApiService {
     } catch (_) {
       // The deployment can return an HTML or empty body when the function crashes.
     }
-    return {'message': 'Server returned an invalid response (${response.statusCode})'};
+    return {
+      'message': 'Server returned an invalid response (${response.statusCode})',
+    };
   }
 
   String? _readToken(Map<String, Object?> values) {
@@ -31,7 +33,10 @@ class ApiService {
     ];
 
     for (final value in candidates) {
-      if (value is String && value.isNotEmpty && value != 'null' && value != 'undefined') {
+      if (value is String &&
+          value.isNotEmpty &&
+          value != 'null' &&
+          value != 'undefined') {
         return value;
       }
       if (value is Map) {
@@ -83,11 +88,13 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> login(String email, String password) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/auth/login'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({'email': email, 'password': password}),
-    ).timeout(const Duration(seconds: 20));
+    final response = await http
+        .post(
+          Uri.parse('$baseUrl/auth/login'),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode({'email': email, 'password': password}),
+        )
+        .timeout(const Duration(seconds: 20));
     final data = _decodeObject(response);
     if (response.statusCode == 200) {
       return data;
@@ -96,26 +103,40 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> register(String fullName, String email, String password) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/auth/register'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({'name': fullName, 'email': email, 'password': password}),
-    ).timeout(const Duration(seconds: 20));
+  Future<Map<String, dynamic>> register(
+    String fullName,
+    String email,
+    String password,
+  ) async {
+    final response = await http
+        .post(
+          Uri.parse('$baseUrl/auth/register'),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode({
+            'name': fullName,
+            'email': email,
+            'password': password,
+          }),
+        )
+        .timeout(const Duration(seconds: 20));
     final data = _decodeObject(response);
     if (response.statusCode == 200 || response.statusCode == 201) {
       return data;
     } else {
-      throw Exception(data['message'] ?? data['error'] ?? 'Registration failed');
+      throw Exception(
+        data['message'] ?? data['error'] ?? 'Registration failed',
+      );
     }
   }
 
   Future<Map<String, dynamic>> sendOtp(String email) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/auth/send-otp'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({'email': email}),
-    ).timeout(const Duration(seconds: 20));
+    final response = await http
+        .post(
+          Uri.parse('$baseUrl/auth/send-otp'),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode({'email': email}),
+        )
+        .timeout(const Duration(seconds: 20));
     final data = _decodeObject(response);
     if (response.statusCode == 200) {
       return data;
@@ -125,11 +146,13 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> verifyOtp(String email, String code) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/auth/verify-otp'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({'email': email, 'otp': code}),
-    ).timeout(const Duration(seconds: 20));
+    final response = await http
+        .post(
+          Uri.parse('$baseUrl/auth/verify-otp'),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode({'email': email, 'otp': code}),
+        )
+        .timeout(const Duration(seconds: 20));
     final data = _decodeObject(response);
     if (response.statusCode == 200) {
       return data;
@@ -161,12 +184,11 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> createBooking(Map<String, dynamic> bookingData) async {
+  Future<Map<String, dynamic>> createBooking(
+    Map<String, dynamic> bookingData,
+  ) async {
     final headers = await _getHeaders();
-    final payload = {
-      ...bookingData,
-      'isOffline': true,
-    };
+    final payload = {...bookingData, 'isOffline': true};
     final response = await http.post(
       Uri.parse('$baseUrl/orders'),
       headers: headers,
@@ -179,7 +201,9 @@ class ApiService {
     if (response.statusCode == 200 || response.statusCode == 201) {
       return data;
     } else {
-      throw Exception(data['message'] ?? data['error'] ?? 'Failed to create order');
+      throw Exception(
+        data['message'] ?? data['error'] ?? 'Failed to create order',
+      );
     }
   }
 
@@ -232,7 +256,9 @@ class ApiService {
   }
 
   Future<List<dynamic>> getProductReviews(String productId) async {
-    final response = await http.get(Uri.parse('$baseUrl/reviews/product/$productId'));
+    final response = await http.get(
+      Uri.parse('$baseUrl/reviews/product/$productId'),
+    );
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else {
@@ -241,7 +267,9 @@ class ApiService {
   }
 
   Future<List<dynamic>> getSupplierReviews(String supplierId) async {
-    final response = await http.get(Uri.parse('$baseUrl/reviews/supplier/$supplierId'));
+    final response = await http.get(
+      Uri.parse('$baseUrl/reviews/supplier/$supplierId'),
+    );
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else {
@@ -263,7 +291,9 @@ class ApiService {
       return data.map((json) => BookingModel.fromJson(json)).toList();
     } else {
       final data = json.decode(response.body);
-      throw Exception(data['message'] ?? data['error'] ?? 'Failed to load orders');
+      throw Exception(
+        data['message'] ?? data['error'] ?? 'Failed to load orders',
+      );
     }
   }
 
@@ -280,7 +310,9 @@ class ApiService {
     if (response.statusCode == 200) {
       return data;
     } else {
-      throw Exception(data['message'] ?? data['error'] ?? 'Failed to cancel order');
+      throw Exception(
+        data['message'] ?? data['error'] ?? 'Failed to cancel order',
+      );
     }
   }
 
@@ -293,10 +325,7 @@ class ApiService {
     final response = await http.post(
       Uri.parse('$baseUrl/orders/$bookingId/pay'),
       headers: headers,
-      body: json.encode({
-        'amount': amount,
-        'paymentMethod': paymentMethod,
-      }),
+      body: json.encode({'amount': amount, 'paymentMethod': paymentMethod}),
     );
     if (response.statusCode >= 400) {
       await _handleErrorResponse(response);
@@ -305,7 +334,9 @@ class ApiService {
     if (response.statusCode == 200 || response.statusCode == 201) {
       return data;
     } else {
-      throw Exception(data['message'] ?? data['error'] ?? 'Failed to process payment');
+      throw Exception(
+        data['message'] ?? data['error'] ?? 'Failed to process payment',
+      );
     }
   }
 }
